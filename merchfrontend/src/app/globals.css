@@ -1,10 +1,19 @@
 @import "tailwindcss";
-
+ 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --landing-header-bg: #1f2937;          
+  --landing-header-bg-hover: #374151;    
+  --landing-header-text: #ffffff;
+  --landing-highlight: #2563eb;          
+  --landing-btn-primary: #3b82f6;        
+  --landing-btn-primary-hover: #2563eb;  
+  --landing-btn-secondary-border: #9ca3af; 
+  --landing-btn-secondary-hover: #f3f4f6; 
+  --landing-text-muted: #6b7280;          
+  --landing-stats-text: #111827;          
+  --landing-stats-subtext: #4b5563;
 }
-
+/*
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -23,4 +32,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
+} */
