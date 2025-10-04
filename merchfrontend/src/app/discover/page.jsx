@@ -1,5 +1,5 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import TopPicks from "./components/TopPicks";
 import TrendSetter from "./components/TrendSetter";
 import CustomTees from "./components/CustomTees";
