@@ -8,7 +8,7 @@ const Navbar = () => {
     <nav className="bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/home" className="flex items-center space-x-2">
             <Shirt className="w-8 h-8 text-white" strokeWidth={2.5} />
             <span className="text-2xl font-bold tracking-tight text-white">
               TeeCustoms
@@ -17,7 +17,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              href="/"
+              href="/home"
               className="text-white hover:text-orange-100 transition-colors font-medium"
             >
               Home
