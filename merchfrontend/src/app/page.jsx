@@ -114,7 +114,7 @@ const Landing = () => {
             Sign up for exclusive deals and updates
             <br /> on the latest t-shirt designs.
           </h3>
-          <button className="px-8 py-3 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105">
+          <button className="px-8 py-3 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105">
             Sign up
           </button>
         </div>
