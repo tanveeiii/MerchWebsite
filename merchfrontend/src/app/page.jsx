@@ -52,7 +52,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="my-20 p-10 flex justify-between bg-gray-100 rounded-lg text-center">
+      <section className="my-20 p-10 flex justify-between bg-tansperent rounded-lg text-center">
         <div>
             <img src="ww.photo.com" alt="Cloths" className="rounded-lg"/>
         </div>
