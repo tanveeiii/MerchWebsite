@@ -25,7 +25,7 @@ const Footer = () => {
           </div>
 
           <div className="text-white font-medium">
-            &copy; 2023 TeeDesigns. All rights reserved.
+            &copy; 2025 TeeCustoms. All rights reserved.
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ const Navbar = () => {
           <Link href="/" className="flex items-center space-x-2">
             <Shirt className="w-8 h-8 text-white" strokeWidth={2.5} />
             <span className="text-2xl font-bold tracking-tight text-white">
-              TeeDesigns
+              TeeCustoms
             </span>
           </Link>
 
