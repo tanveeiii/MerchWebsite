@@ -19,12 +19,14 @@ const Categories = () => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <h2 className="text-4xl font-bold mb-12">Popular Categories</h2>
+      <h2 className="text-4xl font-bold mb-12 bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+        Popular Categories
+      </h2>
 
       <div className="grid md:grid-cols-3 gap-8">
         {categories.map((category) => (
           <div key={category.name} className="group cursor-pointer">
-            <div className="bg-gray-200 rounded-3xl overflow-hidden aspect-square mb-6 hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-orange-100 via-pink-100 to-purple-100 rounded-3xl overflow-hidden aspect-square mb-6 hover:shadow-2xl transition-all hover:scale-105">
               <div className="w-full h-full flex items-center justify-center p-8">
                 <div className="w-48 h-48 rounded-full bg-white shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
                   <img
