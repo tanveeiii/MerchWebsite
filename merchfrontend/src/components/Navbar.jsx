@@ -1,59 +1,114 @@
 "use client";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
+import { useState } from "react";
+import { FaRegUser } from "react-icons/fa";
+import { FaRegHeart } from "react-icons/fa";
+import { LuShoppingBag } from "react-icons/lu";
+// import Footer from "../app/discover/components/Footer";
+// import TopPicks from "./components/TopPicks";
+// import TrendSetter from "./components/TrendSetter";
+// import CustomTees from "./components/CustomTees";
+// import BestSellers from "./components/BestSellers";
+// import Inspiration from "./components/Inspiration";
+import SearchBox from "./SearchBox"
 
-import { ShoppingCart, Shirt } from "lucide-react";
-import Link from "next/link";
 
-const Navbar = () => {
+export function NavbarFinal() {
+  const navItems = [
+    {
+      name: "Features",
+      link: "#features",
+    },
+    {
+      name: "Pricing",
+      link: "#pricing",
+    },
+    {
+      name: "Contact",
+      link: "#contact",
+    },
+  ];
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
-    <nav className="bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/home" className="flex items-center space-x-2">
-            <Shirt className="w-8 h-8 text-white" strokeWidth={2.5} />
-            <span className="text-2xl font-bold tracking-tight text-white">
-              TeeCustoms
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/home"
-              className="text-white hover:text-orange-100 transition-colors font-medium"
-            >
-              Home
-            </Link>
-            <Link
-              href="/discover"
-              className="text-white hover:text-orange-100 transition-colors font-medium"
-            >
-              Discover
-            </Link>
-            <a
-              href="#"
-              className="text-white hover:text-orange-100 transition-colors font-medium"
-            >
-              Customized
-            </a>
-            <a
-              href="#"
-              className="text-white hover:text-orange-100 transition-colors font-medium"
-            >
-              Non-Customized
-            </a>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button className="bg-white text-orange-500 px-6 py-2 rounded-md hover:bg-orange-50 transition-colors font-bold">
-              Start Shopping
-            </button>
-            <button className="p-2 hover:bg-white/20 rounded-full transition-colors">
-              <ShoppingCart className="w-6 h-6 text-white" />
-            </button>
-          </div>
+    // <div className="z-10 w-full sticky">
+    // <>
+    <Navbar>
+      {/* Desktop Navigation */}
+      <NavBody>
+        <div className="flex justify-around w-full">
+        <NavbarLogo />
+        <NavItems items={navItems}/>
         </div>
-      </div>
-    </nav>
-  );
-};
+        <div className="flex items-center gap-4">
+          <SearchBox/>  
+          <NavbarButton variant="secondary"><LuShoppingBag size={28}/></NavbarButton>
+          <NavbarButton variant="secondary"><FaRegHeart size={28}/></NavbarButton>
+          <NavbarButton variant="secondary"><FaRegUser size={28}/></NavbarButton>
+        </div>
+      </NavBody>
 
-export default Navbar;
+      {/* Mobile Navigation */}
+      <MobileNav>
+        <MobileNavHeader>
+          <NavbarLogo />
+          <MobileNavToggle
+            isOpen={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          />
+        </MobileNavHeader>
+
+        <MobileNavMenu
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+        >
+          {navItems.map((item, idx) => (
+            <a
+              key={`mobile-link-${idx}`}
+              href={item.link}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="relative text-neutral-600 dark:text-neutral-300"
+            >
+              <span className="block">{item.name}</span>
+            </a>
+          ))}
+          <div className="flex w-full flex-col gap-4">
+            <NavbarButton
+              onClick={() => setIsMobileMenuOpen(false)}
+              variant="primary"
+              className="w-full"
+            >
+              <LuShoppingBag/>
+            </NavbarButton>
+            <NavbarButton
+              onClick={() => setIsMobileMenuOpen(false)}
+              variant="primary"
+              className="w-full"
+            >
+              <FaRegHeart/>
+            </NavbarButton>
+            <NavbarButton
+              onClick={() => setIsMobileMenuOpen(false)}
+              variant="primary"
+              className="w-full"
+            >
+              <FaRegUser/>
+            </NavbarButton>
+          </div>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
+    // </div>
+  );
+}
