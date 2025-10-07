@@ -10,7 +10,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa";
 import { LuShoppingBag } from "react-icons/lu";
@@ -40,6 +40,17 @@ export function NavbarFinal() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+   const [atTop, setAtTop] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // show only when at top
+      setAtTop(window.scrollY === 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     // <div className="z-10 w-full sticky">
@@ -52,7 +63,11 @@ export function NavbarFinal() {
         <NavItems items={navItems}/>
         </div>
         <div className="flex items-center gap-4">
-          <SearchBox/>  
+          {atTop && (
+            <div className="transition-opacity duration-500 opacity-100">
+              <SearchBox />
+            </div>
+          )}
           <NavbarButton variant="secondary"><LuShoppingBag size={28}/></NavbarButton>
           <NavbarButton variant="secondary"><FaRegHeart size={28}/></NavbarButton>
           <NavbarButton variant="secondary"><FaRegUser size={28}/></NavbarButton>
