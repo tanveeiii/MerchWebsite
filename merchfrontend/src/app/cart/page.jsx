@@ -39,11 +39,15 @@ const Cart = () => {
   return (
     <div>
     <NavbarFinal/>
-    <div className='flex w-full justify-center'>
+    <div className='flex w-full justify-between mt-10'>
+        <div className='w-[65.8vw]'>
     <CartItems items={items}
             onQuantityChange={handleQuantityChange}
-            onRemove={handleRemove}/>
+            onRemove={handleRemove} />
+            </div>
+            <div className='w-[30vw] mr-5'>
     <PriceDetails />
+    </div>
     </div>
     </div>
   )
