@@ -11,15 +11,9 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState, useEffect } from "react";
-import { FaRegUser } from "react-icons/fa";
-import { FaRegHeart } from "react-icons/fa";
+import { User } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { LuShoppingBag } from "react-icons/lu";
-// import Footer from "../app/discover/components/Footer";
-// import TopPicks from "./components/TopPicks";
-// import TrendSetter from "./components/TrendSetter";
-// import CustomTees from "./components/CustomTees";
-// import BestSellers from "./components/BestSellers";
-// import Inspiration from "./components/Inspiration";
 import SearchBox from "./SearchBox"
 
 
@@ -68,9 +62,9 @@ export function NavbarFinal() {
               <SearchBox />
             </div>
           )}
-          <NavbarButton variant="secondary"><LuShoppingBag size={28}/></NavbarButton>
-          <NavbarButton variant="secondary"><FaRegHeart size={28}/></NavbarButton>
-          <NavbarButton variant="secondary"><FaRegUser size={28}/></NavbarButton>
+          <NavbarButton variant="secondary"><LuShoppingBag size={28} strokeWidth={1.5}/></NavbarButton>
+          <NavbarButton variant="secondary"><Heart size={30} strokeWidth={2} color="red"/></NavbarButton>
+          <NavbarButton variant="secondary"><User size={28} strokeWidth={2}/></NavbarButton>
         </div>
       </NavBody>
 
@@ -111,14 +105,14 @@ export function NavbarFinal() {
               variant="primary"
               className="w-full"
             >
-              <FaRegHeart/>
+              <Heart/>
             </NavbarButton>
             <NavbarButton
               onClick={() => setIsMobileMenuOpen(false)}
               variant="primary"
               className="w-full"
             >
-              <FaRegUser/>
+              <User/>
             </NavbarButton>
           </div>
         </MobileNavMenu>
