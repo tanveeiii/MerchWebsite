@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import './BestSellers.css'
 
 const BestSellers = ({scrollLtoR}) => {
   const bestSellers = [
