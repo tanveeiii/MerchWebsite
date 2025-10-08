@@ -11,12 +11,11 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState, useEffect } from "react";
+import { useMotionValueEvent } from "motion/react";
 import { User } from 'lucide-react';
 import { Heart } from 'lucide-react';
 import { LuShoppingBag } from "react-icons/lu";
 import SearchBox from "./SearchBox"
-
-
 export function NavbarFinal() {
   const navItems = [
     {
@@ -34,18 +33,30 @@ export function NavbarFinal() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-   const [atTop, setAtTop] = useState(true);
+   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     // show only when at top
+  //     setAtTop(window.scrollY === 0);
+  //   };
+
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
+  //   const [visible, setVisible] = useState(false);
+
+   useEffect(() => {
     const handleScroll = () => {
-      // show only when at top
-      setAtTop(window.scrollY === 0);
+      setVisible(window.scrollY < 100);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    // set initial state based on current scroll position
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   return (
     // <div className="z-10 w-full sticky">
     // <>
@@ -57,7 +68,7 @@ export function NavbarFinal() {
         <NavItems items={navItems}/>
         </div>
         <div className="flex items-center gap-4">
-          {atTop && (
+          {visible && (
             <div className="transition-opacity duration-500 opacity-100">
               <SearchBox />
             </div>

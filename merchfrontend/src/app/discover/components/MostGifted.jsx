@@ -1,6 +1,6 @@
 import React from "react";
 
-const TopPicks = () => {
+const MostGifted = () => {
   const image =
     "https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg?auto=compress&cs=tinysrgb&w=800";
 
@@ -18,4 +18,4 @@ const TopPicks = () => {
   );
 };
 
-export default TopPicks;
+export default MostGifted;
