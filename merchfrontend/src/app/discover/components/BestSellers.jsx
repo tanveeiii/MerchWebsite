@@ -1,7 +1,8 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import './BestSellers.css'
 
-const BestSellers = () => {
+const BestSellers = ({scrollLtoR}) => {
   const bestSellers = [
     {
       title: "Best Sellers This Month",
@@ -40,75 +41,99 @@ const BestSellers = () => {
     },
   ];
 
-  const scrollRef = useRef(null);
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  const [duration, setDuration] = useState(20);
 
   useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    let animationFrame;
-    let scrollSpeed = 100; // adjust for faster/slower scrolling
-
-    const smoothScroll = () => {
-      scrollContainer.scrollLeft += scrollSpeed;
-
-      // reset to start when reaching end
-      if (
-        scrollContainer.scrollLeft >=
-        scrollContainer.scrollWidth - scrollContainer.clientWidth
-      ) {
-        scrollContainer.scrollLeft = 0;
+    const updateDuration = () => {
+      const content = contentRef.current;
+      if (!content) return;
+      const totalWidth = content.scrollWidth;
+      if (!totalWidth) {
+        requestAnimationFrame(updateDuration);
+        return;
       }
 
-      animationFrame = requestAnimationFrame(smoothScroll);
+      const singleWidth = totalWidth / 2;
+      const pxPerSecond = 80;
+      const computed = Math.max(8, singleWidth / pxPerSecond);
+      setDuration(computed);
     };
 
-    animationFrame = requestAnimationFrame(smoothScroll);
-    return () => cancelAnimationFrame(animationFrame);
+    const raf = requestAnimationFrame(updateDuration);
+    window.addEventListener("resize", updateDuration);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateDuration);
+    };
   }, []);
 
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-          Top Picks
-        </h2>
-        <button className="text-sm font-medium hover:underline">
-          Check Them Out
-        </button>
-      </div>
+    <div className="w-full mt-5">
+     <div className="flex justify-center items-center mb-6">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+        Top Picks
+      </h2>
+    </div>
+
 
       <div
-        ref={scrollRef}
-        className="flex space-x-6 overflow-x-scroll no-scrollbar snap-x snap-mandatory"
+        ref={containerRef}
+        className="relative w-full overflow-hidden" /* hides scrollbar */
       >
-        {[...bestSellers, ...bestSellers].map((item, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center justify-center bg-white rounded-2xl shadow-md hover:shadow-lg p-5 min-w-[260px] snap-start cursor-pointer transition-transform hover:scale-105"
-          >
-            <div className="w-52 h-52 rounded-2xl overflow-hidden mb-4">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
+        {/* Content is duplicated to allow seamless looping */}
+        <div
+          ref={contentRef}
+          className="marquee flex items-center"
+          style={{ animationDuration: `${duration}s` }}
+        >
+          {[...bestSellers, ...bestSellers].map((item, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col items-center justify-center bg-white rounded-2xl shadow-md p-6 min-w-[300px] flex-shrink-0 mr-6 transition-transform hover:scale-105"
+            >
+              <div className="w-64 h-64 rounded-2xl overflow-hidden mb-4">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+              </div>
+              <h3 className="font-bold text-base">{item.title}</h3>
+              <p className="text-gray-600 text-sm">{item.designer}</p>
+              <p className="font-bold mt-1 text-lg">${item.price}</p>
             </div>
-            <h3 className="font-bold text-base">{item.title}</h3>
-            <p className="text-gray-600 text-sm">{item.designer}</p>
-            <p className="font-bold mt-1 text-lg">${item.price}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-
       <style jsx>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+          .marquee {
+            display: flex;
+            width: max-content;
+            animation: ${scrollLtoR ? "scrollRight":"scrollLeft"} linear infinite;
+            animation-timing-function: linear;
+          }
+
+          @keyframes scrollRight {
+            0% {
+              transform: translateX(-50%);
+            }
+            100% {
+              transform: translateX(0);
+            }
+          }
+
+          @keyframes scrollLeft {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+
+          @media (prefers-reduced-motion: no-preference) {
+            .marquee {
+              will-change: transform;
+            }
+          }
       `}</style>
     </div>
   );
