@@ -5,7 +5,7 @@ import ItemCard from '@/components/itemCard'
 const Wishlist = () => {
     return (
         <div>
-            <NavbarFinal />
+            <NavbarFinal/>
             <ItemCard/>
         </div>
     )
