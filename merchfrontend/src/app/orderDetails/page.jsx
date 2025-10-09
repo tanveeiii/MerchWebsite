@@ -31,18 +31,27 @@ const OrderDetails = () => {
                     <div >Total: </div>
                 </div>
             </div>
-            <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 flex flex-row bg-white'>
-                <img src="https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=400" 
-                       className=' object-contain h-full py-3 mx-3'/>
-                <div className='flex flex-col py-3'>
-                    <div>Bestseller-1</div>
-                    <div>Price: 200 Rs.</div>
-                    <div className='grid grid-cols-2 gap-2'>
-                        <button className=' text-white bg-slate-400 rounded-2xl px-2 py-1 cursor-pointer '>Buy again</button>
-                        <button className=' text-white bg-slate-400 rounded-2xl px-2 py-1 cursor-pointer '>View item</button>
+            <div className='h-[30vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 flex flex-row bg-white justify-between'>
+                <div className='flex flex-row'>
+                    <img src="https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                        className=' object-contain h-full py-3 mx-3 mr-5'/>
+                    <div className='flex flex-col  justify-around py-3'>
+                        <div className='font-semibold'>Delivery Status</div>
+                        <div>Bestseller-1</div>
+                        <div>Price: 200 Rs.</div>
+                        <div>Return Window</div>
+                        <div className='grid grid-cols-2 gap-2'>
+                            <button className=' text-white bg-slate-400 rounded-2xl px-2 py-1 cursor-pointer h-10'>Buy again</button>
+                            <button className=' text-white bg-slate-400 rounded-2xl px-2 py-1 cursor-pointer '>View item</button>
+                        </div>
                     </div>
                 </div>
+                    <div className='flex flex-col gap-5 m-9'>
+                        <button className=' text-black border-black border-2 bg-white rounded-2xl px-2 py-1 cursor-pointer h-10'>Give a product review</button>
+                        <button className=' text-black border-black border-2 bg-white rounded-2xl px-2 py-1 cursor-pointer h-10'>Check delivery status</button>
+                    </div>
             </div>
+
         </div>
     </div>
   )
