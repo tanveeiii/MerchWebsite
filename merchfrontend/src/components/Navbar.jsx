@@ -11,6 +11,7 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useMotionValueEvent } from "motion/react";
 import { User } from 'lucide-react';
 import { Heart } from 'lucide-react';
@@ -19,21 +20,21 @@ import SearchBox from "./SearchBox"
 export function NavbarFinal() {
   const navItems = [
     {
-      name: "Features",
+      name: "Lowers",
       link: "#features",
     },
     {
-      name: "Pricing",
+      name: "Customized",
       link: "#pricing",
     },
     {
-      name: "Contact",
+      name: "Non-Customized",
       link: "#contact",
     },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-   const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -46,7 +47,7 @@ export function NavbarFinal() {
   // }, []);
   //   const [visible, setVisible] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setVisible(window.scrollY < 100);
     };
@@ -64,8 +65,8 @@ export function NavbarFinal() {
       {/* Desktop Navigation */}
       <NavBody>
         <div className="flex justify-around w-full">
-        <NavbarLogo />
-        <NavItems items={navItems}/>
+          <NavbarLogo />
+          <NavItems items={navItems} />
         </div>
         <div className="flex items-center gap-4">
           {visible && (
@@ -73,9 +74,15 @@ export function NavbarFinal() {
               <SearchBox />
             </div>
           )}
-          <NavbarButton variant="secondary"><LuShoppingBag size={28} strokeWidth={1.5}/></NavbarButton>
-          <NavbarButton variant="secondary"><Heart size={30} strokeWidth={2} color="red"/></NavbarButton>
-          <NavbarButton variant="secondary"><User size={28} strokeWidth={2}/></NavbarButton>
+          <Link className="w-full" href="/orderDetails">
+          <NavbarButton variant="secondary"><LuShoppingBag size={28} strokeWidth={1.5} /></NavbarButton>
+          </Link>
+          <Link className="w-full" href="/wishlist">
+          <NavbarButton variant="secondary"><Heart size={30} strokeWidth={2} color="red" /></NavbarButton>
+          </Link>
+          <Link className="w-full" href="/account" >
+          <NavbarButton variant="secondary"><User size={28} strokeWidth={2} /></NavbarButton>
+          </Link>
         </div>
       </NavBody>
 
@@ -104,26 +111,28 @@ export function NavbarFinal() {
             </a>
           ))}
           <div className="flex w-full flex-col gap-4">
+            <Link href="/orderDetails" className="w-full">
+              <NavbarButton
+                onClick={() => setIsMobileMenuOpen(false)}
+                variant="primary"
+                className="w-full"
+              >
+                <LuShoppingBag />
+              </NavbarButton>
+            </Link>
             <NavbarButton
               onClick={() => setIsMobileMenuOpen(false)}
               variant="primary"
               className="w-full"
             >
-              <LuShoppingBag/>
+              <Heart />
             </NavbarButton>
             <NavbarButton
               onClick={() => setIsMobileMenuOpen(false)}
               variant="primary"
               className="w-full"
             >
-              <Heart/>
-            </NavbarButton>
-            <NavbarButton
-              onClick={() => setIsMobileMenuOpen(false)}
-              variant="primary"
-              className="w-full"
-            >
-              <User/>
+              <User />
             </NavbarButton>
           </div>
         </MobileNavMenu>
