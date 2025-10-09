@@ -3,7 +3,7 @@ import { NavbarFinal } from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import TopPicks from "./components/TopPicks";
 import MostGifted from "./components/MostGifted";
-import CustomTees from "./components/CustomTees";
+import CustomTees from "./components/SignupSection";
 import BestSellers from "./components/BestSellers";
 import Inspiration from "./components/Inspiration";
 import SearchBox from "../../components/SearchBox";
@@ -21,7 +21,7 @@ const Discover = () => {
       </div>
       <BestSellers scrollLtoR = {true} title={"Sports Jersey"}/>
       <BestSellers scrollLtoR = {false} title={"Events Tshirt"} />
-
+      <CustomTees />
       <Footer />
     </div>
   );
