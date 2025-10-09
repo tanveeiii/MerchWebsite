@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 
-const BestSellers = ({scrollLtoR}) => {
+const BestSellers = ({scrollLtoR, title}) => {
   const bestSellers = [
     {
       title: "Best Sellers This Month",
@@ -72,7 +72,7 @@ const BestSellers = ({scrollLtoR}) => {
     <div className="w-full mt-5">
      <div className="flex justify-center items-center mb-6">
       <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-        Top Picks
+        {title}
       </h2>
     </div>
 
@@ -108,6 +108,10 @@ const BestSellers = ({scrollLtoR}) => {
             width: max-content;
             animation: ${scrollLtoR ? "scrollRight":"scrollLeft"} linear infinite;
             animation-timing-function: linear;
+          }
+
+          .marquee:hover {
+            animation-play-state: paused;
           }
 
           @keyframes scrollRight {

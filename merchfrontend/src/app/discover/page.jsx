@@ -19,8 +19,8 @@ const Discover = () => {
       <TopPicks />
       <MostGifted />
       </div>
-      <BestSellers scrollLtoR = {true}/>
-      <BestSellers scrollLtoR = {false}/>
+      <BestSellers scrollLtoR = {true} title={"Sports Jersey"}/>
+      <BestSellers scrollLtoR = {false} title={"Events Tshirt"} />
 
       <Footer />
     </div>
