@@ -12,7 +12,7 @@ const OrderDetails = () => {
             <div className='pt-2 ml-4 w-full text-[22px] font-[410]'>
                 Order Details
             </div>
-            <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 grid grid-cols-3 px-3 py-3'>
+            <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 grid grid-cols-3 px-3 py-3 bg-white'>
                 <div className='flex flex-col'>
                     <div>Ship to: </div>
                     <div className='text-sm'>House no./Apartment no.</div>
@@ -31,7 +31,7 @@ const OrderDetails = () => {
                     <div >Total: </div>
                 </div>
             </div>
-            <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 flex flex-row'>
+            <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 flex flex-row bg-white'>
                 <img src="https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=400" 
                        className=' object-contain h-full py-3 mx-3'/>
                 <div className='flex flex-col py-3'>
