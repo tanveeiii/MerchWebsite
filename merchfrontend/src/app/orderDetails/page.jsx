@@ -1,3 +1,4 @@
+"use client"
 import { NavbarFinal } from '@/components/Navbar'
 import React from 'react'
 import Image from 'next/image'
@@ -14,20 +15,20 @@ const OrderDetails = () => {
             <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 grid grid-cols-3 px-3 py-3'>
                 <div className='flex flex-col'>
                     <div>Ship to: </div>
-                    <div>House no./Apartment no.</div>
-                    <div>Street address</div>
-                    <div>City, state</div>
-                    <div>PinCode</div>
+                    <div className='text-sm'>House no./Apartment no.</div>
+                    <div className='text-sm'>Street address</div>
+                    <div className='text-sm'>City, state</div>
+                    <div className='text-sm'>PinCode</div>
                 </div>
                 <div className='flex flex-col'>
                     <div>Payment method: </div>
-                    <div>Method</div>
+                    <div className='text-sm'>Method</div>
                 </div>
                 <div className='flex flex-col'>
                     <div>Order summary: </div>
-                    <div>Item(s) subtotal: </div>
-                    <div>Shipping: </div>
-                    <div>Total: </div>
+                    <div className='text-sm'>Item(s) subtotal: </div>
+                    <div className='text-sm'>Shipping: </div>
+                    <div >Total: </div>
                 </div>
             </div>
             <div className='h-[25vh] border-[#8080802e] m-4 mt-4 rounded-md border-2 flex flex-row'>
