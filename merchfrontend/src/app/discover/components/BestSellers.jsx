@@ -1,6 +1,7 @@
-import React from "react";
+"use client";
+import React, { useEffect, useRef, useState } from "react";
 
-const BestSellers = () => {
+const BestSellers = ({scrollLtoR}) => {
   const bestSellers = [
     {
       title: "Best Sellers This Month",
@@ -39,42 +40,100 @@ const BestSellers = () => {
     },
   ];
 
+  const containerRef = useRef(null);
+  const contentRef = useRef(null);
+  const [duration, setDuration] = useState(20);
+
+  useEffect(() => {
+    const updateDuration = () => {
+      const content = contentRef.current;
+      if (!content) return;
+      const totalWidth = content.scrollWidth;
+      if (!totalWidth) {
+        requestAnimationFrame(updateDuration);
+        return;
+      }
+
+      const singleWidth = totalWidth / 2;
+      const pxPerSecond = 80;
+      const computed = Math.max(8, singleWidth / pxPerSecond);
+      setDuration(computed);
+    };
+
+    const raf = requestAnimationFrame(updateDuration);
+    window.addEventListener("resize", updateDuration);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateDuration);
+    };
+  }, []);
+
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-            Top Picks
-          </h2>
-          <button className="text-sm font-medium hover:underline">
-            Check Them Out
-          </button>
-        </div>
-        <div className="space-y-4">
-          {bestSellers.map((item, index) => (
+    <div className="w-full mt-5">
+     <div className="flex justify-center items-center mb-6">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+        Top Picks
+      </h2>
+    </div>
+
+
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-hidden" /* hides scrollbar */
+      >
+        {/* Content is duplicated to allow seamless looping */}
+        <div
+          ref={contentRef}
+          className="marquee flex items-center"
+          style={{ animationDuration: `${duration}s` }}
+        >
+          {[...bestSellers, ...bestSellers].map((item, idx) => (
             <div
-              key={index}
-              className="flex items-center space-x-4 group cursor-pointer hover:bg-gray-50 p-3 rounded-xl transition-colors"
+              key={idx}
+              className="flex flex-col items-center justify-center bg-white rounded-2xl shadow-md p-6 min-w-[300px] flex-shrink-0 mr-6 transition-transform hover:scale-105"
             >
-              <div className="text-2xl font-bold text-gray-300 w-8">
-                {index + 1}
+              <div className="w-64 h-64 rounded-2xl overflow-hidden mb-4">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               </div>
-              <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-sm">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.designer}</p>
-              </div>
-              <p className="font-bold">${item.price}</p>
+              <h3 className="font-bold text-base">{item.title}</h3>
+              <p className="text-gray-600 text-sm">{item.designer}</p>
+              <p className="font-bold mt-1 text-lg">${item.price}</p>
             </div>
           ))}
         </div>
       </div>
+      <style jsx>{`
+          .marquee {
+            display: flex;
+            width: max-content;
+            animation: ${scrollLtoR ? "scrollRight":"scrollLeft"} linear infinite;
+            animation-timing-function: linear;
+          }
+
+          @keyframes scrollRight {
+            0% {
+              transform: translateX(-50%);
+            }
+            100% {
+              transform: translateX(0);
+            }
+          }
+
+          @keyframes scrollLeft {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+
+          @media (prefers-reduced-motion: no-preference) {
+            .marquee {
+              will-change: transform;
+            }
+          }
+      `}</style>
     </div>
   );
 };
