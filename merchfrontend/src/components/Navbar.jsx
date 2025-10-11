@@ -74,7 +74,7 @@ export function NavbarFinal() {
               <SearchBox />
             </div>
           )}
-          <Link className="w-full" href="/orderDetails">
+          <Link className="w-full" href="/cart">
           <NavbarButton variant="secondary"><LuShoppingBag size={28} strokeWidth={1.5} /></NavbarButton>
           </Link>
           <Link className="w-full" href="/wishlist">
