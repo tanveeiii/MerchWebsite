@@ -6,7 +6,21 @@ const Wishlist = () => {
     return (
         <div>
             <NavbarFinal/>
-            <ItemCard/>
+            <div className='grid grid-cols-4 mx-auto items-center justify-center'>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+                <ItemCard/>
+            </div>
+            
         </div>
     )
 }
