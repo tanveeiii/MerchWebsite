@@ -32,4 +32,376 @@ model User {
   updated_at   DateTime
   last_login   DateTime
   access_token String
+
+  Address          Address[]
+  UserNotification UserNotification[]
+  Wishlist         Wishlist[]
+  CouponUsage      CouponUsage[]
+  Order            Order[]
+  Review           Review[]
+  Analytics        Analytics[]
+
+  Return Return[]
+
+  ReturnRequest ReturnRequest[]
+  Cart          Cart[]
+}
+
+model Address {
+  address_id      Int      @id @default(autoincrement())
+  user_id         Int
+  user            User     @relation(fields: [user_id], references: [user_id])
+  address_type    String
+  street_address  String
+  apartment_suite String
+  city            String
+  state_province  String
+  postal_code     String
+  is_default      Boolean  @default(true)
+  created_at      DateTime
+  updated_at      DateTime
+
+  Order Order[] @relation(name: "shipping")
+
+  // Order Order[] @relation(name: "billing")
+}
+
+model UserNotification {
+  notification_id   Int      @id @default(autoincrement())
+  user_id           Int
+  user              User     @relation(fields: [user_id], references: [user_id])
+  notification_type String
+  title             String
+  message           String
+  link_url          String
+  is_read           Boolean  @default(false)
+  created_at        DateTime
+  updated_at        DateTime
+}
+
+model Category {
+  category_id   Int      @id @default(autoincrement())
+  category_name String
+  slug          String   @unique
+  description   String
+  image_url     String
+  is_active     Boolean  @default(true)
+  created_at    DateTime
+  updated_at    DateTime
+
+  Product Product[]
+}
+
+model Product {
+  product_id     Int      @id @default(autoincrement())
+  product_name   String
+  slug           String   @unique
+  tag_id         Int
+  tag            Tag      @relation(fields: [tag_id], references: [tag_id])
+  description    String
+  category_id    Int
+  category       Category @relation(fields: [category_id], references: [category_id])
+  base_price     Decimal
+  sku            String
+  is_active      Boolean  @default(true)
+  view_count     Int
+  average_rating Decimal
+  total_reviews  Int
+  created_at     DateTime
+  updated_at     DateTime
+
+  ProductVariant  ProductVariant[]
+  Wishlist        Wishlist[]
+  Review          Review[]
+  OrderItem       OrderItem[]
+  ProductImage    ProductImage[]
+  ProductDiscount ProductDiscount[]
+
+  Analytics Analytics[]
+  Cart      Cart[]
+}
+
+model ProductVariant {
+  product_variant_id  Int      @id @default(autoincrement())
+  product_id          Int
+  product             Product  @relation(fields: [product_id], references: [product_id])
+  size                String
+  color               String
+  material            String
+  sku                 String
+  price               Decimal
+  stock_quantity      Int
+  low_stock_threshold Int
+  weight              Decimal
+  is_available        Boolean  @default(true)
+  created_at          DateTime
+  updated_at          DateTime
+
+  Wishlist     Wishlist[]
+  OrderItem    OrderItem[]
+  InventoryLog InventoryLog[]
+  Cart         Cart[]
+}
+
+model ProductImage {
+  image_id      Int      @id @default(autoincrement())
+  product_id    Int
+  product       Product  @relation(fields: [product_id], references: [product_id])
+  image_url     String
+  alt_text      String
+  display_order Int
+  is_primary    Boolean  @default(false)
+  uploaded_at   DateTime
+}
+
+model ProductDiscount {
+  product_discount_id Int      @id @default(autoincrement())
+  product_id          Int
+  product             Product  @relation(fields: [product_id], references: [product_id])
+  discount_type       String
+  discount_value      Decimal
+  start_date          DateTime
+  end_date            DateTime
+  is_active           Boolean  @default(true)
+  created_at          DateTime
+}
+
+model InventoryLog {
+  log_id             Int            @id @default(autoincrement())
+  product_variant_id Int
+  product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
+  action_type        String
+  quantity_change    Int
+  quantity_after     Int
+  created_at         DateTime
+}
+
+model Tag {
+  tag_id     Int       @id @default(autoincrement())
+  tag_name   String
+  slug       String    @unique
+  created_at DateTime
+  Product    Product[]
+}
+
+model Cart {
+  cart_id            Int            @id @default(autoincrement())
+  user_id            Int
+  user               User           @relation(fields: [user_id], references: [user_id])
+  product_id         Int
+  product            Product        @relation(fields: [product_id], references: [product_id])
+  product_variant_id Int
+  product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
+  quantity           Int
+  added_at           DateTime
+  updated_at         DateTime
+}
+
+model Wishlist {
+  wishlist_id        Int            @id @default(autoincrement())
+  user_id            Int
+  user               User           @relation(fields: [user_id], references: [user_id])
+  product_id         Int
+  product            Product        @relation(fields: [product_id], references: [product_id])
+  product_variant_id Int
+  product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
+}
+
+model Order {
+  order_id         Int      @id @default(autoincrement())
+  order_number     String
+  shipping_address Int
+  s_address        Address  @relation(name: "shipping", fields: [shipping_address], references: [address_id])
+  // billing_address  Int
+  // b_address        Address @relation(name: "billing", fields: [billing_address], references: [address_id])
+  subtotal         Decimal
+  tax_amount       Decimal
+  shipping_cost    Decimal
+  discount_amount  Decimal
+  total_amount     Decimal
+  payment_type     String
+  order_status     String
+  user_id          Int
+  user             User     @relation(fields: [user_id], references: [user_id])
+  created_at       DateTime
+  updated_at       DateTime
+
+  CouponUsage        CouponUsage[]
+  OrderStatusHistory OrderStatusHistory[]
+  Review             Review[]
+  Payment            Payment[]
+  OrderItem          OrderItem[]
+
+  Return Return[]
+
+  ReturnRequest ReturnRequest[]
+}
+
+model OrderItem {
+  order_item_id      Int            @id @default(autoincrement())
+  order_id           Int
+  order              Order          @relation(fields: [order_id], references: [order_id])
+  product_id         Int
+  product            Product        @relation(fields: [product_id], references: [product_id])
+  product_variant_id Int
+  product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
+  quantity           Int
+  unit_price         Decimal
+  discount_amount    Decimal
+  tax_amount         Decimal
+  total_price        Decimal
+  created_at         DateTime
+
+  ReturnItem ReturnItem[]
+}
+
+model OrderStatusHistory {
+  status_history_id Int      @id @default(autoincrement())
+  order_id          Int
+  order             Order    @relation(fields: [order_id], references: [order_id])
+  status            String
+  changed_at        DateTime
+}
+
+model Payment {
+  payment_id      Int      @id @default(autoincrement())
+  order_id        Int
+  order           Order    @relation(fields: [order_id], references: [order_id])
+  payment_method  String
+  transaction_id  String
+  amount          Decimal
+  payment_status  String
+  payment_details String
+  payment_date    DateTime
+  created_at      DateTime
+}
+
+model Review {
+  review_id    Int      @id @default(autoincrement())
+  user_id      Int
+  user         User     @relation(fields: [user_id], references: [user_id])
+  product_id   Int
+  product      Product  @relation(fields: [product_id], references: [product_id])
+  order_id     Int
+  order        Order    @relation(fields: [order_id], references: [order_id])
+  rating       Int
+  review_title String
+  review_text  String
+  created_at   DateTime
+  updated_at   DateTime
+
+  ReviewImage ReviewImage[]
+}
+
+model ReviewImage {
+  review_image_id Int      @id @default(autoincrement())
+  review_id       Int
+  review          Review   @relation(fields: [review_id], references: [review_id])
+  image_url       String
+  updated_at      DateTime
+}
+
+model Coupon {
+  coupon_id           Int      @id @default(autoincrement())
+  coupon_code         String   @unique
+  description         String
+  discount_type       String
+  min_purchase_amount Int
+  max_purchase_amount Int
+  usage_limit         Int
+  usage_count         Int
+  is_active           Boolean  @default(true)
+  start_date          DateTime
+  end_date            DateTime
+  created_at          DateTime
+
+  CouponUsage CouponUsage[]
+}
+
+model CouponUsage {
+  usage_id         Int      @id @default(autoincrement())
+  coupon_id        Int
+  coupon           Coupon   @relation(fields: [coupon_id], references: [coupon_id])
+  order_id         Int
+  order            Order    @relation(fields: [order_id], references: [order_id])
+  user_id          Int
+  user             User     @relation(fields: [user_id], references: [user_id])
+  discount_applied Decimal
+  used_at          DateTime
+}
+
+model Admin {
+  admin_id     Int      @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  email        String   @unique
+  password     String
+  phone_number String
+  access_token String
+  created_at   DateTime
+  updated_at   DateTime
+}
+
+model Complaint {
+  message_id     Int      @id @default(autoincrement())
+  ticket_id      Int
+  sender_id      Int
+  sender_type    String
+  message        String
+  attachment_url String
+  created_at     DateTime
+}
+
+model Analytics {
+  analytics_id Int      @id @default(autoincrement())
+  user_id      Int
+  user         User     @relation(fields: [user_id], references: [user_id])
+  product_id   Int
+  product      Product  @relation(fields: [product_id], references: [product_id])
+  event_type   String
+  page_url     String
+  ip_address   String
+  event_data   String
+  created_at   DateTime
+}
+
+model Return {
+  return_id     Int      @id @default(autoincrement())
+  return_number String   @unique
+  user_id       Int
+  user          User     @relation(fields: [user_id], references: [user_id])
+  order_id      Int
+  order         Order    @relation(fields: [order_id], references: [order_id])
+  refund_amount Decimal
+  reason        String
+  return_status String
+  requested_at  DateTime
+  completed_at  DateTime
+
+  ReturnItem ReturnItem[]
+}
+
+model ReturnRequest {
+  return_request_id Int      @id @default(autoincrement())
+  return_name       String   @unique
+  user_id           Int
+  user              User     @relation(fields: [user_id], references: [user_id])
+  order_id          Int
+  order             Order    @relation(fields: [order_id], references: [order_id])
+  reason            String
+  return_status     String
+  refund_amount     Decimal
+  requested_at      DateTime
+  approved_at       DateTime
+  completed_at      DateTime
+}
+
+model ReturnItem {
+  return_item_id Int       @id @default(autoincrement())
+  return_id      Int
+  return         Return    @relation(fields: [return_id], references: [return_id])
+  order_item_id  Int
+  order_item     OrderItem @relation(fields: [order_item_id], references: [order_item_id])
+  quantity       Int
+  created_at     Int
 }
