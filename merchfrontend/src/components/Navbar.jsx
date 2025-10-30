@@ -13,10 +13,11 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useMotionValueEvent } from "motion/react";
-import { User } from 'lucide-react';
-import { Heart } from 'lucide-react';
+import { User } from "lucide-react";
+import { Heart } from "lucide-react";
 import { LuShoppingBag } from "react-icons/lu";
-import SearchBox from "./SearchBox"
+import SearchBox from "./SearchBox";
+
 export function NavbarFinal() {
   const navItems = [
     {
@@ -25,7 +26,7 @@ export function NavbarFinal() {
     },
     {
       name: "Customized",
-      link: "#pricing",
+      link: "/customized", // Updated link to the new page
     },
     {
       name: "Non-Customized",
@@ -35,17 +36,6 @@ export function NavbarFinal() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     // show only when at top
-  //     setAtTop(window.scrollY === 0);
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
-  //   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,13 +65,19 @@ export function NavbarFinal() {
             </div>
           )}
           <Link className="w-full" href="/cart">
-          <NavbarButton variant="secondary"><LuShoppingBag size={28} strokeWidth={1.5} /></NavbarButton>
+            <NavbarButton variant="secondary">
+              <LuShoppingBag size={28} strokeWidth={1.5} />
+            </NavbarButton>
           </Link>
           <Link className="w-full" href="/wishlist">
-          <NavbarButton variant="secondary"><Heart size={30} strokeWidth={2} color="red" /></NavbarButton>
+            <NavbarButton variant="secondary">
+              <Heart size={30} strokeWidth={2} color="red" />
+            </NavbarButton>
           </Link>
-          <Link className="w-full" href="/account" >
-          <NavbarButton variant="secondary"><User size={28} strokeWidth={2} /></NavbarButton>
+          <Link className="w-full" href="/account">
+            <NavbarButton variant="secondary">
+              <User size={28} strokeWidth={2} />
+            </NavbarButton>
           </Link>
         </div>
       </NavBody>
@@ -141,3 +137,4 @@ export function NavbarFinal() {
     // </div>
   );
 }
+
