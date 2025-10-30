@@ -2,7 +2,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class LoginDto {
   @IsString()
-  email: string; 
+  identity: string; 
 
   @IsOptional()
   @IsString()

@@ -32,6 +32,8 @@ model User {
   updated_at   DateTime
   last_login   DateTime
   access_token String
+  otp_hashed   String?
+  otp_expiry   DateTime?
 
   Address          Address[]
   UserNotification UserNotification[]
@@ -40,9 +42,7 @@ model User {
   Order            Order[]
   Review           Review[]
   Analytics        Analytics[]
-
   Return Return[]
-
   ReturnRequest ReturnRequest[]
   Cart          Cart[]
 }
