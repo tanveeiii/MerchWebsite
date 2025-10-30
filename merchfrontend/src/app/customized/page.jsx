@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { NavbarFinal } from "@/components/Navbar"; // Using path alias
-import Footer from "@/components/Footer"; // Using path alias
+import { NavbarFinal } from "../../components/Navbar"; // Corrected relative path
+import Footer from "../../components/Footer"; // Corrected relative path
 import {
   Palette,
   Type,
@@ -14,82 +14,108 @@ import {
   ArrowRight,
   ZoomIn,
   ZoomOut,
-  Upload, // Added for image upload
+  Upload,
+  Layers, // For part selection
+  Droplet, // For color picker
 } from "lucide-react";
 
 // --- SVG T-Shirt Components ---
-// Updated "half-sleeve" and "longer" T-Shirt SVGs
-const TShirtFrontSvg = ({ color }) => (
+// T-Shirt SVGs now have multiple paths for different colors
+const TShirtFrontSvg = ({ colors }) => (
   <svg
-    viewBox="0 0 500 600" // Made viewBox taller
+    viewBox="0 0 500 600"
     xmlns="http://www.w3.org/2000/svg"
     className="w-full h-full drop-shadow-lg"
   >
     <path
-      fill={color}
-      stroke="#777"
-      strokeWidth="3"
-      // New path for a more realistic half-sleeve shirt
-      d="M120,100 L50,130 L20,200 L100,250 L100,550 L400,550 L400,250 L480,200 L450,130 L380,100 Q250,180 120,100 Z"
-    />
-    {/* Collar stitch */}
-    <path
-      fill="none"
+      fill={colors.collar}
       stroke="#777"
       strokeWidth="2"
-      opacity="0.6"
-      d="M120,100 Q250,180 380,100"
+      d="M120,100 Q250,180 380,100 L375,105 Q250,185 125,105 L120,100 Z"
+    />
+    <path
+      fill={colors.leftSleeve}
+      stroke="#777"
+      strokeWidth="3"
+      d="M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z"
+    />
+    <path
+      fill={colors.rightSleeve}
+      stroke="#777"
+      strokeWidth="3"
+      d="M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z"
+    />
+    <path
+      fill={colors.body}
+      stroke="#777"
+      strokeWidth="3"
+      d="M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,180 120,100 Q110,180 100,220 Z"
     />
   </svg>
 );
 
-const TShirtBackSvg = ({ color }) => (
+const TShirtBackSvg = ({ colors }) => (
   <svg
-    viewBox="0 0 500 600" // Made viewBox taller
+    viewBox="0 0 500 600"
     xmlns="http://www.w3.org/2000/svg"
     className="w-full h-full drop-shadow-lg"
   >
     <path
-      fill={color}
+      fill={colors.collar}
+      stroke="#777"
+      strokeWidth="2"
+      d="M120,100 Q250,120 380,100 L375,105 Q250,125 125,105 L120,100 Z"
+    />
+    <path
+      fill={colors.leftSleeve}
       stroke="#777"
       strokeWidth="3"
-      // New path for the back (higher neckline)
-      d="M120,100 L50,130 L20,200 L100,250 L100,550 L400,550 L400,250 L480,200 L450,130 L380,100 Q250,120 120,100 Z"
+      d="M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z"
+    />
+    <path
+      fill={colors.rightSleeve}
+      stroke="#777"
+      strokeWidth="3"
+      d="M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z"
+    />
+    <path
+      fill={colors.body}
+      stroke="#777"
+      strokeWidth="3"
+      d="M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,120 120,100 Q110,180 100,220 Z"
     />
   </svg>
 );
 
-// --- Customization Overlay Component ---
+// --- Customization Overlay Component (Unchanged) ---
 const CustomizationOverlay = ({ customization }) => {
   const { text, graphic } = customization;
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-      {/* Custom Graphic - Now an <img> tag */}
+    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
       {graphic.content && (
         <img
           src={graphic.content}
           alt="Custom Graphic"
-          className="absolute object-contain"
+          className="absolute object-contain pointer-events-auto"
           style={{
             top: `${graphic.y}%`,
             left: `${graphic.x}%`,
-            width: `${graphic.scale * 20}%`, // Scale a bit differently for images
+            width: `${graphic.scale * 20}%`,
             transform: `translate(-50%, -50%) rotate(${graphic.rotation}deg)`,
             userSelect: "none",
             cursor: "move",
           }}
         />
       )}
-      {/* Custom Text */}
       {text.content && (
         <div
-          className="absolute text-4xl font-bold text-center"
+          className="absolute text-4xl font-bold text-center pointer-events-auto"
           style={{
             top: `${text.y}%`,
             left: `${text.x}%`,
             fontFamily: text.font,
-            color: text.color, // Use dynamic text color
+            color: text.color,
             textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
             transform: `translate(-50%, -50%) scale(${text.scale}) rotate(${text.rotation}deg)`,
             userSelect: "none",
@@ -107,13 +133,19 @@ const CustomizationOverlay = ({ customization }) => {
 // --- Main Page Component ---
 const CustomizedPage = () => {
   // --- State Variables ---
-  const [shirtColor, setShirtColor] = useState("#ffffff");
+  const [shirtColors, setShirtColors] = useState({
+    body: "#ffffff",
+    leftSleeve: "#ffffff",
+    rightSleeve: "#ffffff",
+    collar: "#ffffff",
+  });
+  const [activePart, setActivePart] = useState("body");
   const [activeSide, setActiveSide] = useState("front");
   const [activeTab, setActiveTab] = useState("color");
 
   const initialCustomization = {
     text: { content: "", x: 50, y: 40, scale: 1, font: "Arial", color: "#000000", rotation: 0 },
-    graphic: { content: null, x: 50, y: 55, scale: 5, rotation: 0 }, // Default scale for images
+    graphic: { content: null, x: 50, y: 55, scale: 5, rotation: 0 },
   };
 
   const [customizations, setCustomizations] = useState({
@@ -122,7 +154,7 @@ const CustomizedPage = () => {
   });
 
   // --- Data for Options ---
-  const colors = [
+  const colorSwatches = [
     { name: "White", hex: "#ffffff" },
     { name: "Black", hex: "#000000" },
     { name: "Navy", hex: "#0d3c59" },
@@ -131,31 +163,52 @@ const CustomizedPage = () => {
     { name: "Yellow", hex: "#fde047" },
     { name: "Green", hex: "#166534" },
     { name: "Blue", hex: "#2563eb" },
-    { name: "Purple", hex: "#7e22ce" },
-    { name: "Orange", hex: "#f97316" },
-    { name: "Pink", hex: "#ec4899" },
-    { name: "Brown", hex: "#78350f" },
   ];
   
   const fonts = ["Arial", "Verdana", "Impact", "Courier New", "Georgia", "Times New Roman", "Comic Sans MS"];
+  const shirtParts = [
+    { id: "body", name: "Body" },
+    { id: "leftSleeve", name: "Left Sleeve" },
+    { id: "rightSleeve", name: "Right Sleeve" },
+    { id: "collar", name: "Collar" },
+  ];
 
   // --- Helper Functions ---
   const resetCustomization = () => {
     setCustomizations({
-      front: {
-        text: { content: "", x: 50, y: 40, scale: 1, font: "Arial", color: "#000000", rotation: 0 },
-        graphic: { content: null, x: 50, y: 55, scale: 5, rotation: 0 },
-      },
-      back: {
-        text: { content: "", x: 50, y: 40, scale: 1, font: "Arial", color: "#000000", rotation: 0 },
-        graphic: { content: null, x: 50, y: 55, scale: 5, rotation: 0 },
-      },
+      front: { ...initialCustomization },
+      back: { ...initialCustomization },
     });
-    setShirtColor("#ffffff");
+    setShirtColors({
+      body: "#ffffff",
+      leftSleeve: "#ffffff",
+      rightSleeve: "#ffffff",
+      collar: "#ffffff",
+    });
     setActiveSide("front");
     setActiveTab("color");
+    setActivePart("body");
   };
 
+  // Set all parts to one color from swatch
+  const setBaseColor = (hex) => {
+    setShirtColors({
+      body: hex,
+      leftSleeve: hex,
+      rightSleeve: hex,
+      collar: hex,
+    });
+  };
+
+  // Set individual part color
+  const handlePartColorChange = (e) => {
+    const newColor = e.target.value;
+    setShirtColors(prev => ({
+      ...prev,
+      [activePart]: newColor,
+    }));
+  };
+  
   // Generic handler for sliders (scale, rotation)
   const handleSliderChange = (property, value) => {
     if (activeTab === "color") return;
@@ -259,22 +312,62 @@ const CustomizedPage = () => {
 
   // --- Render Functions for Tabs ---
   const renderColorPicker = () => (
-    <div className="grid grid-cols-6 gap-3">
-      {colors.map((color) => (
-        <button
-          key={color.name}
-          title={color.name}
-          onClick={() => setShirtColor(color.hex)}
-          className={`w-12 h-12 rounded-full border-2 transition-all ${
-            shirtColor === color.hex ? "border-blue-500 scale-110" : "border-gray-200"
-          }`}
-          style={{ backgroundColor: color.hex }}
-        >
-          {shirtColor === color.hex && (
-            <Check className="w-6 h-6 m-auto" style={{ color: color.hex === '#000000' || color.hex === '#0d3c59' ? '#fff' : '#000' }} />
-          )}
-        </button>
-      ))}
+    <div className="space-y-6">
+      {/* Base Color Swatches */}
+      <div>
+        <label className="text-sm font-medium text-gray-500 block mb-3">
+          Base Color (All Parts)
+        </label>
+        <div className="grid grid-cols-8 gap-2">
+          {colorSwatches.map((color) => (
+            <button
+              key={color.name}
+              title={color.name}
+              onClick={() => setBaseColor(color.hex)}
+              className="w-9 h-9 rounded-full border border-gray-200 transition-all hover:scale-110"
+              style={{ backgroundColor: color.hex }}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* Advanced Color Picker */}
+      <div>
+        <label className="text-sm font-medium text-gray-500 block mb-3">
+          Advanced Color (By Part)
+        </label>
+        <div className="space-y-4">
+          {/* Part Selector */}
+          <div className="grid grid-cols-2 gap-2">
+            {shirtParts.map(part => (
+              <button
+                key={part.id}
+                onClick={() => setActivePart(part.id)}
+                className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                  activePart === part.id
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {part.name}
+              </button>
+            ))}
+          </div>
+          {/* Color Input */}
+          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <Droplet className="w-5 h-5 text-gray-500" />
+            <span className="text-sm font-medium text-gray-800 capitalize flex-1">
+              {activePart} Color
+            </span>
+            <input
+              type="color"
+              value={shirtColors[activePart]}
+              onChange={handlePartColorChange}
+              className="w-10 h-10 p-0 border-none rounded-md cursor-pointer"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -358,9 +451,14 @@ const CustomizedPage = () => {
 
   const renderTransformControls = () => {
     const currentItem = customizations[activeSide][activeTab];
-    if (!currentItem) return null;
+    if (!currentItem || (activeTab === 'text' && !currentItem.content) || (activeTab === 'graphic' && !currentItem.content)) {
+      return (
+        <div className="text-center text-gray-500 p-4 bg-gray-50 rounded-lg">
+          {activeTab === 'text' ? 'Add some text to see controls' : 'Upload a graphic to see controls'}
+        </div>
+      );
+    }
     
-    // Use different min/max/step for text vs graphic scale
     const isText = activeTab === 'text';
     const scaleMin = isText ? 0.5 : 1;
     const scaleMax = isText ? 3 : 10;
@@ -420,27 +518,27 @@ const CustomizedPage = () => {
     <div className="bg-gray-100 min-h-screen">
       <NavbarFinal />
       <div className="container mx-auto max-w-7xl p-4 lg:p-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Create Your Custom T-Shirt
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* --- T-Shirt Display (Left/Top) --- */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center justify-center min-h-[80vh]">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center min-h-[85vh]">
             {/* Front/Back Toggle */}
-            <div className="flex mb-4 rounded-lg bg-gray-200 p-1">
+            <div className="flex mb-6 rounded-lg bg-gray-200 p-1">
               <button
                 onClick={() => setActiveSide("front")}
-                className={`px-6 py-2 rounded-md font-medium ${
-                  activeSide === "front" ? "bg-white shadow" : "text-gray-600"
+                className={`px-8 py-2 rounded-md font-medium transition-all ${
+                  activeSide === "front" ? "bg-white shadow-md" : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Front
               </button>
               <button
                 onClick={() => setActiveSide("back")}
-                className={`px-6 py-2 rounded-md font-medium ${
-                  activeSide === "back" ? "bg-white shadow" : "text-gray-600"
+                className={`px-8 py-2 rounded-md font-medium transition-all ${
+                  activeSide === "back" ? "bg-white shadow-md" : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Back
@@ -449,16 +547,16 @@ const CustomizedPage = () => {
             {/* T-Shirt Display Area */}
             <div className="relative w-full max-w-lg">
               {activeSide === "front" ? (
-                <TShirtFrontSvg color={shirtColor} />
+                <TShirtFrontSvg colors={shirtColors} />
               ) : (
-                <TShirtBackSvg color={shirtColor} />
+                <TShirtBackSvg colors={shirtColors} />
               )}
               <CustomizationOverlay customization={customizations[activeSide]} />
             </div>
           </div>
 
           {/* --- Customization Panel (Right/Bottom) --- */}
-          <div className="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 space-y-6">
+          <div className="lg:col-span-1 bg-white rounded-2xl shadow-xl p-6 flex flex-col">
             {/* Tab Navigation */}
             <div className="flex border-b">
               <TabButton
@@ -482,7 +580,7 @@ const CustomizedPage = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="min-h-[250px] p-2">
+            <div className="flex-1 min-h-[300px] py-6">
               {activeTab === "color" && renderColorPicker()}
               {activeTab === "text" && renderTextEditor()}
               {activeTab === "graphic" && renderGraphicPicker()}
@@ -496,8 +594,8 @@ const CustomizedPage = () => {
             )}
 
             {/* --- Actions --- */}
-            <div className="border-t pt-6 space-y-4">
-              <button className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition-colors">
+            <div className="border-t pt-6 space-y-4 mt-auto">
+              <button className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-blue-500/50">
                 Add to Cart
               </button>
               <button
@@ -520,16 +618,17 @@ const CustomizedPage = () => {
 const TabButton = ({ icon, label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-medium transition-colors ${
+    className={`flex-1 flex flex-col items-center justify-center gap-1 px-4 py-3 font-medium transition-all ${
       isActive
         ? "text-blue-600 border-b-2 border-blue-600"
-        : "text-gray-500 hover:text-gray-800"
+        : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg"
     }`}
   >
-    {icon}
-    <span>{label}</span>
+    {React.cloneElement(icon, { className: 'w-5 h-5' })}
+    <span className="text-sm">{label}</span>
   </button>
 );
 
 export default CustomizedPage;
+
 
