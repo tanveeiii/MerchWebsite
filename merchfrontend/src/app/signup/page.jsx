@@ -1,6 +1,6 @@
 import React from "react";
-import { NavbarFinal } from "../../../components/Navbar"; // Adjusted path (2 levels up)
-import Footer from "../../../components/Footer"; // Adjusted path (2 levels up)
+import { NavbarFinal } from "../../components/Navbar"; // Adjusted path (2 levels up)
+import Footer from "../../components/Footer"; // Adjusted path (2 levels up)
 import {
   Mail,
   User,

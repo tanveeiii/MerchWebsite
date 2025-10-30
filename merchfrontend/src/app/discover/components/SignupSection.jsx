@@ -20,7 +20,7 @@ const CustomTees = () => {
         </div>
         {/* Wrap button in an <a> tag to link to the new page */}
         <a
-          href="/discover/signup"
+          href="/signup"
           className="inline-block px-8 py-3 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105"
         >
           Sign up
