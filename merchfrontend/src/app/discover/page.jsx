@@ -22,6 +22,7 @@ const Discover = () => {
       <BestSellers scrollLtoR = {true} title={"Sports Jersey"}/>
       <BestSellers scrollLtoR = {false} title={"Events Tshirt"} />
       <CustomTees />
+      <Inspiration />
       <Footer />
     </div>
   );

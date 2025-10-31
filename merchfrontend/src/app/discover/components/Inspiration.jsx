@@ -6,7 +6,7 @@ const Inspiration = () => {
       title: "Top T-shirt Picks",
       cta: "View Collection",
       image:
-        "https://images.pexels.com/photos/8532389/pexels-photo-8532389.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/5698853/pexels-photo-5698853.jpeg?auto=compress&cs=tinysrgb&w=800",
     },
     {
       title: "Explore Our Latest Designs",
