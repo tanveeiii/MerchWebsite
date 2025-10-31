@@ -31,15 +31,15 @@ const Hero = () => {
       img: "https://placehold.co/1200x600/f4b400/FFF?text=Best+Sellers",
       headline: "Shop Our Best Sellers",
       description: "See what's trending and find your new favorite items.",
-      cta: "See Top Picks",
-      link: "/discover/top-picks",
+      cta: "See best sellers",
+      link: "/discover/best-sellers",
     },
     {
       img: "https://placehold.co/1200x600/8e44ad/FFF?text=Hoodie+Season",
       headline: "Cozy Up with New Hoodies",
       description: "Explore our latest collection of hoodies and outerwear.",
       cta: "Shop Hoodies",
-      link: "/shop/hoodies",
+      link: "/discover/hoodies",
     },
   ];
 
