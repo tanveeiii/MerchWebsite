@@ -18,7 +18,7 @@ const Hero = () => {
       headline: "Create Your Own Style",
       description: "Use our customizer to build the perfect tee, just for you.",
       cta: "Start Designing",
-      link: "/discover/customized",
+      link: "/customized",
     },
     {
       img: "https://placehold.co/1200x600/4a90e2/FFF?text=Spring+Sale",
