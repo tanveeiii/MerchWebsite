@@ -30,7 +30,7 @@ export function NavbarFinal() {
     },
     {
       name: "Non-Customized",
-      link: "#contact",
+      link: "non-customized", // Updated link to the new page
     },
   ];
 
