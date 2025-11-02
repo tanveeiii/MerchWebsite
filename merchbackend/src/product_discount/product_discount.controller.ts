@@ -6,7 +6,7 @@ import { CerateProductDiscountDto } from "./product_discount.dto";
 export class ProductDiscountController{
     constructor(private productDiscountService: ProductDiscountService) {};
     async create(@Body() dto: CerateProductDiscountDto){
-        const discount = this.productDiscountService.add(dto);
+        const discount = this.productDiscountService.create(dto);
         return discount;
     }
 }   
