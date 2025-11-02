@@ -24,7 +24,6 @@ export class AuthService {
         OR: [{ email: cleanIdentity }, { mobile: cleanIdentity }],
       },
     });
-    console.log(user);
     if (!user)
       throw new NotFoundException({ code: 404, message: 'User not found' });
     if (password) {
