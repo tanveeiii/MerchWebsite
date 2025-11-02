@@ -28,6 +28,7 @@ export class ProductService{
                 updated_at: new Date(Date.now())
             },
             select:{
+                product_id: true,
                 product_name: true,
                 slug: true,
                 tag_id: true,
