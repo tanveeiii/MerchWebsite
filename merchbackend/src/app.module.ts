@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { ProductDiscountModule } from './product_discount/product_discount.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { ProductDiscountModule } from './product_discount/product_discount.modul
     AuthModule,
     ProductModule,
     CategoryModule,
-    ProductDiscountModule
+    ProductDiscountModule,
+    TagModule
   ],
 })
 export class AppModule {}
