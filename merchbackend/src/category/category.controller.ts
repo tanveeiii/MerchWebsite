@@ -5,8 +5,8 @@ import { CreateCategoryDto } from './category.dto';
 @Controller('category')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
-  @Post('add')
-  async add(@Body() dto: CreateCategoryDto) {
+  @Post('create')
+  async create(@Body() dto: CreateCategoryDto) {
     const category = this.categoryService.add(dto);
     return category;
   }

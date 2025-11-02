@@ -6,7 +6,7 @@ import { CreateAdminDto } from './admin.dto';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateAdminDto) {
     return this.adminService.create(dto);
   }

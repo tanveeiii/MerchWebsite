@@ -6,7 +6,7 @@ import { CreateCouponUsageDto } from './coupon_usage.dto';
 export class CouponUsageController {
   constructor(private readonly couponUsageService: CouponUsageService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateCouponUsageDto) {
     return this.couponUsageService.create(dto);
   }

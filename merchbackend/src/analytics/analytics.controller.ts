@@ -6,7 +6,7 @@ import { AnalyticsService } from './analytics.service';
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateAnalyticsDto) {
     return this.analyticsService.create(dto);
   }

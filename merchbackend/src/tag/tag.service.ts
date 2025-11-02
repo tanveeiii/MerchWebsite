@@ -10,7 +10,7 @@ import slugify from 'slugify';
 @Injectable({})
 export class TagService {
   constructor(private prisma: PrismaService) {}
-  async add(dto: CreateTagDto) {
+  async create(dto: CreateTagDto) {
     console.log(dto);
     const { tag_name } = dto;
     if (!tag_name)

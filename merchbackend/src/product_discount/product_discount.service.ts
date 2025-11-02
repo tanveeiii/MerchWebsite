@@ -7,7 +7,7 @@ import { CerateProductDiscountDto } from "./product_discount.dto";
 export class ProductDiscountService{
     constructor(private prisma: PrismaService) {}
 
-    async add(dto: CerateProductDiscountDto){
+    async create(dto: CerateProductDiscountDto){
         const {product_id, discount_type, discount_value, start_date, end_date, is_active} = dto;
         if(!product_id || !discount_type || !discount_value || !start_date || !end_date || !is_active)
             throw new BadRequestException({code: 400, message: "Full Data is not provided"});

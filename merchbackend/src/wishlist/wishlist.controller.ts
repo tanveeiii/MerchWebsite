@@ -6,7 +6,7 @@ import { CreateWishlistDto } from './wishlist.dto';
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateWishlistDto) {
     return this.wishlistService.create(dto);
   }

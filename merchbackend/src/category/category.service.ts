@@ -10,7 +10,7 @@ import slugify from 'slugify';
 @Injectable({})
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
-  async add(dto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto) {
     const { category_name, description, is_active, image_url } = dto;
     if (!category_name || !description || !image_url || !is_active)
       throw new BadRequestException({

@@ -6,7 +6,7 @@ import { CreateReturnRequestDto } from './return_request.dto';
 export class ReturnRequestController {
   constructor(private readonly returnRequestService: ReturnRequestService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateReturnRequestDto) {
     return this.returnRequestService.create(dto);
   }

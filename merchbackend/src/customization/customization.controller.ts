@@ -5,8 +5,8 @@ import { CreateCustomizationDto } from './customization.dto';
 @Controller('customization')
 export class CustomizationController {
   constructor(private customizationService: CustomizationService) {}
-  @Post('add')
-  async add(@Body() dto: CreateCustomizationDto) {
+  @Post('create')
+  async create(@Body() dto: CreateCustomizationDto) {
     const tag = this.customizationService.add(dto);
     return tag;
   }

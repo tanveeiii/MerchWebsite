@@ -6,7 +6,7 @@ import { CreateComplaintDto } from './complaint.dto';
 export class ComplaintController {
   constructor(private readonly complaintService: ComplaintService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateComplaintDto) {
     return this.complaintService.create(dto);
   }

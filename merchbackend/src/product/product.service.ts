@@ -6,7 +6,7 @@ import slugify from 'slugify';
 @Injectable({})
 export class ProductService {
   constructor(private prisma: PrismaService) {}
-  async add(dto: CreateProductDto) {
+  async create(dto: CreateProductDto) {
     const {
       product_name,
       tag_id,

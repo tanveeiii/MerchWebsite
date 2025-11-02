@@ -318,7 +318,6 @@ model Admin {
 
 model Complaint {
   message_id     Int      @id @default(autoincrement())
-  ticket_id      Int
   sender_id      Int
   sender_type    String
   message        String

@@ -6,7 +6,7 @@ import { CreateProductImageDto } from './product_image.dto';
 export class ProductImageController {
   constructor(private readonly prodcutImageService: ProductImageService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateProductImageDto) {
     return this.prodcutImageService.create(dto);
   }

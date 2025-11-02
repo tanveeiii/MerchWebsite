@@ -6,7 +6,7 @@ import { CreateUserNotificationDto } from './user_notification.dto';
 export class UserNotificationController {
   constructor(private readonly userNotificationService: UserNotificationService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateUserNotificationDto) {
     return this.userNotificationService.create(dto);
   }

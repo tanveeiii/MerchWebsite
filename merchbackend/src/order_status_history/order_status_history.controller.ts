@@ -6,7 +6,7 @@ import { CreateOrderStatusHistoryDto } from './order_status_history.dto';
 export class OrderStatusHistoryController {
   constructor(private readonly orderStatusHistoryService: OrderStatusHistoryService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateOrderStatusHistoryDto) {
     return this.orderStatusHistoryService.create(dto);
   }

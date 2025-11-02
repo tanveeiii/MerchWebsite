@@ -6,7 +6,7 @@ import { CreateReturnItemDto } from './return_item.dto';
 export class ReturnItemController {
   constructor(private readonly returnItemService: ReturnItemService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateReturnItemDto) {
     return this.returnItemService.create(dto);
   }

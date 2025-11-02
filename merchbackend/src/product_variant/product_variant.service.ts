@@ -5,7 +5,7 @@ import { CreateProductVariantDto } from './product_variant.dto';
 @Injectable({})
 export class ProductVariantService {
   constructor(private prisma: PrismaService) {}
-  async add(dto: CreateProductVariantDto) {
+  async create(dto: CreateProductVariantDto) {
     const {
       product_id,
       size,

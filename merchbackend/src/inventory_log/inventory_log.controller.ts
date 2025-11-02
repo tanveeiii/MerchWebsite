@@ -6,7 +6,7 @@ import { CreateInventoryLogDto } from './inventory_log.dto';
 export class InventoryLogController {
   constructor(private readonly inventroyLogService: InventoryLogService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateInventoryLogDto) {
     return this.inventroyLogService.create(dto);
   }

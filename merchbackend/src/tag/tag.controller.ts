@@ -5,8 +5,8 @@ import { CreateTagDto } from './tag.dto';
 @Controller('tag')
 export class TagController {
   constructor(private tagService: TagService) {}
-  @Post('add')
-  async add(@Body() dto: CreateTagDto) {
+  @Post('create')
+  async create(@Body() dto: CreateTagDto) {
     const tag = this.tagService.add(dto);
     return tag;
   }

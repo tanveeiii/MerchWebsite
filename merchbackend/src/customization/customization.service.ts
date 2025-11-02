@@ -5,7 +5,7 @@ import { CreateCustomizationDto } from './customization.dto';
 @Injectable({})
 export class CustomizationService {
   constructor(private prisma: PrismaService) {}
-  async add(dto: CreateCustomizationDto) {
+  async create(dto: CreateCustomizationDto) {
     // return tag;
   }
 

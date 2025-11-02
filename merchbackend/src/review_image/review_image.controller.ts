@@ -6,7 +6,7 @@ import { CreateReviewImageDto } from './review_image.dto';
 export class ReviewImageController {
   constructor(private readonly reviewImageService: ReviewImageService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateReviewImageDto) {
     return this.reviewImageService.create(dto);
   }

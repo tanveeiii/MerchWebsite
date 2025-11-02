@@ -6,7 +6,7 @@ import { CreateCartDto } from './cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post('add')
+  @Post('create')
   async create(@Body() dto: CreateCartDto) {
     return this.cartService.create(dto);
   }
