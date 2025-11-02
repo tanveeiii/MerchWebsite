@@ -24,7 +24,7 @@ export class CategoryService {
         category_name: category_name,
         slug: slug,
         description: description,
-        is_active: is_active,
+        is_active: Boolean(is_active),
         image_url: image_url,
         created_at: new Date(Date.now()),
         updated_at: new Date(Date.now()),

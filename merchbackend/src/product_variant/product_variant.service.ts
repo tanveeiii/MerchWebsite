@@ -19,7 +19,7 @@ export class ProductVariantService {
       is_available,
     } = dto;
     const product = await this.prisma.product.findUnique({
-      where: { product_id },
+      where: { product_id: Number(product_id) },
     });
     if (
       !product ||
@@ -40,16 +40,16 @@ export class ProductVariantService {
 
     const product_variant = await this.prisma.productVariant.create({
       data: {
-        product_id,
+        product_id: Number(product_id),
         size,
         color,
         material,
         sku,
         price,
-        stock_quantity,
-        low_stock_threshold,
+        stock_quantity: Number(stock_quantity),
+        low_stock_threshold: Number(low_stock_threshold),
         weight,
-        is_available,
+        is_available: Boolean(is_available),
         created_at: new Date(Date.now()),
         updated_at: new Date(Date.now()),
       },

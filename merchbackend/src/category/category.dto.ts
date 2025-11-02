@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsBoolean,
@@ -10,6 +11,7 @@ export class CreateCategoryDto {
   @IsString()
   category_name: string;
 
+  @Type(() => Number)
   @IsInt()
   category_id: number;
 
