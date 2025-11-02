@@ -79,7 +79,7 @@ export class OrderService {
 
       return { code: 200, message: 'Order successfully added', order };
     } catch (e: any) {
-      throw new InternalServerErrorException({ code: 500, message: 'Failed to create order', details: e?.message });
+      throw new InternalServerErrorException({ code: 500, message: 'Failed to create order', error: e?.message });
     }
   }
 }
