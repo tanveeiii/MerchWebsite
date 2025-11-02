@@ -26,9 +26,22 @@ export class ProductService{
                 total_reviews: 0,
                 created_at: new Date(Date.now()),
                 updated_at: new Date(Date.now())
+            },
+            select:{
+                product_name: true,
+                slug: true,
+                tag_id: true,
+                description: true,
+                category_id: true,
+                base_price: true,
+                sku: true,
+                is_active: true,
+                view_count:  true,
+                average_rating: true,
+                total_reviews: true
             }
         })
-        
+
         return {code: "200", message: "Product added successfully", product}
     }
 }
