@@ -60,7 +60,7 @@ export class AuthService {
           where: { user_id: user.user_id },
           data: { otp_hashed: null, otp_expiry: null },
         });
-        throw new BadRequestException({ code: 401, message: 'otp expired' });
+        throw new BadRequestException({ code: 400, message: 'otp expired' });
       }
       const check = await bcrypt.compare(otp, user.otp_hashed);
       if (!check)

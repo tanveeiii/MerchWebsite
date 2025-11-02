@@ -1,0 +1,34 @@
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { PrismaService } from "src/prisma.service";
+import { CreateProductDto } from "./product.dto";
+import slugify from "slugify";
+
+@Injectable({})
+export class ProductService{
+    constructor(private prisma:PrismaService) {}
+    async add(dto:CreateProductDto){    
+        const {product_name, tag_id, description, category_id, base_price, sku, is_active} = dto;
+        if(!product_name || !tag_id || !description || !category_id || !base_price || !sku || !is_active) throw new BadRequestException({code: 400, message: "Incomplete data provided"});
+
+        const slug = slugify(product_name, {lower: true, strict: true});
+        const product = await this.prisma.product.create({
+            data: {
+                product_name: product_name,
+                slug:slug,
+                tag_id:tag_id,
+                description: description,
+                category_id: category_id,
+                base_price: base_price,
+                sku: sku,
+                is_active: is_active,
+                view_count: 0,
+                average_rating: 0,
+                total_reviews: 0,
+                created_at: new Date(Date.now()),
+                updated_at: new Date(Date.now())
+            }
+        })
+        
+        return {code: "200", message: "Product added successfully", product}
+    }
+}
