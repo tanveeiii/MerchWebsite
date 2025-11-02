@@ -1,8 +1,16 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsDateString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class LoginDto {
   @IsString()
-  identity: string; 
+  identity: string;
 
   @IsOptional()
   @IsString()
@@ -11,4 +19,22 @@ export class LoginDto {
   @IsOptional()
   @IsString()
   otp?: string;
+}
+
+export class SignUpDto {
+  @IsNotEmpty() @IsString() first_name: string;
+  @IsNotEmpty() @IsString() last_name: string;
+  @IsEmail() email: string;
+  @IsNotEmpty() @IsString() mobile: string;
+  @IsDateString() dob: string;
+  @IsNotEmpty()
+  @IsString()
+  @Length(6, 128)
+  password: string;
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^(male|female|other)$/i, {
+    message: 'gender must be male, female, or other',
+  })
+  gender: string;
 }
