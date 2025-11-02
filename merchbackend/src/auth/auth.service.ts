@@ -118,6 +118,14 @@ export class AuthService {
   }
 
   async signup(createUserDTO: SignUpDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDTO.email },
+    });
+    if (existingUser)
+      throw new BadRequestException({
+        code: 400,
+        message: 'User already exists',
+      });
     const hashed = await bcrypt.hash(createUserDTO.password, 10);
     const now = new Date();
     const user = await this.prisma.user.create({
