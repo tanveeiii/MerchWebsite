@@ -7,7 +7,7 @@ export class ProductVariantController{
     constructor(private  productService: ProductVariantService) {}
     @Post('create')
     async create(@Body() dto:CreateProductVariantDto){
-        const product = this.productService.add(dto);
+        const product = this.productService.create(dto);
         return product;
     }
 }

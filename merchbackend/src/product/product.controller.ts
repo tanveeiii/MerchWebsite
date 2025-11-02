@@ -7,7 +7,7 @@ export class ProductController{
     constructor(private  productService: ProductService) {}
     @Post('create')
     async create(@Body() dto:CreateProductDto){
-        const product = this.productService.add(dto);
+        const product = this.productService.create(dto);
         return product;
     }
 }

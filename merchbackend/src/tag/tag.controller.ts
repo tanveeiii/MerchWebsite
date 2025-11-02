@@ -7,7 +7,7 @@ export class TagController {
   constructor(private tagService: TagService) {}
   @Post('create')
   async create(@Body() dto: CreateTagDto) {
-    const tag = this.tagService.add(dto);
+    const tag = this.tagService.create(dto);
     return tag;
   }
 

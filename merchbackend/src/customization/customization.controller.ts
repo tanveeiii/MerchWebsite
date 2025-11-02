@@ -7,7 +7,7 @@ export class CustomizationController {
   constructor(private customizationService: CustomizationService) {}
   @Post('create')
   async create(@Body() dto: CreateCustomizationDto) {
-    const tag = this.customizationService.add(dto);
+    const tag = this.customizationService.create(dto);
     return tag;
   }
 

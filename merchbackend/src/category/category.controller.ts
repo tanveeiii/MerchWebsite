@@ -7,7 +7,7 @@ export class CategoryController {
   constructor(private categoryService: CategoryService) {}
   @Post('create')
   async create(@Body() dto: CreateCategoryDto) {
-    const category = this.categoryService.add(dto);
+    const category = this.categoryService.create(dto);
     return category;
   }
 
