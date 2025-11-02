@@ -227,6 +227,8 @@ model OrderItem {
   product            Product        @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
   ReturnItem         ReturnItem[]
+
+  Customization Customization[]
 }
 
 model OrderStatusHistory {
@@ -375,6 +377,19 @@ model ReturnItem {
   created_at     Int
   order_item     OrderItem @relation(fields: [order_item_id], references: [order_item_id])
   return         Return    @relation(fields: [return_id], references: [return_id])
+}
+
+model Customization {
+  customization_id Int      @id @default(autoincrement())
+  order_item_id    Int      @unique
+  front_image_url  String?
+  back_image_url   String?
+  custom_text      String?
+  font_style       String?
+  text_color       String?
+  created_at       DateTime @default(now())
+
+  order_item OrderItem @relation(fields: [order_item_id], references: [order_item_id])
 }
 
 enum Gender {

@@ -27,6 +27,7 @@ import { ReviewImageModule } from './review_image/review_image.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { CartModule } from './cart/cart.module';
 import { OrderStatusHistoryModule } from './order_status_history/order_status_history.module';
+import { CustomizationModule } from './customization/customization.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { OrderStatusHistoryModule } from './order_status_history/order_status_hi
     ComplaintModule,
     CouponModule,
     CouponUsageModule,
+    CustomizationModule,
     InventoryLogModule,
     OrderModule,
     OrderItemModule,
