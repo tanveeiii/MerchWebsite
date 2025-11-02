@@ -1,8 +1,17 @@
-import { IsString, IsBoolean, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsDateString,
+  IsInt,
+} from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
   category_name: string;
+
+  @IsInt()
+  category_id: number;
 
   @IsString()
   description: string;

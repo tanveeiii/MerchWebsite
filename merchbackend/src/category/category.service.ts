@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateCategoryDto } from './category.dto';
 import slugify from 'slugify';
@@ -35,5 +39,37 @@ export class CategoryService {
     });
 
     return { code: '200', message: 'Category added successfully', category };
+  }
+
+  async update(dto: CreateCategoryDto) {
+    const { category_id, category_name, description, is_active, image_url } =
+      dto;
+    const existingCategory = await this.prisma.category.findFirst({
+      where: {
+        category_id,
+      },
+    });
+    if (!existingCategory)
+      throw new NotFoundException({ code: 404, message: 'Category not found' });
+
+    const now = new Date();
+    let updated_data = { updated_at: now };
+    if (category_name) updated_data['category_name'] = category_name;
+    if (description) updated_data['description'] = description;
+    if (is_active) updated_data['is_active'] = is_active;
+    if (image_url) updated_data['image_url'] = image_url;
+    const category = await this.prisma.category.update({
+      where: { category_id },
+      data: updated_data,
+      select: {
+        category_id: true,
+        category_name: true,
+        description: true,
+        is_active: true,
+        image_url: true,
+      },
+    });
+
+    return category;
   }
 }

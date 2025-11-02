@@ -1,6 +1,9 @@
-import { IsString } from "class-validator";
+import { IsInt, IsString } from 'class-validator';
 
-export class CreateTagDto{
-    @IsString()
-    tag_name: string;
+export class CreateTagDto {
+  @IsString()
+  tag_name: string;
+
+  @IsInt()
+  tag_id: number;
 }
