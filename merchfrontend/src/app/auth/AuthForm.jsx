@@ -42,22 +42,34 @@ const AuthForms = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 1. Logic to split Full Name into First and Last Name for the backend
-    const nameParts = formData.fullName.trim().split(" ");
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+    if (type === "signup") {
+      // --- SIGNUP LOGIC ---
+      const nameParts = formData.fullName.trim().split(" ");
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : ".";
 
-    // 2. Prepare the payload exactly as the backend expects it
-    const submissionData = {
-        ...formData,
+      const submissionData = {
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
         first_name: firstName,
-        last_name: lastName || ".", // Backend says cannot be empty, using dot as fallback if no last name provided
-        // Remove the original fullName field from the payload sent to API
-        // Keep email, password, mobile, dob, gender
-    };
-    
-    // Pass the transformed data to the parent handler
-    onSubmit(submissionData);
+        last_name: lastName,
+        mobile: formData.mobile,
+        dob: formData.dob,
+        gender: formData.gender,
+      };
+      
+      onSubmit(submissionData);
+
+    } else {
+      // --- LOGIN LOGIC ---
+      const submissionData = {
+        identity: formData.email, // <--- CHANGED: "email" to "identity" to match your Backend
+        password: formData.password,
+      };
+      
+      onSubmit(submissionData);
+    }
   };
 
   const isSignup = type === "signup";

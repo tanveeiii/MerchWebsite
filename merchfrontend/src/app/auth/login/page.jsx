@@ -91,7 +91,7 @@ export default function LoginPage() {
 
     try {
       // 1. Ensure this URL matches your backend port (Django is usually 8000, Node is 3000/5000)
-      const response = await fetch("http://127.0.0.1:5000/api/auth/login/", {
+      const response = await fetch("http://localhost:5000/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -113,7 +113,7 @@ export default function LoginPage() {
       }
 
       // 3. Redirect to Dashboard
-      router.push("/dashboard"); 
+      router.push("/discover"); 
 
     } catch (err) {
       console.error("Login Error:", err);
