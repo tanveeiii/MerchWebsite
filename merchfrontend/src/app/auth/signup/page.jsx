@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AuthForms from "../AuthForm";
 
 const SignupPage = () => {
@@ -10,8 +10,31 @@ const SignupPage = () => {
 
   const handleSignup = async (formData) => {
     setError("");
+    setIsLoading(true);
 
-    setIsLoading(false);
+    try {
+      // Replace with your actual backend URL
+      // If you are testing locally without a backend yet, this will fail unless you comment the fetch out.
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      // Success! Redirect to login
+      router.push("/auth/login");
+      
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
