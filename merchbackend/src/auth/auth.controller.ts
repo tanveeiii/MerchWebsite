@@ -29,4 +29,6 @@ export class AuthController {
     const user = await this.authService.signup(signupDTO);
     return { success: true, user };
   }
+
+  
 }

@@ -9,13 +9,15 @@ import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { identity } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+import { sendEmail } from 'src/send_email';
 
 @Injectable({})
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-  ) {}
+  ) { }
   async login(dto: LoginDto) {
     const { identity, password, otp } = dto;
     const cleanIdentity = identity.trim().toLowerCase();
@@ -158,4 +160,61 @@ export class AuthService {
 
     return user;
   }
+
+  async sendResetLink(identity: string) {
+    const clean = identity.trim().toLowerCase();
+    const user = await this.prisma.user.findFirst({
+      where: { OR: [{ email: clean }, { mobile: clean }] },
+    });
+
+    if (!user)
+      throw new NotFoundException({ code: 404, message: 'User not found' });
+
+    const token = uuid();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: { user_id: user.user_id },
+      data: { reset_token: token, reset_token_expiry: expiry },
+    });
+
+    const resetLink = `http://localhost:3000/reset-password/${token}`;
+    const subject = "Reset Your Password";
+    const message = `Click the following link to reset your password. This link is valid for 10 minutes:\n\n${resetLink}`;
+      
+    try{
+      await sendEmail(user.email, subject, message);
+      return { code: 200, message: 'Reset link sent successfully'};
+    }catch(e){
+      return {code: 500, message: 'There was an error in sending the email please try again', errorMessage: e.message||e};
+    }
+    
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { reset_token: token },
+    });
+
+    if (!user)
+      throw new BadRequestException({ code: 400, message: 'Invalid token' });
+
+    if (!user.reset_token_expiry || new Date() > new Date(user.reset_token_expiry))
+      throw new BadRequestException({ code: 400, message: 'Token expired' });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { user_id: user.user_id },
+      data: {
+        password: hashed,
+        reset_token: null,
+        reset_token_expiry: null,
+        updated_at: new Date(),
+      },
+    });
+
+    return { code: 200, message: 'Password reset successfully' };
+  }
+
 }

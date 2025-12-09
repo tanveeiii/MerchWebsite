@@ -22,6 +22,8 @@ model User {
   access_token     String
   otp_expiry       DateTime?
   otp_hashed       String?
+  reset_token      String?
+  reset_token_expiry DateTime?
   Address          Address[]
   Analytics        Analytics[]
   Cart             Cart[]
