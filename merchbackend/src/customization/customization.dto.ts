@@ -1,15 +1,15 @@
-import { IsInt, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateCustomizationDto {
   @IsInt()
-  order_item_id: number;
+  cart_id: number; // <--- MUST BE 'cart_id'
 
   @IsOptional()
-  @IsUrl({}, { message: 'front_image_url must be a valid URL' })
+  @IsString()
   front_image_url?: string;
 
   @IsOptional()
-  @IsUrl({}, { message: 'back_image_url must be a valid URL' })
+  @IsString()
   back_image_url?: string;
 
   @IsOptional()

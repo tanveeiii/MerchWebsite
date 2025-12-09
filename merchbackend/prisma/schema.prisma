@@ -175,6 +175,7 @@ model Cart {
   product            Product        @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
   user               User           @relation(fields: [user_id], references: [user_id])
+  customization Customization?
 }
 
 model Wishlist {
@@ -380,17 +381,20 @@ model ReturnItem {
 
 model Customization {
   customization_id Int      @id @default(autoincrement())
-  order_item_id    Int      @unique
+  
+  order_item_id    Int?     @unique
+  order_item       OrderItem? @relation(fields: [order_item_id], references: [order_item_id])
+
+  cart_id          Int?     @unique
+  cart             Cart?    @relation(fields: [cart_id], references: [cart_id])
+
   front_image_url  String?
   back_image_url   String?
   custom_text      String?
   font_style       String?
   text_color       String?
   created_at       DateTime @default(now())
-
-  order_item OrderItem @relation(fields: [order_item_id], references: [order_item_id])
 }
-
 enum Gender {
   MALE   @map("Male")
   FEMALE @map("Female")
