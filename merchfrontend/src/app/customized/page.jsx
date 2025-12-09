@@ -1,12 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { NavbarFinal } from "../../components/Navbar"; // Corrected relative path
-import Footer from "../../components/Footer"; // Corrected relative path
+import { NavbarFinal } from "../../components/Navbar"; 
+import Footer from "../../components/Footer"; 
 import {
   Palette,
   Type,
   Image as ImageIcon,
-  Check,
   RotateCcw,
   ArrowUp,
   ArrowDown,
@@ -15,12 +14,10 @@ import {
   ZoomIn,
   ZoomOut,
   Upload,
-  Layers, // For part selection
-  Droplet, // For color picker
+  Droplet, 
 } from "lucide-react";
 
 // --- SVG T-Shirt Components ---
-// T-Shirt SVGs now have multiple paths for different colors
 const TShirtFrontSvg = ({ colors }) => (
   <svg
     viewBox="0 0 500 600"
@@ -87,7 +84,7 @@ const TShirtBackSvg = ({ colors }) => (
   </svg>
 );
 
-// --- Customization Overlay Component (Unchanged) ---
+// --- Customization Overlay Component ---
 const CustomizationOverlay = ({ customization }) => {
   const { text, graphic } = customization;
 
@@ -190,17 +187,15 @@ const CustomizedPage = () => {
     setActivePart("body");
   };
 
-  // Set all parts to one color from swatch
-  const setBaseColor = (hex) => {
-    setShirtColors({
-      body: hex,
-      leftSleeve: hex,
-      rightSleeve: hex,
-      collar: hex,
-    });
+  // UPDATED: Now sets color ONLY for the active part
+  const handleSwatchColorChange = (hex) => {
+    setShirtColors(prev => ({
+      ...prev,
+      [activePart]: hex,
+    }));
   };
 
-  // Set individual part color
+  // Set individual part color via native picker
   const handlePartColorChange = (e) => {
     const newColor = e.target.value;
     setShirtColors(prev => ({
@@ -209,7 +204,6 @@ const CustomizedPage = () => {
     }));
   };
   
-  // Generic handler for sliders (scale, rotation)
   const handleSliderChange = (property, value) => {
     if (activeTab === "color") return;
     const newValue = parseFloat(value);
@@ -226,7 +220,6 @@ const CustomizedPage = () => {
     }));
   };
 
-  // Generic handler for position buttons
   const handleTransform = (property, change) => {
     if (activeTab === "color") return;
 
@@ -313,17 +306,39 @@ const CustomizedPage = () => {
   // --- Render Functions for Tabs ---
   const renderColorPicker = () => (
     <div className="space-y-6">
-      {/* Base Color Swatches */}
+       {/* Part Selector - Moved up for clarity so user knows what they are coloring */}
+       <div>
+        <label className="text-sm font-medium text-gray-500 block mb-3">
+          Select Part to Color
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {shirtParts.map(part => (
+            <button
+              key={part.id}
+              onClick={() => setActivePart(part.id)}
+              className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                activePart === part.id
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {part.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Preset Swatches */}
       <div>
         <label className="text-sm font-medium text-gray-500 block mb-3">
-          Base Color (All Parts)
+          Preset Colors (Applies to {shirtParts.find(p => p.id === activePart)?.name})
         </label>
         <div className="grid grid-cols-8 gap-2">
           {colorSwatches.map((color) => (
             <button
               key={color.name}
               title={color.name}
-              onClick={() => setBaseColor(color.hex)}
+              onClick={() => handleSwatchColorChange(color.hex)}
               className="w-9 h-9 rounded-full border border-gray-200 transition-all hover:scale-110"
               style={{ backgroundColor: color.hex }}
             />
@@ -331,41 +346,19 @@ const CustomizedPage = () => {
         </div>
       </div>
       
-      {/* Advanced Color Picker */}
+      {/* Custom Color Input */}
       <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">
-          Advanced Color (By Part)
-        </label>
-        <div className="space-y-4">
-          {/* Part Selector */}
-          <div className="grid grid-cols-2 gap-2">
-            {shirtParts.map(part => (
-              <button
-                key={part.id}
-                onClick={() => setActivePart(part.id)}
-                className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                  activePart === part.id
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {part.name}
-              </button>
-            ))}
-          </div>
-          {/* Color Input */}
-          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <Droplet className="w-5 h-5 text-gray-500" />
-            <span className="text-sm font-medium text-gray-800 capitalize flex-1">
-              {activePart} Color
-            </span>
-            <input
-              type="color"
-              value={shirtColors[activePart]}
-              onChange={handlePartColorChange}
-              className="w-10 h-10 p-0 border-none rounded-md cursor-pointer"
-            />
-          </div>
+        <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <Droplet className="w-5 h-5 text-gray-500" />
+          <span className="text-sm font-medium text-gray-800 capitalize flex-1">
+            Custom {shirtParts.find(p => p.id === activePart)?.name} Color
+          </span>
+          <input
+            type="color"
+            value={shirtColors[activePart]}
+            onChange={handlePartColorChange}
+            className="w-10 h-10 p-0 border-none rounded-md cursor-pointer"
+          />
         </div>
       </div>
     </div>
@@ -630,5 +623,3 @@ const TabButton = ({ icon, label, isActive, onClick }) => (
 );
 
 export default CustomizedPage;
-
-
