@@ -5,76 +5,98 @@ import CartItems from './components/cartItems';
 import PriceDetails from './components/priceDetails';
 
 const Cart = () => {
-  const [items, setItems] = useState([
-    // Mock Data - Replace with empty array [] once backend is ready
-    {
-      id: 1,
-      name: "Classic Sky Blue Hoodie",
-      price: 799,
-      quantity: 1,
-      image: "https://readymadeui.com/images/product14.webp",
-    },
-    {
-      id: 2,
-      name: "Pixelverse T-Shirt",
-      price: 499,
-      quantity: 2,
-      image: "https://readymadeui.com/images/product14.webp",
-    },
-  ]);
-  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // --- 1. Fetch Cart Data (Uncomment when Backend GET endpoint is ready) ---
-  /*
+  // --- 1. Fetch Cart Data ---
   useEffect(() => {
     const fetchCart = async () => {
       setLoading(true);
       try {
-        const userId = localStorage.getItem("userId"); // Assuming you store ID on login
+        // TODO: Get actual logged-in user ID here
+        const userId = 1; // HARDCODED FOR TESTING
+        
         const res = await fetch(`http://localhost:5000/api/cart/${userId}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        
         const data = await res.json();
-        setItems(data); // Backend must return array of items
+
+        // Format backend data to match UI structure
+        const formattedItems = data.map(item => ({
+          id: item.cart_id,
+          name: item.product?.product_name || "Unknown Product",
+          // Use base_price or fallback to 0. Update 'base_price' if your DB field is named differently
+          price: item.product?.base_price || 0, 
+          quantity: item.quantity,
+          // Use a placeholder if no image exists yet in DB
+          image: item.product?.image_url || "https://readymadeui.com/images/product14.webp", 
+        }));
+
+        setItems(formattedItems);
       } catch (error) {
         console.error("Failed to fetch cart:", error);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchCart();
   }, []);
-  */
 
   // --- 2. Calculate Totals ---
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const discount = subtotal > 2000 ? 100 : 0; // Example logic
-  const tax = subtotal * 0.05; // 5% tax
+  const discount = subtotal > 2000 ? 100 : 0; 
+  const tax = subtotal * 0.05; 
   const total = subtotal - discount + tax;
 
   // --- 3. Handlers ---
   const handleQuantityChange = async (id, newQty) => {
     if (newQty < 1) return;
     
-    // Optimistic UI Update (Update screen immediately)
+    // 1. Optimistic UI Update (Update screen instantly)
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item))
     );
 
-    // TODO: Call Backend API to update quantity
-    // await fetch(`http://localhost:5000/api/cart/update/${id}`, { method: 'PUT', body: JSON.stringify({ quantity: newQty }) });
+    // 2. Call Backend API
+    try {
+      await fetch(`http://localhost:5000/api/cart/update/${id}`, { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQty }) 
+      });
+    } catch (error) {
+      console.error("Failed to update quantity:", error);
+      // Optional: Revert UI if error occurs
+    }
   };
 
   const handleRemove = async (id) => {
-    // Optimistic UI Update
+    // 1. Optimistic UI Update
     setItems((prev) => prev.filter((item) => item.id !== id));
 
-    // TODO: Call Backend API to delete
-    // await fetch(`http://localhost:5000/api/cart/remove/${id}`, { method: 'DELETE' });
+    // 2. Call Backend API
+    try {
+      await fetch(`http://localhost:5000/api/cart/remove/${id}`, { 
+        method: 'DELETE' 
+      });
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+    }
   };
 
   const handleCheckout = () => {
     alert("Proceeding to checkout with Total: $" + total.toFixed(2));
     // router.push('/checkout');
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <p className="text-xl font-semibold text-gray-500">Loading Cart...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
