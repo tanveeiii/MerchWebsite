@@ -123,7 +123,11 @@ const Account = () => {
         <div>
             <NavbarFinal />
             <div className="flex bg-gray-50 min-h-screen">
-                <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+                <Sidebar 
+                activeSection={activeSection} 
+                setActiveSection={setActiveSection} 
+                userData={userData}  // <--- ADD THIS PROP
+            />
 
                 <div className="flex-1 p-8">
                     {/* OVERVIEW */}
