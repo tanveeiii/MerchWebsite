@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ReturnService } from './return.service';
 import { CreateReturnDto } from './return.dto';
 
@@ -9,5 +9,11 @@ export class ReturnController {
   @Post('create')
   async create(@Body() dto: CreateReturnDto) {
     return this.returnService.create(dto);
+  }
+
+  // GET /api/return/:userId
+  @Get(':userId')
+  async findAll(@Param('userId', ParseIntPipe) userId: number) {
+    return this.returnService.findAll(userId);
   }
 }
