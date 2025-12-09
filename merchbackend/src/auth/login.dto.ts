@@ -40,10 +40,10 @@ export class SignUpDto {
 }
 
 export class resetRequestDto{
-  @IsString() identity: String;
+  @IsString() identity: string;
 }
 
 export class resetDto {
-  token: string;
-  newPassword: string;
+  @IsString() token: string;
+  @IsString() newPassword: string;
 }

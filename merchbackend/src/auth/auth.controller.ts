@@ -31,12 +31,15 @@ export class AuthController {
   }
 
   @Post('resetPasswordRequest')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   async sendResetLink(@Body() resetDto: resetRequestDto) {
     return this.authService.sendResetLink(resetDto);
   }
 
   @Post('resetPassword')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   resetPassword(@Body() dto: resetDto) {
+    console.log("DTO: ", dto)
     return this.authService.resetPassword(dto);
   }
 }

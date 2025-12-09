@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { identity } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+// import { v4 as uuid } from 'uuid';
 import { sendEmail } from 'src/send_email';
 import { dot } from 'node:test/reporters';
 
@@ -163,7 +163,7 @@ export class AuthService {
   }
 
   async sendResetLink(dto: resetRequestDto) {
-    const { identity } = dto;
+    const identity = dto.identity;
     const clean = identity.trim().toLowerCase();
     const user = await this.prisma.user.findFirst({
       where: { OR: [{ email: clean }, { mobile: clean }] },
@@ -171,7 +171,7 @@ export class AuthService {
 
     if (!user)
       throw new NotFoundException({ code: 404, message: 'User not found' });
-
+    const { v4: uuid } = await import('uuid');
     const token = uuid();
     const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -183,28 +183,38 @@ export class AuthService {
     const resetLink = `http://localhost:3000/reset-password/${token}`;
     const subject = "Reset Your Password";
     const message = `Click the following link to reset your password. This link is valid for 10 minutes:\n\n${resetLink}`;
-      
-    try{
+
+    try {
       await sendEmail(user.email, subject, message);
-      return { code: 200, message: 'Reset link sent successfully'};
-    }catch(e){
-      return {code: 500, message: 'There was an error in sending the email please try again', errorMessage: e.message||e};
+      return { code: 200, message: 'Reset link sent successfully' };
+    } catch (e) {
+      return { code: 500, message: 'There was an error in sending the email please try again', errorMessage: e.message || e };
     }
-    
+
   }
 
   async resetPassword(dto: resetDto) {
     const token = dto.token
     const newPassword = dto.newPassword
+    console.log("Token: ", token)
     const user = await this.prisma.user.findFirst({
       where: { reset_token: token },
     });
 
     if (!user)
       throw new BadRequestException({ code: 400, message: 'Invalid token' });
+    console.log(user)
+    if (!user.reset_token_expiry) {
+      throw new BadRequestException({ code: 400, message: "Token expired go to reset email" });
+    }
 
-    if (!user.reset_token_expiry || new Date() > new Date(user.reset_token_expiry))
-      throw new BadRequestException({ code: 400, message: 'Token expired' });
+    const expiry = new Date(user.reset_token_expiry).getTime();
+    const now = Date.now();
+
+    if (now > expiry) {
+      throw new BadRequestException({ code: 400, message: "Token expired" });
+    }
+
 
     const hashed = await bcrypt.hash(newPassword, 10);
 
