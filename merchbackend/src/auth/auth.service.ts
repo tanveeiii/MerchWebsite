@@ -4,13 +4,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginDto, SignUpDto } from './login.dto';
+import { LoginDto, resetDto, resetRequestDto, SignUpDto } from './login.dto';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { identity } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { sendEmail } from 'src/send_email';
+import { dot } from 'node:test/reporters';
 
 @Injectable({})
 export class AuthService {
@@ -161,7 +162,8 @@ export class AuthService {
     return user;
   }
 
-  async sendResetLink(identity: string) {
+  async sendResetLink(dto: resetRequestDto) {
+    const { identity } = dto;
     const clean = identity.trim().toLowerCase();
     const user = await this.prisma.user.findFirst({
       where: { OR: [{ email: clean }, { mobile: clean }] },
@@ -191,7 +193,9 @@ export class AuthService {
     
   }
 
-  async resetPassword(token: string, newPassword: string) {
+  async resetPassword(dto: resetDto) {
+    const token = dto.token
+    const newPassword = dto.newPassword
     const user = await this.prisma.user.findFirst({
       where: { reset_token: token },
     });

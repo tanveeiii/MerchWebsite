@@ -6,11 +6,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, SignUpDto } from './login.dto';
+import { LoginDto, resetDto, resetRequestDto, SignUpDto } from './login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
@@ -30,5 +30,13 @@ export class AuthController {
     return { success: true, user };
   }
 
-  
+  @Post('resetPasswordRequest')
+  async sendResetLink(@Body() resetDto: resetRequestDto) {
+    return this.authService.sendResetLink(resetDto);
+  }
+
+  @Post('resetPassword')
+  resetPassword(@Body() dto: resetDto) {
+    return this.authService.resetPassword(dto);
+  }
 }

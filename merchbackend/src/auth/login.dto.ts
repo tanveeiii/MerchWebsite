@@ -38,3 +38,12 @@ export class SignUpDto {
   })
   gender: string;
 }
+
+export class resetRequestDto{
+  @IsString() identity: String;
+}
+
+export class resetDto {
+  token: string;
+  newPassword: string;
+}
