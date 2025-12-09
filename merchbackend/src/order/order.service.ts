@@ -3,12 +3,13 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateOrderDto } from './order.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 
-
 @Injectable()
 export class OrderService {
   constructor(private prisma: PrismaService) {}
 
+  // ... (Keep your existing create method exactly as it is) ...
   async create(data: CreateOrderDto) {
+    // ... existing create logic ...
     const {
       order_number,
       shipping_address,
@@ -80,6 +81,29 @@ export class OrderService {
       return { code: 200, message: 'Order successfully added', order };
     } catch (e: any) {
       throw new InternalServerErrorException({ code: 500, message: 'Failed to create order', error: e?.message });
+    }
+  }
+
+  // --- NEW: Add this method to fetch orders ---
+  async findAll(userId: number) {
+    try {
+      const orders = await this.prisma.order.findMany({
+        where: { user_id: userId },
+        include: {
+          // We include OrderItems to get the product details (like image) for the card
+          OrderItem: { 
+            include: {
+              product: true 
+            }
+          }
+        },
+        orderBy: {
+          created_at: 'desc' // Newest orders first
+        }
+      });
+      return { code: 200, data: orders };
+    } catch (e) {
+      throw new InternalServerErrorException({ code: 500, message: 'Failed to fetch orders', error: e.message });
     }
   }
 }

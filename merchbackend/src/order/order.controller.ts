@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './order.dto';
 
@@ -9,5 +9,11 @@ export class OrderController {
   @Post('create')
   async create(@Body() dto: CreateOrderDto) {
     return this.orderService.create(dto);
+  }
+
+  // --- NEW Endpoint ---
+  @Get(':userId')
+  async findAll(@Param('userId', ParseIntPipe) userId: number) {
+    return this.orderService.findAll(userId);
   }
 }
