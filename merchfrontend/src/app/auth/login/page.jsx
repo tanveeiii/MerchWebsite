@@ -90,7 +90,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // 1. Ensure this URL matches your backend port (Django is usually 8000, Node is 3000/5000)
       const response = await fetch("http://localhost:5000/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,19 +99,22 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // If backend returns specific field errors, format them, otherwise use generic message
         throw new Error(data.message || data.detail || "Invalid email or password");
       }
 
-      // 2. Save Token (Adjust 'access' based on your backend response structure)
-      if (data.access) {
-         localStorage.setItem("accessToken", data.access);
-         localStorage.setItem("refreshToken", data.refresh); // If available
-      } else if (data.token) {
+      // --- CRITICAL FIX START ---
+      // 1. Save Token
+      if (data.token) {
          localStorage.setItem("token", data.token);
       }
 
-      // 3. Redirect to Dashboard
+      // 2. Save User ID (This is what the Account page needs!)
+      if (data.id) {
+          localStorage.setItem("userId", data.id);
+      }
+      // --- CRITICAL FIX END ---
+
+      // 3. Redirect
       router.push("/discover"); 
 
     } catch (err) {

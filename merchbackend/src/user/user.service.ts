@@ -13,6 +13,25 @@ import { AddAddressDto } from './address.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  // --- Fetch Profile (with Addresses) ---
+  async getProfile(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { user_id: userId },
+      include: {
+        Address: true, // Fetch associated addresses
+      },
+    });
+
+    if (!user) throw new NotFoundException({ code: 404, message: 'User not found' });
+
+    // FIX: Use destructuring to separate sensitive fields from the rest of the data.
+    // This avoids the "operand of delete must be optional" TS error.
+    const { password, access_token, otp_hashed, ...safeUser } = user;
+
+    return { code: 200, data: safeUser };
+  }
+
+  // --- Update User Profile ---
   async update(updateUserDTO: UpdateUserDto) {
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -31,6 +50,7 @@ export class UserService {
       updated_data['last_name'] = updateUserDTO.last_name;
     if (updateUserDTO.mobile) updated_data['mobile'] = updateUserDTO.mobile;
     if (updateUserDTO.gender) updated_data['gender'] = updateUserDTO.gender;
+    
     const user = await this.prisma.user.update({
       where: { email: updateUserDTO.email },
       data: updated_data,
@@ -51,46 +71,48 @@ export class UserService {
     return user;
   }
 
+  // --- Add Address ---
   async addAddress(addAddressDTO: AddAddressDto) {
     const existingUser = await this.prisma.user.findFirst({
-      where: {
-        email: addAddressDTO.email,
-      },
-    });
-    if (!existingUser)
-      throw new NotFoundException({ code: 404, message: 'User not found' });
-    if (
-      !addAddressDTO.street_address ||
-      !addAddressDTO.postal_code ||
-      !addAddressDTO.state_province
-    )
-      throw new BadRequestException({ code: 400, message: 'Bad Request' });
-    const now = new Date();
-    const user = await this.prisma.address.create({
-      data: {
-        user_id: existingUser.user_id,
-        address_type: addAddressDTO.address_type,
-        street_address: addAddressDTO.street_address,
-        apartment_suite: addAddressDTO.apartment_suite,
-        city: addAddressDTO.city,
-        state_province: addAddressDTO.state_province,
-        postal_code: addAddressDTO.postal_code,
-        is_default: addAddressDTO.is_default,
-        created_at: now,
-        updated_at: now,
-      },
-      select: {
-        address_id: true,
-        user_id: true,
-        address_type: true,
-        street_address: true,
-        apartment_suite: true,
-        city: true,
-        state_province: true,
-        postal_code: true,
-      },
-    });
-
-    return user;
+        where: {
+          email: addAddressDTO.email,
+        },
+      });
+      if (!existingUser)
+        throw new NotFoundException({ code: 404, message: 'User not found' });
+      if (
+        !addAddressDTO.street_address ||
+        !addAddressDTO.postal_code ||
+        !addAddressDTO.state_province
+      )
+        throw new BadRequestException({ code: 400, message: 'Bad Request' });
+      
+      const now = new Date();
+      const user = await this.prisma.address.create({
+        data: {
+          user_id: existingUser.user_id,
+          address_type: addAddressDTO.address_type,
+          street_address: addAddressDTO.street_address,
+          apartment_suite: addAddressDTO.apartment_suite,
+          city: addAddressDTO.city,
+          state_province: addAddressDTO.state_province,
+          postal_code: addAddressDTO.postal_code,
+          is_default: addAddressDTO.is_default,
+          created_at: now,
+          updated_at: now,
+        },
+        select: {
+          address_id: true,
+          user_id: true,
+          address_type: true,
+          street_address: true,
+          apartment_suite: true,
+          city: true,
+          state_province: true,
+          postal_code: true,
+        },
+      });
+  
+      return user;
   }
 }
