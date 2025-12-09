@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { NavbarFinal } from "../../components/Navbar"; 
-import Footer from "../../components/Footer"; 
+import { NavbarFinal } from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import {
   Palette,
   Type,
@@ -14,75 +14,132 @@ import {
   ZoomIn,
   ZoomOut,
   Upload,
-  Droplet, 
+  Droplet,
+  Shirt, // New icon for the Style tab
 } from "lucide-react";
 
-// --- SVG T-Shirt Components ---
-const TShirtFrontSvg = ({ colors }) => (
-  <svg
-    viewBox="0 0 500 600"
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-full h-full drop-shadow-lg"
-  >
-    <path
-      fill={colors.collar}
-      stroke="#777"
-      strokeWidth="2"
-      d="M120,100 Q250,180 380,100 L375,105 Q250,185 125,105 L120,100 Z"
-    />
-    <path
-      fill={colors.leftSleeve}
-      stroke="#777"
-      strokeWidth="3"
-      d="M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z"
-    />
-    <path
-      fill={colors.rightSleeve}
-      stroke="#777"
-      strokeWidth="3"
-      d="M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z"
-    />
-    <path
-      fill={colors.body}
-      stroke="#777"
-      strokeWidth="3"
-      d="M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,180 120,100 Q110,180 100,220 Z"
-    />
-  </svg>
-);
+// --- DYNAMIC SVG COMPONENTS ---
 
-const TShirtBackSvg = ({ colors }) => (
-  <svg
-    viewBox="0 0 500 600"
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-full h-full drop-shadow-lg"
-  >
-    <path
-      fill={colors.collar}
-      stroke="#777"
-      strokeWidth="2"
-      d="M120,100 Q250,120 380,100 L375,105 Q250,125 125,105 L120,100 Z"
-    />
-    <path
-      fill={colors.leftSleeve}
-      stroke="#777"
-      strokeWidth="3"
-      d="M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z"
-    />
-    <path
-      fill={colors.rightSleeve}
-      stroke="#777"
-      strokeWidth="3"
-      d="M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z"
-    />
-    <path
-      fill={colors.body}
-      stroke="#777"
-      strokeWidth="3"
-      d="M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,120 120,100 Q110,180 100,220 Z"
-    />
-  </svg>
-);
+const TShirtFrontSvg = ({ colors, config }) => {
+  const isFullSleeve = config.sleeve === "full";
+  const isPolo = config.neck === "polo";
+
+  // Dynamic Paths
+  const leftSleevePath = isFullSleeve
+    ? "M120,100 L50,130 L10,380 L70,400 L100,220 Q110,180 120,100 Z" // Full
+    : "M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z"; // Half
+
+  const rightSleevePath = isFullSleeve
+    ? "M380,100 L450,130 L490,380 L430,400 L400,220 Q390,180 380,100 Z" // Full
+    : "M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z"; // Half
+
+  // Body path needs to adjust slightly for the neck hole if it's round vs polo
+  const bodyPath = isPolo
+    ? "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,180 120,100 Q110,180 100,220 Z"
+    : "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,150 120,100 Q110,180 100,220 Z";
+
+  return (
+    <svg
+      viewBox="0 0 500 600"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full drop-shadow-lg"
+    >
+      {/* Back Inside (visible through neck hole) */}
+      <path fill="#e5e5e5" d="M120,100 Q250,150 380,100 L380,110 Q250,160 120,110 Z" />
+
+      {/* Sleeves */}
+      <path
+        fill={colors.leftSleeve}
+        stroke="#777"
+        strokeWidth="2"
+        d={leftSleevePath}
+      />
+      <path
+        fill={colors.rightSleeve}
+        stroke="#777"
+        strokeWidth="2"
+        d={rightSleevePath}
+      />
+
+      {/* Body */}
+      <path
+        fill={colors.body}
+        stroke="#777"
+        strokeWidth="2"
+        d={bodyPath}
+      />
+
+      {/* Neck / Collar Area */}
+      {isPolo ? (
+        // Polo Collar Path
+        <path
+          fill={colors.collar}
+          stroke="#777"
+          strokeWidth="2"
+          d="M120,100 Q250,180 380,100 L375,105 Q250,185 125,105 L120,100 Z"
+        />
+      ) : (
+        // Round Neck Ribbing
+        <path
+          fill={colors.collar}
+          stroke="#777"
+          strokeWidth="2"
+          d="M120,100 Q250,150 380,100 L380,115 Q250,165 120,115 Z"
+        />
+      )}
+    </svg>
+  );
+};
+
+const TShirtBackSvg = ({ colors, config }) => {
+  const isFullSleeve = config.sleeve === "full";
+  const isPolo = config.neck === "polo";
+
+  const leftSleevePath = isFullSleeve
+    ? "M120,100 L50,130 L10,380 L70,400 L100,220 Q110,180 120,100 Z"
+    : "M120,100 L50,130 L20,200 L100,250 L100,220 Q110,180 120,100 Z";
+
+  const rightSleevePath = isFullSleeve
+    ? "M380,100 L450,130 L490,380 L430,400 L400,220 Q390,180 380,100 Z"
+    : "M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z";
+
+  // For back view, the neck line is higher
+  const bodyPath = "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,90 120,100 Q110,180 100,220 Z";
+
+  return (
+    <svg
+      viewBox="0 0 500 600"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full drop-shadow-lg"
+    >
+      <path
+        fill={colors.leftSleeve}
+        stroke="#777"
+        strokeWidth="2"
+        d={leftSleevePath}
+      />
+      <path
+        fill={colors.rightSleeve}
+        stroke="#777"
+        strokeWidth="2"
+        d={rightSleevePath}
+      />
+      <path
+        fill={colors.body}
+        stroke="#777"
+        strokeWidth="2"
+        d={bodyPath}
+      />
+      {/* Back Collar Detail */}
+      <path
+        fill={colors.collar}
+        stroke="#777"
+        strokeWidth="2"
+        d="M120,100 Q250,90 380,100 L380,110 Q250,100 120,110 Z"
+      />
+    </svg>
+  );
+};
 
 // --- Customization Overlay Component ---
 const CustomizationOverlay = ({ customization }) => {
@@ -136,9 +193,16 @@ const CustomizedPage = () => {
     rightSleeve: "#ffffff",
     collar: "#ffffff",
   });
+  
+  // NEW: State for Shirt Configuration (Style)
+  const [shirtConfig, setShirtConfig] = useState({
+    sleeve: "half", // 'half' or 'full'
+    neck: "polo",   // 'polo' or 'round'
+  });
+
   const [activePart, setActivePart] = useState("body");
   const [activeSide, setActiveSide] = useState("front");
-  const [activeTab, setActiveTab] = useState("color");
+  const [activeTab, setActiveTab] = useState("style"); // Default to style to show off new features
 
   const initialCustomization = {
     text: { content: "", x: 50, y: 40, scale: 1, font: "Arial", color: "#000000", rotation: 0 },
@@ -163,11 +227,13 @@ const CustomizedPage = () => {
   ];
   
   const fonts = ["Arial", "Verdana", "Impact", "Courier New", "Georgia", "Times New Roman", "Comic Sans MS"];
+  
+  // Updated part names based on config
   const shirtParts = [
     { id: "body", name: "Body" },
     { id: "leftSleeve", name: "Left Sleeve" },
     { id: "rightSleeve", name: "Right Sleeve" },
-    { id: "collar", name: "Collar" },
+    { id: "collar", name: shirtConfig.neck === "polo" ? "Collar" : "Neck Trim" },
   ];
 
   // --- Helper Functions ---
@@ -182,12 +248,16 @@ const CustomizedPage = () => {
       rightSleeve: "#ffffff",
       collar: "#ffffff",
     });
+    setShirtConfig({
+        sleeve: "half",
+        neck: "polo"
+    });
     setActiveSide("front");
-    setActiveTab("color");
+    setActiveTab("style");
     setActivePart("body");
   };
 
-  // UPDATED: Now sets color ONLY for the active part
+  // Sets color ONLY for the active part
   const handleSwatchColorChange = (hex) => {
     setShirtColors(prev => ({
       ...prev,
@@ -205,7 +275,7 @@ const CustomizedPage = () => {
   };
   
   const handleSliderChange = (property, value) => {
-    if (activeTab === "color") return;
+    if (activeTab === "color" || activeTab === "style") return;
     const newValue = parseFloat(value);
     
     setCustomizations(prev => ({
@@ -221,7 +291,7 @@ const CustomizedPage = () => {
   };
 
   const handleTransform = (property, change) => {
-    if (activeTab === "color") return;
+    if (activeTab === "color" || activeTab === "style") return;
 
     setCustomizations((prev) => {
       const current = prev[activeSide][activeTab];
@@ -304,9 +374,70 @@ const CustomizedPage = () => {
   };
 
   // --- Render Functions for Tabs ---
+
+  // NEW: Style Selector Renderer
+  const renderStyleSelector = () => (
+    <div className="space-y-6">
+        <div>
+            <label className="text-sm font-medium text-gray-500 block mb-3">
+                Sleeve Length
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+                <button
+                    onClick={() => setShirtConfig(prev => ({ ...prev, sleeve: 'half' }))}
+                    className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
+                        shirtConfig.sleeve === 'half'
+                            ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
+                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                >
+                    <span className="font-bold">Half Sleeve</span>
+                </button>
+                <button
+                    onClick={() => setShirtConfig(prev => ({ ...prev, sleeve: 'full' }))}
+                    className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
+                        shirtConfig.sleeve === 'full'
+                            ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
+                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                >
+                    <span className="font-bold">Full Sleeve</span>
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <label className="text-sm font-medium text-gray-500 block mb-3">
+                Neck Style
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+                <button
+                    onClick={() => setShirtConfig(prev => ({ ...prev, neck: 'polo' }))}
+                    className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
+                        shirtConfig.neck === 'polo'
+                            ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
+                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                >
+                    <span className="font-bold">Polo Collar</span>
+                </button>
+                <button
+                    onClick={() => setShirtConfig(prev => ({ ...prev, neck: 'round' }))}
+                    className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
+                        shirtConfig.neck === 'round'
+                            ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
+                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                >
+                    <span className="font-bold">Round Neck</span>
+                </button>
+            </div>
+        </div>
+    </div>
+  );
+
   const renderColorPicker = () => (
     <div className="space-y-6">
-       {/* Part Selector - Moved up for clarity so user knows what they are coloring */}
        <div>
         <label className="text-sm font-medium text-gray-500 block mb-3">
           Select Part to Color
@@ -540,9 +671,9 @@ const CustomizedPage = () => {
             {/* T-Shirt Display Area */}
             <div className="relative w-full max-w-lg">
               {activeSide === "front" ? (
-                <TShirtFrontSvg colors={shirtColors} />
+                <TShirtFrontSvg colors={shirtColors} config={shirtConfig} />
               ) : (
-                <TShirtBackSvg colors={shirtColors} />
+                <TShirtBackSvg colors={shirtColors} config={shirtConfig} />
               )}
               <CustomizationOverlay customization={customizations[activeSide]} />
             </div>
@@ -552,6 +683,13 @@ const CustomizedPage = () => {
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-xl p-6 flex flex-col">
             {/* Tab Navigation */}
             <div className="flex border-b">
+              {/* NEW TAB: Style */}
+              <TabButton
+                icon={<Shirt />}
+                label="Style"
+                isActive={activeTab === "style"}
+                onClick={() => setActiveTab("style")}
+              />
               <TabButton
                 icon={<Palette />}
                 label="Color"
@@ -574,13 +712,14 @@ const CustomizedPage = () => {
 
             {/* Tab Content */}
             <div className="flex-1 min-h-[300px] py-6">
+              {activeTab === "style" && renderStyleSelector()}
               {activeTab === "color" && renderColorPicker()}
               {activeTab === "text" && renderTextEditor()}
               {activeTab === "graphic" && renderGraphicPicker()}
             </div>
 
             {/* Transform Controls */}
-            {activeTab !== "color" && (
+            {activeTab !== "color" && activeTab !== "style" && (
               <div className="border-t pt-6">
                 {renderTransformControls()}
               </div>
