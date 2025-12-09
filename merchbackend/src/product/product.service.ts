@@ -65,4 +65,9 @@ export class ProductService {
 
     return { code: '200', message: 'Product added successfully', product };
   }
+
+  async fetch(){
+    const prodcuts = this.prisma.product.findMany();
+    return{ code: '200', message: 'Product fetched successfully', prodcuts}
+  }
 }

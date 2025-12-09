@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './product.dto';
 
@@ -9,5 +9,11 @@ export class ProductController {
   async create(@Body() dto: CreateProductDto) {
     const product = this.productService.create(dto);
     return product;
+  }
+
+  @Get('fetch')
+  async fetch(){
+    const products = this.productService.fetch();
+    return products;
   }
 }
