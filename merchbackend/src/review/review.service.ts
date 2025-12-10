@@ -6,13 +6,10 @@ import { CreateReviewDto } from './review.dto';
 export class ReviewService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. CREATE REVIEW
   async create(data: CreateReviewDto) {
     const { user_id, product_id, order_id, rating, review_title, review_text } = data;
-
-    // Check if user actually bought the product (Optional validation)
-    // const orderItem = await this.prisma.orderItem.findFirst({ ... })
-
+    if(!user_id || !product_id || !order_id || !rating || !review_title || !review_text) throw new BadRequestException({code: 400, message: "Incomplete data provided. Please provide full review data"})
+      
     try {
       const review = await this.prisma.review.create({
         data: {
@@ -28,20 +25,19 @@ export class ReviewService {
       });
       return { code: 200, message: 'Review submitted', data: review };
     } catch (e) {
-      throw new InternalServerErrorException({ code: 500, message: 'Failed to submit review', error: e.message });
+      throw new InternalServerErrorException({ code: 500, message: 'Failed to submit review', error: e.message||e });
     }
   }
 
-  // 2. GET REVIEWS BY PRODUCT (Crucial for frontend)
   async findByProduct(productId: number) {
     try {
       const reviews = await this.prisma.review.findMany({
         where: { product_id: productId },
         include: {
-          user: { // Fetch reviewer name
+          user: { 
             select: { first_name: true, last_name: true }
           },
-          ReviewImage: true // Fetch associated images
+          ReviewImage: true 
         },
         orderBy: { created_at: 'desc' }
       });
