@@ -10,4 +10,10 @@ export class CouponController {
   async create(@Body() dto: CreateCouponDto) {
     return this.couponService.create(dto);
   }
+
+  @Get('fetch')
+  async fetch(){
+    const coupons = this.couponService.fetch();
+    return coupons
+  }
 }
