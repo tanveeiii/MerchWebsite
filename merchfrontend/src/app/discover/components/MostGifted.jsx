@@ -1,20 +1,19 @@
+"use client";
 import React from "react";
-// Removed import Link from "next/link"; as it was causing a build error
+import Link from "next/link";
 
 const MostGifted = () => {
-  const image =
-    "https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg?auto=compress&cs=tinysrgb&w=800";
+  const image = "https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg?auto=compress&cs=tinysrgb&w=800";
 
   return (
-    // Changed Link to a standard <a> tag to resolve the build error
-    <a
+    <Link
       href="/discover/most-gifted"
-      className="w-[45vw] mx-auto my-8 flex flex-col justify-center items-center h-[70vh] group"
+      className="w-[45vw] mx-auto my-8 h-[70vh] flex flex-col justify-center items-center group cursor-pointer"
     >
       <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
         Most Gifted
       </h2>
-      <div className="relative max-h-11/12 w-full aspect-square rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-all cursor-pointer">
+      <div className="relative w-full max-h-11/12 aspect-square rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-all">
         <img
           src={image}
           alt="Most Gifted Merch"
@@ -26,9 +25,8 @@ const MostGifted = () => {
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 
 export default MostGifted;
-

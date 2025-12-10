@@ -27,13 +27,6 @@ const Inspiration = () => {
       link: "/discover/trending", // Links to Trending page
     },
     {
-      title: "Express Yourself with Tees",
-      cta: "Discover More",
-      image:
-        "https://images.pexels.com/photos/4066288/pexels-photo-4066288.jpeg?auto=compress&cs=tinysrgb&w=800",
-      link: "/discover/virtual-try-on", // Links to the new Virtual Try-On page
-    },
-    {
       title: "Best Sellers This Month",
       cta: "Shop Bestsellers",
       image:
