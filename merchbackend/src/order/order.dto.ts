@@ -1,10 +1,4 @@
-import {
-  IsInt,
-  IsString,
-  IsNumber,
-  IsDateString,
-} from 'class-validator';
-import { Decimal } from '@prisma/client/runtime/library';
+import { IsInt, IsString } from "class-validator";
 
 export class CreateOrderDto {
   @IsString()
@@ -13,20 +7,20 @@ export class CreateOrderDto {
   @IsInt()
   shipping_address: number;
 
-  @IsNumber()
-  subtotal: Decimal;
+  @IsString()
+  subtotal: string;
 
-  @IsNumber()
-  tax_amount: Decimal;
+  @IsString()
+  tax_amount: string;
 
-  @IsNumber()
-  shipping_cost: Decimal;
+  @IsString()
+  shipping_cost: string;
 
-  @IsNumber()
-  discount_amount: Decimal;
+  @IsString()
+  discount_amount: string;
 
-  @IsNumber()
-  total_amount: Decimal;
+  @IsString()
+  total_amount: string;
 
   @IsString()
   payment_type: string;
