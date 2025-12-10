@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Get, Controller, Post } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto as CreateCouponDto } from './coupon.dto';
 
