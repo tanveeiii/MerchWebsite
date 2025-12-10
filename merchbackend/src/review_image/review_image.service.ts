@@ -8,7 +8,7 @@ export class ReviewImageService {
 
   async create(dto: CreateReviewImageDto) {
     const {review_id, image_url} = dto;
-    if(!review_id || image_url) throw new BadRequestException({code: 400, message: "Data not complete. Please send all the data"})
+    if(!review_id || !image_url) throw new BadRequestException({code: 400, message: "Data not complete. Please send all the data"})
     
     try{
       const entry = await this.prisma.reviewImage.create({

@@ -7,9 +7,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class OrderService {
   constructor(private prisma: PrismaService) {}
 
-  // ... (Keep your existing create method exactly as it is) ...
   async create(data: CreateOrderDto) {
-    // ... existing create logic ...
     const {
       order_number,
       shipping_address,

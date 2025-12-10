@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateCouponDto } from './coupon.dto';
 
@@ -45,5 +45,14 @@ export class CouponService {
     });
 
     return coupon;
+  }
+
+  async fetch(){
+    try{
+      const coupons = this.prisma.coupon.findMany();
+      return{code: 200, coupons,  message: "Coupons data extracted successfull"}
+    }catch(e){
+      throw new InternalServerErrorException({code: 400, message: "There was an error while creating", error_message: e||e.message})
+    }
   }
 }
