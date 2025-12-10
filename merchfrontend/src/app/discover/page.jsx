@@ -35,10 +35,7 @@ const Discover = () => {
   }, []);
 
   // -- Data Distribution --
-  // 1. Top Pick: Use the first product available
   const topPickProduct = products.length > 0 ? products[0] : null;
-  
-  // 2. Best Sellers Groups: Slice the array
   const bestSellers1 = products.slice(0, 6);
   const bestSellers2 = products.slice(6, 12);
 

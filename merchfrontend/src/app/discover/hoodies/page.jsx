@@ -4,6 +4,7 @@ import { NavbarFinal } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
+import ProductCard from "@/components/ProductCard";
 
 const HoodiesPage = () => {
   const [products, setProducts] = useState([]);
@@ -16,8 +17,9 @@ const HoodiesPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          // FILTER: Check if category includes 'Hoodie'
-          setProducts(mapped.filter(p => p.category.toLowerCase().includes("hoodie")));
+          // Filter for Hoodies
+          const hoodies = mapped.filter(p => p.category.toLowerCase().includes("hoodie"));
+          setProducts(hoodies);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
@@ -30,22 +32,15 @@ const HoodiesPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Hoodies Collection</h1>
-          <p className="text-lg text-gray-600">Comfort and style.</p>
+          <p className="text-lg text-gray-600">Comfort and style for every season.</p>
         </div>
-        {loading ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
+        {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.length > 0 ? products.map(product => (
-              <div key={product.id} className="group relative bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-xl transition-all">
-                <div className="aspect-w-4 aspect-h-5 overflow-hidden relative h-80">
-                  <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
-                  <p className="text-lg font-bold text-gray-900 mt-2">${product.price}</p>
-                </div>
-                <a href={`/shop/product/${product.id}`} className="absolute inset-0 z-0"><span className="sr-only">View</span></a>
-              </div>
-            )) : <p className="text-center col-span-full">No hoodies found.</p>}
+            {products.length > 0 ? (
+              products.map(product => <ProductCard key={product.id} product={product} />)
+            ) : (
+              <p className="text-center col-span-full text-gray-500">No hoodies found right now.</p>
+            )}
           </div>
         )}
       </main>

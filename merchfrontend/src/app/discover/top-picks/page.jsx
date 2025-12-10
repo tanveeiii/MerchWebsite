@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { NavbarFinal } from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ShoppingCart, Star, Loader2 } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
+import ProductCard from "@/components/ProductCard";
 
 const TopPicksPage = () => {
   const [products, setProducts] = useState([]);
@@ -15,8 +16,8 @@ const TopPicksPage = () => {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
         if (json.data) {
-          // Just take the first 4 items as "Top Picks" for now
-          setProducts(json.data.map(mapProductFromBackend).slice(0, 4));
+          const mapped = json.data.map(mapProductFromBackend);
+          setProducts(mapped.slice(0, 4)); // First 4 items
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
@@ -28,28 +29,12 @@ const TopPicksPage = () => {
       <NavbarFinal />
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 text-center mb-4">Our Top Picks</h1>
-        <p className="text-lg text-gray-600 text-center mb-12">Customer favorites and best-rated items.</p>
+        <p className="text-lg text-gray-600 text-center mb-12">Customer favorites.</p>
 
-        {loading ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
+        {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div> : (
           <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
             {products.map((product) => (
-              <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all">
-                <div className="aspect-w-3 aspect-h-4 bg-gray-200 h-72 overflow-hidden">
-                  <img src={product.img} alt={product.name} className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform" />
-                </div>
-                <div className="flex flex-1 flex-col space-y-2 p-4">
-                  <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
-                  <div className="flex items-center text-yellow-400">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
-                    <span className="ml-2 text-gray-500 text-sm">(Top Rated)</span>
-                  </div>
-                  <p className="text-lg font-semibold text-gray-800">${product.price}</p>
-                  <button className="mt-4 flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to cart
-                  </button>
-                </div>
-                <a href={`/shop/product/${product.id}`} className="absolute inset-0 z-0"><span className="sr-only">View</span></a>
-              </div>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}

@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { NavbarFinal } from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Gift, ShoppingCart, Loader2 } from "lucide-react";
+import { Gift, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
+import ProductCard from "@/components/ProductCard";
 
 const MostGiftedPage = () => {
   const [products, setProducts] = useState([]);
@@ -16,8 +17,8 @@ const MostGiftedPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          // FILTER: Affordable gifts (Price < 50)
-          setProducts(mapped.filter(p => parseFloat(p.price) < 50).slice(0, 12));
+          // Filter: Affordable items under $50
+          setProducts(mapped.filter(p => parseFloat(p.price) < 50).slice(0, 8));
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };
@@ -33,22 +34,10 @@ const MostGiftedPage = () => {
         </h1>
         <p className="text-lg text-gray-600 text-center mb-12">Perfect presents everyone loves.</p>
 
-        {loading ? <div className="flex justify-center"><Loader2 className="animate-spin" /></div> : (
+        {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div> : (
           <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
             {products.map((product) => (
-              <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all">
-                <div className="aspect-w-3 aspect-h-4 bg-gray-200 h-72 overflow-hidden">
-                  <img src={product.img} alt={product.name} className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform" />
-                </div>
-                <div className="flex flex-1 flex-col space-y-2 p-4">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">{product.name}</h3>
-                  <p className="text-lg font-semibold text-gray-800">${product.price}</p>
-                  <button className="mt-4 flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-white shadow-sm hover:bg-indigo-700">
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to cart
-                  </button>
-                </div>
-                <a href={`/shop/product/${product.id}`} className="absolute inset-0 z-0"><span className="sr-only">View</span></a>
-              </div>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
