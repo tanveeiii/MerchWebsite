@@ -139,6 +139,13 @@ const ProductPage = ({ params }) => {
                 <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{product.name}</h1>
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 font-medium">
                     <span className="bg-gray-100 px-2 py-1 rounded">{product.category}</span>
+
+            {product.tag && (
+            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100">
+                {product.tag}
+            </span>
+        )}
+
                     <span>•</span>
                     <span>SKU: {product.sku}</span>
                 </div>

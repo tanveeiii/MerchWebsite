@@ -25,6 +25,7 @@ export const mapProductFromBackend = (product) => {
     name: product.product_name,
     description: product.description,
     category: product.category?.category_name || "General",
+    tag: product.tag?.tag_name || null, // Map the Tag Name
     price: finalPrice.toFixed(2),
     originalPrice: finalPrice < basePrice ? basePrice.toFixed(2) : null,
     img: primaryImg,

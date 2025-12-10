@@ -66,14 +66,14 @@ export class ProductService {
     return { code: '200', message: 'Product added successfully', product };
   }
 
-  async fetch() {
+ async fetch() {
     const products = await this.prisma.product.findMany({
       include: {
-        ProductImage: true,   // Include images so frontend can display them
-        ProductVariant: true, // Include variants for pricing/stock
-        ProductDiscount: {    // Include active discounts
-            where: { is_active: true }
-        }
+        ProductImage: true,
+        ProductVariant: true,
+        ProductDiscount: { where: { is_active: true } },
+        category: true, // Includes Category Name
+        tag: true       // <--- ADD THIS: Include Tag Name
       }
     });
     return { code: '200', message: 'Products fetched successfully', data: products };
