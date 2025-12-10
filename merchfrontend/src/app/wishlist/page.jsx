@@ -16,7 +16,8 @@ const Wishlist = () => {
       
       if (!userId) {
         setLoading(false);
-        return; // Alternatively, redirect to login
+        // Optional: router.push('/auth/login');
+        return; 
       }
 
       try {
@@ -31,12 +32,15 @@ const Wishlist = () => {
             const imgUrl = product.ProductImage?.[0]?.image_url || 'https://readymadeui.com/images/product14.webp';
             
             return {
-              id: item.wishlist_id, // Important: Use wishlist_id for deletion
+              id: item.wishlist_id, // For deleting the wishlist item itself
+              productId: product.product_id, // For linking to the product page
               title: product.product_name || 'Unknown Item',
               price: product.base_price || '0.00',
               image: imgUrl,
               section: product.category?.category_name || 'General',
-              url: `/products/${product.slug || '#'}`
+              
+              // --- FIX: Updated Link to match your Shop Page Route ---
+              url: `/shop/product/${product.product_id}` 
             };
           });
           setItems(mappedItems);
@@ -53,12 +57,10 @@ const Wishlist = () => {
 
   // --- Remove Item Handler ---
   const removeItem = async (wishlistId) => {
-    // 1. Optimistic UI Update
     const previousItems = [...items];
     setItems(items.filter(i => i.id !== wishlistId));
 
     try {
-      // 2. Call Backend
       const res = await fetch(`http://localhost:5000/api/wishlist/remove/${wishlistId}`, {
         method: 'DELETE'
       });
@@ -67,16 +69,9 @@ const Wishlist = () => {
       
     } catch (error) {
       console.error("Error deleting item:", error);
-      // Revert if failed
-      setItems(previousItems);
-      alert("Failed to remove item. Please try again.");
+      setItems(previousItems); // Revert on failure
+      alert("Failed to remove item.");
     }
-  };
-
-  const clearAll = () => {
-    // Optional: Implement a 'Delete All' endpoint in backend if needed
-    // For now, we can loop delete or just alert
-    alert("Clear all functionality requires a specific backend endpoint. Please remove items individually.");
   };
 
   if (loading) {
@@ -95,7 +90,7 @@ const Wishlist = () => {
           <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#1a202c' }}>Your Wishlist</h1>
           {items.length > 0 && (
             <button
-              onClick={() => items.forEach(i => removeItem(i.id))} // Quick client-side clear loop
+              onClick={() => items.forEach(i => removeItem(i.id))} 
               style={{ background: '#e53e3e', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <Trash2 size={16} /> Clear all
@@ -119,11 +114,16 @@ const Wishlist = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 24 }}>
             {items.map(item => (
               <div key={item.id} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', transition: 'transform 0.2s', border: '1px solid #edf2f7' }}>
-                <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f7fafc', padding: 20 }}>
+                
+                {/* Product Image Link */}
+                <a href={item.url} style={{ display: 'block', height: 200, background: '#f7fafc', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={item.image} alt={item.title} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-                </div>
+                </a>
+
                 <div style={{ padding: 16 }}>
-                  <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600, color: '#2d3748', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
+                  <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600, color: '#2d3748', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <a href={item.url} style={{ color: 'inherit', textDecoration: 'none' }}>{item.title}</a>
+                  </h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <strong style={{ color: '#2b6cb0', fontSize: 18 }}>${Number(item.price).toFixed(2)}</strong>
                     <span style={{ fontSize: 12, background: '#edf2f7', padding: '2px 8px', borderRadius: 4, color: '#718096' }}>{item.section}</span>
