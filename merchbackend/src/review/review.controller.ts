@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './review.dto';
 
@@ -9,5 +9,11 @@ export class ReviewController {
   @Post('create')
   async create(@Body() dto: CreateReviewDto) {
     return this.reviewService.create(dto);
+  }
+
+  // --- NEW Endpoint to get reviews for a product ---
+  @Get('product/:productId')
+  async findByProduct(@Param('productId', ParseIntPipe) productId: number) {
+    return this.reviewService.findByProduct(productId);
   }
 }
