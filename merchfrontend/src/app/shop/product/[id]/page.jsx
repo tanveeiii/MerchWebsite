@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react'; // Import 'use'
 import { NavbarFinal } from "@/components/Navbar";
 import { Loader2, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
 import { mapProductFromBackend } from "@/utils/productMapper";
-import ReviewsSection from "@/components/ReviewsSection"; // Imported Reviews Component
+import ReviewsSection from "@/components/ReviewsSection"; 
 
 const ProductPage = ({ params }) => {
-  // Use React.use() or direct access depending on Next.js version (direct access is standard for page props in older app router versions)
-  const productId = params.id; 
+  // FIX: In Next.js 15, params is a Promise. Unwrap it with React.use()
+  const resolvedParams = use(params);
+  const productId = resolvedParams.id;
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,6 @@ const ProductPage = ({ params }) => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        // Fetch all products and filter (Optimization: Ideally create a single-product endpoint in backend)
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
         
@@ -44,7 +44,10 @@ const ProductPage = ({ params }) => {
         setLoading(false); 
       }
     };
-    fetchDetails();
+    
+    if (productId) {
+        fetchDetails();
+    }
   }, [productId]);
 
   const handleAddToCart = async () => {
@@ -60,7 +63,7 @@ const ProductPage = ({ params }) => {
         body: JSON.stringify({
           user_id: Number(userId),
           product_id: product.id,
-          product_variant_id: selectedVariant?.product_variant_id || product.defaultVariantId, // Fallback if no variant selected but needed
+          product_variant_id: selectedVariant?.product_variant_id || product.defaultVariantId, 
           quantity: quantity
         }),
       });
