@@ -17,7 +17,8 @@ const TopPicksPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          setProducts(mapped.slice(0, 4)); // First 4 items
+          const topPicks = mapped.filter(p => p.tag === "Top Pick");    
+        setProducts(topPicks);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };

@@ -16,9 +16,8 @@ const MostGiftedPage = () => {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
         if (json.data) {
-          const mapped = json.data.map(mapProductFromBackend);
-          // Filter: Affordable items under $50
-          setProducts(mapped.filter(p => parseFloat(p.price) < 50).slice(0, 8));
+          const gifted = mapped.filter(p => p.tag === "Gift");
+          setProducts(gifted);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };

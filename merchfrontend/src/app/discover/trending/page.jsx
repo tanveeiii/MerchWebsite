@@ -17,7 +17,7 @@ const TrendingStylesPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          const trending = mapped.sort(() => 0.5 - Math.random()).slice(0, 8); 
+          const trending = mapped.filter(p => p.tag === "Trending");
           setProducts(trending);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }

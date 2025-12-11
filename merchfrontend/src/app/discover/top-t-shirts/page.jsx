@@ -17,8 +17,8 @@ const TopTShirtsPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          const tees = mapped.filter(p => p.category.toLowerCase().includes("tee") || p.category.toLowerCase().includes("shirt"));
-          setProducts(tees);
+          const topTshirts = mapped.filter(p => p.tag === "TopTshirts");          
+          setProducts(topTshirts);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };

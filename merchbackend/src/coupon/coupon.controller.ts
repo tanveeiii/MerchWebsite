@@ -14,6 +14,6 @@ export class CouponController {
   @Get('fetch')
   async fetch(){
     const coupons = this.couponService.fetch();
-    return coupons
+    return coupons;
   }
 }

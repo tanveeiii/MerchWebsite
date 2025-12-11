@@ -18,7 +18,7 @@ const HoodiesPage = () => {
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
           // Filter for Hoodies
-          const hoodies = mapped.filter(p => p.category.toLowerCase().includes("hoodie"));
+          const hoodies = mapped.filter(p => p.tag === "Hoodie");
           setProducts(hoodies);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }

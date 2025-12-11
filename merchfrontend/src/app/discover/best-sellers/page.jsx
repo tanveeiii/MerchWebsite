@@ -19,9 +19,9 @@ const BestSellersPage = () => {
         
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
+          const bestSellers = mapped.filter(p => p.tag === "Best Seller");
           // Simulate Best Sellers by taking the first 12 items
-          setProducts(mapped.slice(0, 12));
-        }
+          setProducts(bestSellers);        }
       } catch (e) {
         console.error(e);
       } finally {

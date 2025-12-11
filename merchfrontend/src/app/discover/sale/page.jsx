@@ -18,8 +18,8 @@ const SalePage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          // FILTER: Only products with a discount (originalPrice is not null)
-          setProducts(mapped.filter(p => p.originalPrice !== null));
+          const sale = mapped.filter(p => p.tag === "Sale");
+          setProducts(sale);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };

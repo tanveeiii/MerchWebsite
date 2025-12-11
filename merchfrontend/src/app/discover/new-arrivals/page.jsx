@@ -18,8 +18,8 @@ const NewArrivalsPage = () => {
         const json = await res.json();
         if (json.data) {
           // Reverse array to show newest additions first
-          const mapped = json.data.map(mapProductFromBackend).reverse();
-          setProducts(mapped);
+          const newArrivals = mapped.filter(p => p.tag === "New Arrival");
+          setProducts(newArrivals);
         }
       } catch (e) { console.error(e); } finally { setLoading(false); }
     };

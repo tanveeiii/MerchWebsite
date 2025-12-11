@@ -54,8 +54,9 @@ const Discover = () => {
       <BestSellers scrollLtoR={true} title={"Trending Now"} products={bestSellers1} />
       <BestSellers scrollLtoR={false} title={"New Arrivals"} products={bestSellers2} />
       
-      <CustomTees />
+      
       <Inspiration />
+      <CustomTees />
       <Footer />
     </div>
   );
