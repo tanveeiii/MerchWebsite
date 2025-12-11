@@ -9,20 +9,36 @@ import BestSellers from "./components/BestSellers";
 import Inspiration from "./components/Inspiration";
 import Hero from "./components/Hero";
 import { mapProductFromBackend } from "@/utils/productMapper";
+import { Loader2 } from "lucide-react";
 
 const Discover = () => {
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Data State
+  const [topPick, setTopPick] = useState(null);
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
-        const data = await res.json();
+        const json = await res.json();
         
-        if (data.data) {
-          const mapped = data.data.map(mapProductFromBackend);
-          setProducts(mapped);
+        if (json.data) {
+          const mapped = json.data.map(mapProductFromBackend);
+
+          // 1. Top Pick: Use the first item
+          setTopPick(mapped[0]);
+
+          // 2. Trending: Randomize list to show variety
+          // Note: In real app, sort by view_count
+          const trending = [...mapped].sort(() => 0.5 - Math.random()).slice(0, 10);
+          setTrendingProducts(trending);
+
+          // 3. New Arrivals: Sort by ID descending (Newest first)
+          const newest = [...mapped].sort((a, b) => b.id - a.id).slice(0, 10);
+          setNewArrivals(newest);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -34,12 +50,13 @@ const Discover = () => {
     fetchProducts();
   }, []);
 
-  // -- Data Distribution --
-  const topPickProduct = products.length > 0 ? products[0] : null;
-  const bestSellers1 = products.slice(0, 6);
-  const bestSellers2 = products.slice(6, 12);
-
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="animate-spin text-gray-400" size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -47,16 +64,28 @@ const Discover = () => {
       <Hero />
       
       <div className="flex flex-col md:flex-row max-h-1/4 ml-3">
-        <TopPicks product={topPickProduct} />
+        <TopPicks product={topPick} />
         <MostGifted />
       </div>
 
-      <BestSellers scrollLtoR={true} title={"Trending Now"} products={bestSellers1} />
-      <BestSellers scrollLtoR={false} title={"New Arrivals"} products={bestSellers2} />
+      {/* --- SCROLLING SECTION 1: TRENDING --- */}
+      <BestSellers 
+        scrollLtoR={true} 
+        title={"Trending Now"} 
+        products={trendingProducts} 
+        link="/discover/trending" 
+      />
       
+      {/* --- SCROLLING SECTION 2: NEW ARRIVALS --- */}
+      <BestSellers 
+        scrollLtoR={false} 
+        title={"New Arrivals"} 
+        products={newArrivals} 
+        link="/discover/new-arrivals" 
+      />
       
-      <Inspiration />
       <CustomTees />
+      <Inspiration />
       <Footer />
     </div>
   );

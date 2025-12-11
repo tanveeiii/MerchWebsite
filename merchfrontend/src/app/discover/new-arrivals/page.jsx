@@ -17,7 +17,6 @@ const NewArrivalsPage = () => {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
         if (json.data) {
-          // Reverse array to show newest additions first
           const newArrivals = mapped.filter(p => p.tag === "New Arrival");
           setProducts(newArrivals);
         }
