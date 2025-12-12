@@ -155,8 +155,9 @@ model InventoryLog {
   action_type        String
   quantity_change    Int
   quantity_after     Int
-  created_at         DateTime
   product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
+  created_at         DateTime @default(now())
+  logged_at          DateTime       @default(now())
 }
 
 model Tag {

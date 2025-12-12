@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, ShoppingBag, Tag, Folder, MessageSquare, LogOut } from "lucide-react";
+import { ClipboardList } from "lucide-react"; // Import icon
+
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -10,6 +12,7 @@ export default function AdminSidebar() {
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/admin" },
     { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
     { name: "Orders", icon: <ShoppingBag size={20} />, path: "/admin/orders" },
+    { name: "Inventory", icon: <ClipboardList size={20} />, path: "/admin/inventory" },
     { name: "Categories", icon: <Folder size={20} />, path: "/admin/categories" },
     { name: "Tags", icon: <Tag size={20} />, path: "/admin/tags" },
     { name: "Complaints", icon: <MessageSquare size={20} />, path: "/admin/complaints" },

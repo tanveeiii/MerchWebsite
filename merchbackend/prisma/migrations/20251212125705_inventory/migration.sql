@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "InventoryLog" ADD COLUMN     "logged_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
