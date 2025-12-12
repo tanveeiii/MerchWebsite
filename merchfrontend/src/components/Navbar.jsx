@@ -13,10 +13,10 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useMotionValueEvent } from "motion/react";
-import { User } from "lucide-react";
-import { Heart } from "lucide-react";
+import { User, Heart } from "lucide-react";
 import { LuShoppingBag } from "react-icons/lu";
 import SearchBox from "./SearchBox";
+import NotificationDropdown from "./NotificationDropdown"; // <--- 1. Import Added
 
 export function NavbarFinal() {
   const navItems = [
@@ -26,11 +26,11 @@ export function NavbarFinal() {
     },
     {
       name: "Customized",
-      link: "/customized", // Updated link to the new page
+      link: "/customized", 
     },
     {
       name: "Non-Customized",
-      link: "non-customized", // Updated link to the new page
+      link: "non-customized", 
     },
   ];
 
@@ -42,15 +42,13 @@ export function NavbarFinal() {
       setVisible(window.scrollY < 100);
     };
 
-    // set initial state based on current scroll position
     handleScroll();
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   return (
-    // <div className="z-10 w-full sticky">
-    // <>
     <Navbar>
       {/* Desktop Navigation */}
       <NavBody>
@@ -64,6 +62,11 @@ export function NavbarFinal() {
               <SearchBox />
             </div>
           )}
+
+          {/* --- 2. Notification Dropdown Added Here --- */}
+          <NotificationDropdown />
+          {/* ------------------------------------------- */}
+
           <Link className="w-full" href="/cart">
             <NavbarButton variant="secondary">
               <LuShoppingBag size={28} strokeWidth={1.5} />
@@ -107,7 +110,9 @@ export function NavbarFinal() {
             </a>
           ))}
           <div className="flex w-full flex-col gap-4">
-            <Link href="/orderDetails" className="w-full">
+            {/* Note: Notifications are usually kept in the header for mobile or added as a list item here if needed */}
+            
+            <Link href="/cart" className="w-full">
               <NavbarButton
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
@@ -116,25 +121,27 @@ export function NavbarFinal() {
                 <LuShoppingBag />
               </NavbarButton>
             </Link>
-            <NavbarButton
-              onClick={() => setIsMobileMenuOpen(false)}
-              variant="primary"
-              className="w-full"
-            >
-              <Heart />
-            </NavbarButton>
-            <NavbarButton
-              onClick={() => setIsMobileMenuOpen(false)}
-              variant="primary"
-              className="w-full"
-            >
-              <User />
-            </NavbarButton>
+            <Link href="/wishlist" className="w-full">
+                <NavbarButton
+                onClick={() => setIsMobileMenuOpen(false)}
+                variant="primary"
+                className="w-full"
+                >
+                <Heart />
+                </NavbarButton>
+            </Link>
+            <Link href="/account" className="w-full">
+                <NavbarButton
+                onClick={() => setIsMobileMenuOpen(false)}
+                variant="primary"
+                className="w-full"
+                >
+                <User />
+                </NavbarButton>
+            </Link>
           </div>
         </MobileNavMenu>
       </MobileNav>
     </Navbar>
-    // </div>
   );
 }
-
