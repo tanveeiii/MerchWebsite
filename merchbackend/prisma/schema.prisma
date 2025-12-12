@@ -284,6 +284,7 @@ model Coupon {
   coupon_code         String        @unique
   description         String
   discount_type       String
+  discount_value      Decimal
   min_purchase_amount Int
   max_purchase_amount Int
   usage_limit         Int

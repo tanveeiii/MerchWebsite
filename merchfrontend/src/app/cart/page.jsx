@@ -7,29 +7,29 @@ import PriceDetails from './components/priceDetails';
 const Cart = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Coupon State
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null); // { id: 1, code: 'SAVE10' }
+  const [couponMessage, setCouponMessage] = useState("");
+
+  const userId = 1; // TODO: Replace with dynamic user ID
 
   // --- 1. Fetch Cart Data ---
   useEffect(() => {
     const fetchCart = async () => {
       setLoading(true);
       try {
-        // TODO: Get actual logged-in user ID here
-        const userId = 1; // HARDCODED FOR TESTING
-        
         const res = await fetch(`http://localhost:5000/api/cart/${userId}`);
         if (!res.ok) throw new Error("Failed to fetch");
         
         const data = await res.json();
-
-        // Format backend data to match UI structure
         const formattedItems = data.map(item => ({
           id: item.cart_id,
           name: item.product?.product_name || "Unknown Product",
-          // Use base_price or fallback to 0. Update 'base_price' if your DB field is named differently
-          price: item.product?.base_price || 0, 
+          price: Number(item.product?.base_price) || 0,
           quantity: item.quantity,
-          // Use a placeholder if no image exists yet in DB
-          image: item.product?.image_url || "https://readymadeui.com/images/product14.webp", 
+          image: item.product?.image_url || "https://readymadeui.com/images/product14.webp",
         }));
 
         setItems(formattedItems);
@@ -39,55 +39,88 @@ const Cart = () => {
         setLoading(false);
       }
     };
-    
     fetchCart();
   }, []);
 
   // --- 2. Calculate Totals ---
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const discount = subtotal > 2000 ? 100 : 0; 
   const tax = subtotal * 0.05; 
-  const total = subtotal - discount + tax;
+  // Total logic: (Subtotal - Coupon) + Tax
+  const total = Math.max(0, subtotal - couponDiscount + tax);
 
   // --- 3. Handlers ---
   const handleQuantityChange = async (id, newQty) => {
     if (newQty < 1) return;
-    
-    // 1. Optimistic UI Update (Update screen instantly)
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item))
-    );
-
-    // 2. Call Backend API
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item)));
     try {
       await fetch(`http://localhost:5000/api/cart/update/${id}`, { 
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQty }) 
       });
-    } catch (error) {
-      console.error("Failed to update quantity:", error);
-      // Optional: Revert UI if error occurs
-    }
+    } catch (error) { console.error("Update failed", error); }
   };
 
   const handleRemove = async (id) => {
-    // 1. Optimistic UI Update
     setItems((prev) => prev.filter((item) => item.id !== id));
-
-    // 2. Call Backend API
     try {
-      await fetch(`http://localhost:5000/api/cart/remove/${id}`, { 
-        method: 'DELETE' 
-      });
+      await fetch(`http://localhost:5000/api/cart/remove/${id}`, { method: 'DELETE' });
+    } catch (error) { console.error("Remove failed", error); }
+  };
+
+  // --- 4. Coupon Handler ---
+  const handleApplyCoupon = async (code) => {
+    setCouponMessage(""); 
+    setCouponDiscount(0); // Reset previous discount before check
+    
+    try {
+        const res = await fetch(`http://localhost:5000/api/coupon/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, orderTotal: subtotal })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setCouponMessage(data.message || "Invalid Coupon");
+            setAppliedCoupon(null);
+            return;
+        }
+
+        // Success
+        setCouponDiscount(data.data.discount_amount);
+        setAppliedCoupon({ id: data.data.coupon_id, code: data.data.coupon_code });
+        setCouponMessage(`Coupon '${data.data.coupon_code}' Applied! Saved $${data.data.discount_amount.toFixed(2)}`);
+
     } catch (error) {
-      console.error("Failed to remove item:", error);
+        console.error("Coupon error:", error);
+        setCouponMessage("Error applying coupon");
     }
   };
 
-  const handleCheckout = () => {
-    alert("Proceeding to checkout with Total: $" + total.toFixed(2));
-    // router.push('/checkout');
+  const handleCheckout = async () => {
+    // Here you would usually create an Order first.
+    // For "Complete Integration", we will mock the Order creation and save Coupon Usage.
+    
+    // 1. Record Coupon Usage (if applied)
+    if (appliedCoupon) {
+        try {
+            await fetch('http://localhost:5000/api/coupon_usage/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    coupon_id: appliedCoupon.id,
+                    user_id: userId,
+                    order_id: 12345, // MOCK Order ID (In real app, get this from Order API response)
+                    discount_applied: couponDiscount
+                })
+            });
+            console.log("Coupon usage recorded");
+        } catch (e) { console.error("Failed to record usage", e); }
+    }
+
+    alert(`Proceeding to checkout. Final Total: $${total.toFixed(2)}`);
   };
 
   if (loading) {
@@ -119,10 +152,12 @@ const Cart = () => {
           <div className="lg:w-1/3">
             <PriceDetails 
               subtotal={subtotal}
-              discount={discount}
+              discount={couponDiscount}
               tax={tax}
               total={total}
               onCheckout={handleCheckout}
+              onApplyCoupon={handleApplyCoupon} // Pass handler
+              couponError={couponMessage}       // Pass status message
             />
           </div>
         </div>

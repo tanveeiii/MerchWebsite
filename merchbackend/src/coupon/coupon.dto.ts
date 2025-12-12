@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsDateString,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateCouponDto {
@@ -14,7 +15,10 @@ export class CreateCouponDto {
   description: string;
 
   @IsString()
-  discount_type: string;
+  discount_type: string; // e.g., 'PERCENTAGE' or 'FLAT'
+
+  @IsNumber()
+  discount_value: number; // <--- ADDED THIS
 
   @IsInt()
   min_purchase_amount: number;

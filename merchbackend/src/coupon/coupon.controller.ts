@@ -1,6 +1,6 @@
 import { Body, Get, Controller, Post } from '@nestjs/common';
 import { CouponService } from './coupon.service';
-import { CreateCouponDto as CreateCouponDto } from './coupon.dto';
+import { CreateCouponDto } from './coupon.dto';
 
 @Controller('coupon')
 export class CouponController {
@@ -12,8 +12,13 @@ export class CouponController {
   }
 
   @Get('fetch')
-  async fetch(){
-    const coupons = this.couponService.fetch();
-    return coupons;
+  async fetch() {
+    return this.couponService.fetch();
+  }
+
+  // --- NEW Endpoint ---
+  @Post('apply')
+  async apply(@Body() body: { code: string; orderTotal: number }) {
+    return this.couponService.applyCoupon(body.code, body.orderTotal);
   }
 }
