@@ -27,7 +27,7 @@ const Account = () => {
 
         // 2. Redirect if not logged in
         if (!userId || !token) {
-            router.push('/login'); 
+            router.push('/auth/login'); 
             return;
         }
 

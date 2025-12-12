@@ -84,8 +84,9 @@ const Discover = () => {
         link="/discover/new-arrivals" 
       />
       
-      <CustomTees />
+      
       <Inspiration />
+      <CustomTees />
       <Footer />
     </div>
   );
