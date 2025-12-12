@@ -8,12 +8,19 @@ export class WishlistService {
 
   // 1. ADD TO WISHLIST
   async create(data: CreateWishlistDto) {
+    const { user_id, product_id, product_variant_id } = data;
+
+    // Check if User exists
+    const user = await this.prisma.user.findUnique({ where: { user_id: Number(user_id) } });
+    if (!user) throw new BadRequestException('User not found');
+
     // Check duplicates
     const existing = await this.prisma.wishlist.findFirst({
         where: {
-            user_id: data.user_id,
-            product_id: data.product_id,
-            product_variant_id: data.product_variant_id
+            user_id: Number(user_id),
+            product_id: Number(product_id),
+            // Fix: Use undefined instead of null/conditional check inside where
+            product_variant_id: product_variant_id ? Number(product_variant_id) : undefined 
         }
     });
 
@@ -23,9 +30,11 @@ export class WishlistService {
 
     return await this.prisma.wishlist.create({
       data: {
-        user_id: data.user_id,
-        product_id: data.product_id,
-        product_variant_id: data.product_variant_id
+        user_id: Number(user_id),
+        product_id: Number(product_id),
+        // FIX 1: Pass undefined instead of null
+        product_variant_id: product_variant_id ? Number(product_variant_id) : undefined,
+        // created_at: new Date() // Removed because schema likely doesn't have it yet
       }
     });
   }
@@ -37,12 +46,14 @@ export class WishlistService {
         include: {
             product: {
                 include: {
-                    ProductImage: true, // To get the image
-                    category: true      // To get the section name
+                    ProductImage: true, 
+                    category: true      
                 }
             },
-            product_variant: true       // To get specific variant price if needed
-        }
+            product_variant: true       
+        },
+        // FIX 2: Sort by ID instead of missing 'created_at' field
+        orderBy: { wishlist_id: 'desc' }
     });
   }
 

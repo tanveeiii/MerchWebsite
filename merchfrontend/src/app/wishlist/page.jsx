@@ -9,37 +9,38 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // --- Fetch Wishlist Data ---
   useEffect(() => {
-    const fetchWishlist = async () => {
-      const userId = localStorage.getItem('userId');
-      
-      if (!userId) {
-        setLoading(false);
-        // Optional: router.push('/auth/login');
-        return; 
-      }
+    // Ensure code runs only on client
+    if (typeof window === 'undefined') return;
 
+    const userId = localStorage.getItem('userId');
+    
+    if (!userId) {
+        setLoading(false);
+        // Optional: Redirect
+        // router.push('/auth/login');
+        return; 
+    }
+
+    const fetchWishlist = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/wishlist/${userId}`);
         const data = await res.json();
 
         if (Array.isArray(data)) {
-          // Map Backend Data to Frontend UI Structure
           const mappedItems = data.map(item => {
             const product = item.product || {};
-            // Get first image or fallback
-            const imgUrl = product.ProductImage?.[0]?.image_url || 'https://readymadeui.com/images/product14.webp';
+            const imgUrl = Array.isArray(product.ProductImage) && product.ProductImage.length > 0
+                ? product.ProductImage[0].image_url
+                : (product.image_url || 'https://readymadeui.com/images/product14.webp');
             
             return {
-              id: item.wishlist_id, // For deleting the wishlist item itself
-              productId: product.product_id, // For linking to the product page
+              id: item.wishlist_id, 
+              productId: product.product_id,
               title: product.product_name || 'Unknown Item',
               price: product.base_price || '0.00',
               image: imgUrl,
               section: product.category?.category_name || 'General',
-              
-              // --- FIX: Updated Link to match your Shop Page Route ---
               url: `/shop/product/${product.product_id}` 
             };
           });
@@ -55,7 +56,6 @@ const Wishlist = () => {
     fetchWishlist();
   }, []);
 
-  // --- Remove Item Handler ---
   const removeItem = async (wishlistId) => {
     const previousItems = [...items];
     setItems(items.filter(i => i.id !== wishlistId));
@@ -64,85 +64,56 @@ const Wishlist = () => {
       const res = await fetch(`http://localhost:5000/api/wishlist/remove/${wishlistId}`, {
         method: 'DELETE'
       });
-
       if (!res.ok) throw new Error("Failed to delete");
-      
     } catch (error) {
       console.error("Error deleting item:", error);
-      setItems(previousItems); // Revert on failure
+      setItems(previousItems);
       alert("Failed to remove item.");
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 className="animate-spin text-gray-500" size={40} />
-      </div>
-    );
-  }
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-gray-500" /></div>;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa' }}>
+    <div className="min-h-screen bg-gray-50">
       <NavbarFinal />
-      <main style={{ maxWidth: 1100, margin: '2rem auto', padding: '0 1rem' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: '#1a202c' }}>Your Wishlist</h1>
+      <main className="max-w-6xl mx-auto px-4 py-10">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Your Wishlist</h1>
           {items.length > 0 && (
             <button
               onClick={() => items.forEach(i => removeItem(i.id))} 
-              style={{ background: '#e53e3e', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm"
             >
               <Trash2 size={16} /> Clear all
             </button>
           )}
-        </header>
+        </div>
 
         {items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '6rem 1rem', color: '#718096' }}>
-            <ShoppingBag size={64} style={{ margin: '0 auto 1rem', opacity: 0.2 }} />
-            <p style={{ fontSize: 18, fontWeight: 500 }}>Your wishlist is empty.</p>
-            <p style={{ marginTop: 8 }}>Save items you love to revisit them later.</p>
-            <button 
-              onClick={() => router.push('/discover')}
-              style={{ marginTop: 20, background: '#3182ce', color: 'white', padding: '10px 20px', borderRadius: 8, border: 'none', cursor: 'pointer' }}
-            >
+          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+            <ShoppingBag size={64} className="mb-4 opacity-20" />
+            <p className="text-lg font-medium">Your wishlist is empty.</p>
+            <button onClick={() => router.push('/discover')} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
               Browse Products
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 24 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {items.map(item => (
-              <div key={item.id} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'hidden', transition: 'transform 0.2s', border: '1px solid #edf2f7' }}>
-                
-                {/* Product Image Link */}
-                <a href={item.url} style={{ display: 'block', height: 200, background: '#f7fafc', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={item.image} alt={item.title} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+              <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                <a href={item.url} className="block h-48 bg-gray-100 relative group">
+                  <img src={item.image} alt={item.title} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform" />
                 </a>
-
-                <div style={{ padding: 16 }}>
-                  <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600, color: '#2d3748', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <a href={item.url} style={{ color: 'inherit', textDecoration: 'none' }}>{item.title}</a>
-                  </h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <strong style={{ color: '#2b6cb0', fontSize: 18 }}>${Number(item.price).toFixed(2)}</strong>
-                    <span style={{ fontSize: 12, background: '#edf2f7', padding: '2px 8px', borderRadius: 4, color: '#718096' }}>{item.section}</span>
+                <div className="p-4">
+                  <a href={item.url} className="font-bold text-gray-900 line-clamp-1 hover:text-blue-600">{item.title}</a>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-blue-600 font-bold">${Number(item.price).toFixed(2)}</span>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{item.section}</span>
                   </div>
-                  
-                  <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      title="Remove from wishlist"
-                      style={{ padding: '10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: '#e53e3e', cursor: 'pointer', flexShrink: 0 }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                    <a
-                      href={item.url}
-                      style={{ flex: 1, textAlign: 'center', padding: '10px', borderRadius: 8, background: '#3182ce', color: '#fff', textDecoration: 'none', fontWeight: 500, display: 'block' }}
-                    >
-                      View Product
-                    </a>
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => removeItem(item.id)} className="p-2 border rounded-lg text-red-500 hover:bg-red-50 transition"><Trash2 size={18} /></button>
+                    <a href={item.url} className="flex-1 text-center bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition text-sm font-medium flex items-center justify-center">View Product</a>
                   </div>
                 </div>
               </div>

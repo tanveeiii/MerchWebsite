@@ -3,9 +3,11 @@ import { NavbarFinal } from '@/components/Navbar';
 import React, { useState, useEffect } from 'react';
 import CartItems from './components/cartItems';
 import PriceDetails from './components/priceDetails';
-import { handleRazorpayPayment } from './utils/handlePayment'; // Import handler
+import { handleRazorpayPayment } from './utils/handlePayment'; 
+import { useRouter } from 'next/navigation';
 
 const Cart = () => {
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -14,41 +16,55 @@ const Cart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null); 
   const [couponMessage, setCouponMessage] = useState("");
 
-  // User State (Ideally fetched from Profile API)
-  const [userProfile, setUserProfile] = useState({ name: "User", email: "user@example.com", mobile: "9999999999" });
+  // User State
+  const [userId, setUserId] = useState(null);
+  const [userProfile, setUserProfile] = useState({ name: "User", email: "", mobile: "" });
 
-  const userId = 1; // TODO: Replace with dynamic user ID
-
-  // --- 1. Fetch Cart & User Data ---
+  // --- 1. Load User & Fetch Data ---
   useEffect(() => {
+    // Get ID from Storage safely
+    const storedUserId = localStorage.getItem("userId");
+    
+    if (!storedUserId) {
+        setLoading(false);
+        // Optional: Redirect to login if cart requires auth
+        // router.push('/auth/login');
+        return;
+    }
+
+    setUserId(storedUserId);
+
     const fetchData = async () => {
       setLoading(true);
       try {
         // Fetch Cart
-        const cartRes = await fetch(`http://localhost:5000/api/cart/${userId}`);
+        const cartRes = await fetch(`http://localhost:5000/api/cart/${storedUserId}`);
         const cartData = await cartRes.json();
         
-        if (cartData) {
+        if (Array.isArray(cartData)) {
             const formattedItems = cartData.map(item => ({
                 id: item.cart_id,
                 name: item.product?.product_name || "Unknown Product",
                 price: Number(item.product?.base_price) || 0,
                 quantity: item.quantity,
-                image: item.product?.image_url || "https://readymadeui.com/images/product14.webp",
-                product_id: item.product_id, // Needed for order creation
-                product_variant_id: item.product_variant_id // Needed for order creation
+                // Handle different image structures (array or single string)
+                image: Array.isArray(item.product?.ProductImage) 
+                    ? item.product.ProductImage[0]?.image_url 
+                    : (item.product?.image_url || "https://readymadeui.com/images/product14.webp"),
+                product_id: item.product_id,
+                product_variant_id: item.product_variant_id
             }));
             setItems(formattedItems);
         }
 
-        // Fetch User (For Razorpay Prefill)
-        const userRes = await fetch(`http://localhost:5000/api/user/profile/${userId}`);
+        // Fetch User Profile (For Payment)
+        const userRes = await fetch(`http://localhost:5000/api/user/profile/${storedUserId}`);
         const userData = await userRes.json();
         if(userData.data) {
             setUserProfile({
                 name: `${userData.data.first_name} ${userData.data.last_name}`,
                 email: userData.data.email,
-                mobile: userData.data.mobile
+                mobile: userData.data.mobile || "9999999999"
             });
         }
 
@@ -69,14 +85,19 @@ const Cart = () => {
   // --- 3. Handlers ---
   const handleQuantityChange = async (id, newQty) => {
     if (newQty < 1) return;
+    // Optimistic UI Update
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item)));
+    
     try {
       await fetch(`http://localhost:5000/api/cart/update/${id}`, { 
         method: 'PUT', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQty }) 
       });
-    } catch (error) { console.error("Update failed", error); }
+    } catch (error) { 
+        console.error("Update failed", error);
+        // Ideally revert UI here on failure
+    }
   };
 
   const handleRemove = async (id) => {
@@ -116,26 +137,24 @@ const Cart = () => {
     }
   };
 
-  // --- 5. Checkout & Payment Handler ---
+  // --- 5. Checkout Handler ---
   const handleCheckout = async () => {
+    if (!userId) return alert("Please log in to checkout.");
     if (items.length === 0) return alert("Your cart is empty");
 
-    // Initiate Razorpay Payment
     await handleRazorpayPayment(
         total,
         userProfile,
         async (response) => {
-            // --- SUCCESS CALLBACK ---
-            alert(`Payment Successful! ID: ${response.razorpay_payment_id}`);
-            
-            // 1. Create Order in Database
+            // SUCCESS
             try {
+                // Create Order
                 const orderRes = await fetch('http://localhost:5000/api/order/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         order_number: `ORD-${Date.now()}`,
-                        shipping_address: 1, // Defaulting to 1 for now, implement address selection later
+                        shipping_address: 1, // Placeholder
                         subtotal: subtotal,
                         tax_amount: tax,
                         shipping_cost: 0,
@@ -143,77 +162,74 @@ const Cart = () => {
                         total_amount: total,
                         payment_type: "Razorpay",
                         order_status: "PAID",
-                        user_id: userId
+                        user_id: Number(userId)
                     })
                 });
                 
                 const orderData = await orderRes.json();
                 
-                // 2. Record Coupon Usage (if any)
+                // Record Coupon Usage
                 if (appliedCoupon && orderData.order) {
                     await fetch('http://localhost:5000/api/coupon_usage/create', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             coupon_id: appliedCoupon.id,
-                            user_id: userId,
+                            user_id: Number(userId),
                             order_id: orderData.order.order_id,
                             discount_applied: couponDiscount
                         })
                     });
                 }
 
-                // 3. Clear Cart (Optional UI cleanup)
-                setItems([]);
-                window.location.href = "/account"; // Redirect to Orders page
+                // Create Payment Record (Optional, if you have a Payment Table)
+                /*
+                await fetch('http://localhost:5000/api/payment/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        order_id: orderData.order.order_id,
+                        payment_method: 'Razorpay',
+                        transaction_id: response.razorpay_payment_id,
+                        amount: total,
+                        payment_status: 'SUCCESS',
+                        payment_date: new Date().toISOString(),
+                        payment_details: JSON.stringify(response)
+                    })
+                });
+                */
+
+                alert(`Order Placed Successfully! ID: ${orderData.order.order_number}`);
+                setItems([]); // Clear Cart UI
+                window.location.href = "/account"; 
 
             } catch (e) {
                 console.error("Order creation failed:", e);
-                alert("Payment successful but failed to create order record. Please contact support.");
+                alert("Payment successful but order creation failed. Contact support.");
             }
         },
         (errorMessage) => {
-            // --- FAILURE CALLBACK ---
+            // FAILURE
             alert(`Payment Failed: ${errorMessage}`);
         }
     );
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-500">Loading Cart...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="h-screen flex items-center justify-center text-gray-500">Loading Cart...</div>;
 
   return (
     <div className="bg-white min-h-screen">
       <NavbarFinal />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
-        
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Side: Cart Items */}
           <div className="lg:w-2/3">
-            <CartItems 
-              items={items} 
-              onQuantityChange={handleQuantityChange} 
-              onRemove={handleRemove} 
-            />
+            <CartItems items={items} onQuantityChange={handleQuantityChange} onRemove={handleRemove} />
           </div>
-
-          {/* Right Side: Price Details */}
           <div className="lg:w-1/3">
             <PriceDetails 
-              subtotal={subtotal}
-              discount={couponDiscount}
-              tax={tax}
-              total={total}
-              onCheckout={handleCheckout}
-              onApplyCoupon={handleApplyCoupon} 
-              couponError={couponMessage}       
+              subtotal={subtotal} discount={couponDiscount} tax={tax} total={total}
+              onCheckout={handleCheckout} onApplyCoupon={handleApplyCoupon} couponError={couponMessage}       
             />
           </div>
         </div>

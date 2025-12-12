@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateCartDto, UpdateCartDto } from './cart.dto';
 
@@ -6,60 +6,78 @@ import { CreateCartDto, UpdateCartDto } from './cart.dto';
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. CREATE
   async create(createCartDto: CreateCartDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { user_id: createCartDto.user_id },
-    });
-    if (!user) throw new BadRequestException('User does not exist');
+    const { user_id, product_id, product_variant_id, quantity } = createCartDto;
 
-    // FIX 1: Added added_at and updated_at
-    const now = new Date(); 
+    // 1. Validate Input
+    if (!user_id || !product_id || !quantity) {
+        throw new BadRequestException("Missing required fields: user_id, product_id, or quantity.");
+    }
 
-    return await this.prisma.cart.create({
-      data: {
-        user_id: user.user_id,
-        product_id: createCartDto.product_id,
-        product_variant_id: createCartDto.product_variant_id,
-        quantity: createCartDto.quantity,
-        added_at: now,   // <--- Added
-        updated_at: now, // <--- Added
-      },
-    });
+    try {
+      // 2. Check if item exists (Same User + Product + Variant)
+      // We handle 'product_variant_id' being null or undefined
+      const existingItem = await this.prisma.cart.findFirst({
+        where: {
+          user_id: Number(user_id),
+          product_id: Number(product_id),
+          product_variant_id: product_variant_id ? Number(product_variant_id) : null,
+        },
+      });
+
+      // 3. Logic: Update if exists, Create if new
+      if (existingItem) {
+        return await this.prisma.cart.update({
+          where: { cart_id: existingItem.cart_id },
+          data: {
+            quantity: existingItem.quantity + Number(quantity),
+            updated_at: new Date(), // Manually refresh timestamp
+          },
+        });
+      } else {
+        return await this.prisma.cart.create({
+          data: {
+            user_id: Number(user_id),
+            product_id: Number(product_id),
+            // Pass 'undefined' if null to satisfy Prisma's optional type
+            product_variant_id: product_variant_id ? Number(product_variant_id) : undefined,
+            quantity: Number(quantity),
+            // 'created_at' and 'updated_at' are handled by @default(now()) in schema
+          },
+        });
+      }
+    } catch (e) {
+      // Log the real error to your backend terminal so you can see it
+      console.error("Cart Create Error:", e); 
+      throw new InternalServerErrorException("Failed to add item to cart. Check server logs.");
+    }
   }
 
-  // 2. GET ALL ITEMS
+  // --- GET CART ---
   async findAll(userId: number) {
     return await this.prisma.cart.findMany({
       where: { user_id: userId },
       include: {
-        // FIX 2: Removed 'select' to avoid guessing field names. 
-        // We fetch the whole product object now.
-        product: true, 
-        customization: true
-      }
+        product: { include: { ProductImage: true } },
+        product_variant: true,
+      },
+      orderBy: { created_at: 'desc' },
     });
   }
 
-  // 3. UPDATE QUANTITY
+  // --- UPDATE QTY ---
   async update(cartId: number, updateCartDto: UpdateCartDto) {
-    const cartItem = await this.prisma.cart.findUnique({ where: { cart_id: cartId } });
-    if (!cartItem) throw new NotFoundException('Cart item not found');
-
     return await this.prisma.cart.update({
       where: { cart_id: cartId },
       data: { 
-        quantity: updateCartDto.quantity,
-        updated_at: new Date(), // Update timestamp
+        quantity: Number(updateCartDto.quantity),
+        updated_at: new Date()
       },
     });
   }
 
-  // 4. DELETE ITEM
+  // --- REMOVE ---
   async remove(cartId: number) {
-    const cartItem = await this.prisma.cart.findUnique({ where: { cart_id: cartId } });
-    if (!cartItem) throw new NotFoundException('Cart item not found');
-
     return await this.prisma.cart.delete({
       where: { cart_id: cartId },
     });

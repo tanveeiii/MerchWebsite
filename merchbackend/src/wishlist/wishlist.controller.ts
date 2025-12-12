@@ -11,13 +11,11 @@ export class WishlistController {
     return this.wishlistService.create(dto);
   }
 
-  // GET /api/wishlist/:userId
   @Get(':userId')
   async findAll(@Param('userId', ParseIntPipe) userId: number) {
     return this.wishlistService.findAll(userId);
   }
 
-  // DELETE /api/wishlist/remove/:id
   @Delete('remove/:id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.wishlistService.remove(id);

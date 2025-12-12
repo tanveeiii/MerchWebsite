@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Cart" ALTER COLUMN "updated_at" DROP DEFAULT,
+ALTER COLUMN "created_at" DROP DEFAULT;
