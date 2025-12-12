@@ -9,6 +9,7 @@ import ProductCard from "@/components/ProductCard";
 const HoodiesPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -17,14 +18,26 @@ const HoodiesPage = () => {
         const json = await res.json();
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          // Filter for Hoodies
+          // Filter to get only Hoodies based on Tag (or Category name if you prefer)
+          // Ensure your products in DB have the tag "Hoodie"
           const hoodies = mapped.filter(p => p.tag === "Hoodie");
           setProducts(hoodies);
         }
-      } catch (e) { console.error(e); } finally { setLoading(false); }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProducts();
   }, []);
+
+  // --- Added Category Logic ---
+  const categories = ["All", ...new Set(products.map(p => p.category))];
+
+  const filteredProducts = activeCategory === "All"
+    ? products
+    : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
@@ -34,14 +47,43 @@ const HoodiesPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Hoodies Collection</h1>
           <p className="text-lg text-gray-600">Comfort and style for every season.</p>
         </div>
-        {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div> : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.length > 0 ? (
-              products.map(product => <ProductCard key={product.id} product={product} />)
-            ) : (
-              <p className="text-center col-span-full text-gray-500">No hoodies found right now.</p>
+
+        {loading ? (
+          <div className="flex justify-center p-20"><Loader2 className="animate-spin text-gray-400" size={40} /></div>
+        ) : (
+          <>
+            {/* --- Added Category Filter Buttons --- */}
+            {categories.length > 1 && (
+              <div className="flex justify-center flex-wrap gap-3 mb-12">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+                      activeCategory === category
+                        ? "bg-black text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             )}
-          </div>
+
+            {/* Grid using filteredProducts */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No hoodies found in this category.
+                </div>
+              )}
+            </div>
+          </>
         )}
       </main>
       <Footer />

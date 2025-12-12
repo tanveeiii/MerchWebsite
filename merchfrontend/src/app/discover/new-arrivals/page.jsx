@@ -16,17 +16,36 @@ const NewArrivalsPage = () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
+        
         if (json.data) {
+          // 1. Map Backend Data
+          const mapped = json.data.map(mapProductFromBackend);
+          
+          // 2. Filter by Tag "New Arrival"
+          // Ensure your products in the database have this tag
           const newArrivals = mapped.filter(p => p.tag === "New Arrival");
+          
+          // If you prefer to just show the newest created items regardless of tag, use this instead:
+          // const newArrivals = mapped.sort((a, b) => b.id - a.id).slice(0, 20);
+
           setProducts(newArrivals);
         }
-      } catch (e) { console.error(e); } finally { setLoading(false); }
+      } catch (e) {
+        console.error("Failed to fetch new arrivals:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProducts();
   }, []);
 
+  // 3. Dynamic Categories (Based on the filtered "New Arrival" products)
   const categories = ["All", ...new Set(products.map(p => p.category))];
-  const filteredProducts = activeCategory === "All" ? products : products.filter(p => p.category === activeCategory);
+
+  // 4. Display Filter Logic
+  const filteredProducts = activeCategory === "All"
+    ? products
+    : products.filter(p => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
@@ -37,17 +56,42 @@ const NewArrivalsPage = () => {
           <p className="text-lg text-gray-600">Fresh styles just added.</p>
         </div>
 
-        {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div> : (
+        {loading ? (
+          <div className="flex justify-center p-20">
+            <Loader2 className="animate-spin text-gray-400" size={40} />
+          </div>
+        ) : (
           <>
-            <div className="flex justify-center flex-wrap gap-3 mb-12">
-              {categories.map((category) => (
-                <button key={category} onClick={() => setActiveCategory(category)} className={`px-6 py-2 rounded-full font-medium transition-all ${activeCategory === category ? "bg-black text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
-                  {category}
-                </button>
-              ))}
-            </div>
+            {/* --- Category Filter Buttons --- */}
+            {categories.length > 1 && (
+              <div className="flex justify-center flex-wrap gap-3 mb-12">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+                      activeCategory === category
+                        ? "bg-black text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map(product => <ProductCard key={product.id} product={product} />)}
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No new arrivals found in this category.
+                </div>
+              )}
             </div>
           </>
         )}

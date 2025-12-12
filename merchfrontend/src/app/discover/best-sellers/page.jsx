@@ -4,7 +4,7 @@ import { NavbarFinal } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Star, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
-import ProductCard from "@/components/ProductCard"; // Reusable Card
+import ProductCard from "@/components/ProductCard";
 
 const BestSellersPage = () => {
   const [products, setProducts] = useState([]);
@@ -19,11 +19,14 @@ const BestSellersPage = () => {
         
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
+          
+          // 1. Filter by Tag "Best Seller" (As per your requirement)
           const bestSellers = mapped.filter(p => p.tag === "Best Seller");
-          // Simulate Best Sellers by taking the first 12 items
-          setProducts(bestSellers);        }
+          
+          setProducts(bestSellers);
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Failed to fetch best sellers:", e);
       } finally {
         setLoading(false);
       }
@@ -31,9 +34,11 @@ const BestSellersPage = () => {
     fetchProducts();
   }, []);
 
-  // Dynamic Categories based on fetched data
+  // 2. Dynamic Category Logic
+  // Extracts unique categories from the loaded 'Best Seller' products
   const categories = ["All", ...new Set(products.map(p => p.category))];
 
+  // 3. Filter Logic for Display
   const filteredProducts = activeCategory === "All"
     ? products
     : products.filter((p) => p.category === activeCategory);
@@ -50,31 +55,41 @@ const BestSellersPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div>
+          <div className="flex justify-center p-20">
+            <Loader2 className="animate-spin text-gray-400" size={40} />
+          </div>
         ) : (
           <>
-            {/* Filter Buttons */}
-            <div className="flex justify-center flex-wrap gap-3 mb-12">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
-                    activeCategory === category
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+            {/* Category Filter Buttons */}
+            {categories.length > 1 && (
+              <div className="flex justify-center flex-wrap gap-3 mb-12">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+                      activeCategory === category
+                        ? "bg-gray-900 text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {/* Grid using ProductCard */}
+            {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No best sellers found in this category.
+                </div>
+              )}
             </div>
           </>
         )}
