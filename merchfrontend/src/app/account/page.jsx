@@ -1,12 +1,13 @@
 "use client"
 import { NavbarFinal } from '@/components/Navbar'
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'; // Import Router
+import { useRouter } from 'next/navigation';
 import Sidebar from './components/sidebar';
 import { User, Package, RotateCcw, MapPin, Lock } from "lucide-react"; 
 import OrderCard from './components/orderCard';
 import Overview from './components/overview';
 import AddressBook from './components/addressBook'; 
+import ComplaintModal from './components/ComplaintModal'; // <--- IMPORT MODAL
 
 const Account = () => {
     const router = useRouter();
@@ -16,16 +17,17 @@ const Account = () => {
     const [orders, setOrders] = useState([]); 
     const [returns, setReturns] = useState([]);
     const [userData, setUserData] = useState(null); 
-    
     const [loading, setLoading] = useState(false);
+
+    // --- Complaint States ---
+    const [showComplaintModal, setShowComplaintModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     // --- Main Fetch Function ---
     useEffect(() => {
-        // 1. GET USER ID DYNAMICALLY
         const userId = localStorage.getItem("userId");
         const token = localStorage.getItem("token");
 
-        // 2. Redirect if not logged in
         if (!userId || !token) {
             router.push('/auth/login'); 
             return;
@@ -34,8 +36,6 @@ const Account = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // 3. Use dynamic 'userId' in all fetch calls
-                
                 // Fetch User Profile
                 if (activeSection === "overview" || activeSection === "address") {
                     const res = await fetch(`http://localhost:5000/api/user/profile/${userId}`);
@@ -75,9 +75,9 @@ const Account = () => {
         };
 
         fetchData();
-    }, [activeSection, router]); // Add router to dependencies
+    }, [activeSection, router]);
 
-    // --- Action Handlers (Keep as is) ---
+    // --- Action Handlers ---
     const handleUpdateProfile = async (updatedData) => {
         try {
             const res = await fetch('http://localhost:5000/api/user/update', {
@@ -87,7 +87,6 @@ const Account = () => {
             });
             if (res.ok) {
                 alert("Profile Updated Successfully!");
-                // Trigger reload by temporarily switching section or forcing update
                 window.location.reload(); 
             } else {
                 const err = await res.json();
@@ -119,15 +118,49 @@ const Account = () => {
         }
     };
 
+    // --- NEW: Complaint Handlers ---
+    const handleOpenComplaint = (orderNo) => {
+        const order = orders.find(o => o.orderNo === orderNo);
+        setSelectedOrder(order);
+        setShowComplaintModal(true);
+    };
+
+    const handleSubmitComplaint = async (message) => {
+        const userId = localStorage.getItem("userId");
+        try {
+            const res = await fetch('http://localhost:5000/api/complaint/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender_id: Number(userId),
+                    sender_type: "User",
+                    message: message, // Message includes order number context
+                    attachment_url: "" // Can be added later if you implement file upload
+                })
+            });
+
+            if (res.ok) {
+                alert("Complaint ticket raised successfully. Our support team will contact you.");
+                setShowComplaintModal(false);
+            } else {
+                const err = await res.json();
+                alert(`Failed to raise complaint: ${err.message}`);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network error raising complaint.");
+        }
+    };
+
     return (
         <div>
             <NavbarFinal />
             <div className="flex bg-gray-50 min-h-screen">
                 <Sidebar 
-                activeSection={activeSection} 
-                setActiveSection={setActiveSection} 
-                userData={userData}  // <--- ADD THIS PROP
-            />
+                    activeSection={activeSection} 
+                    setActiveSection={setActiveSection} 
+                    userData={userData}
+                />
 
                 <div className="flex-1 p-8">
                     {/* OVERVIEW */}
@@ -160,7 +193,11 @@ const Account = () => {
                             ) : orders.length > 0 ? (
                                 <div className="space-y-6">
                                     {orders.map((order, idx) => (
-                                        <OrderCard key={idx} {...order} />
+                                        <OrderCard 
+                                            key={idx} 
+                                            {...order} 
+                                            onComplaint={handleOpenComplaint} // <--- Pass the handler
+                                        />
                                     ))}
                                 </div>
                             ) : (
@@ -178,7 +215,6 @@ const Account = () => {
                                 <RotateCcw size={22} />
                                 <div>MY RETURNS</div>
                             </h1>
-
                             {loading ? (
                                 <div className="text-center py-10 text-gray-500">Loading returns...</div>
                             ) : returns.length > 0 ? (
@@ -247,6 +283,15 @@ const Account = () => {
                     )}
                 </div>
             </div>
+
+            {/* COMPLAINT MODAL (Rendered conditionally) */}
+            {showComplaintModal && selectedOrder && (
+                <ComplaintModal 
+                    order={selectedOrder}
+                    onClose={() => setShowComplaintModal(false)}
+                    onSubmit={handleSubmitComplaint}
+                />
+            )}
         </div>
     )
 }
