@@ -1,24 +1,20 @@
-import { IsInt, IsString, IsNumber, IsDateString } from 'class-validator';
+import { IsNumber, IsString, IsNotEmpty } from 'class-validator';
 
-export class CreatePaymentDto {
-  @IsInt()
-  order_id: number;
-
-  @IsString()
-  payment_method: string;
-
-  @IsString()
-  transaction_id: string;
-
+export class CreatePaymentOrderDto {
   @IsNumber()
-  amount: number;
+  amount: number; // Amount in INR (not paise, we'll convert it in service)
+}
+
+export class VerifyPaymentDto {
+  @IsString()
+  @IsNotEmpty()
+  razorpay_order_id: string;
 
   @IsString()
-  payment_status: string;
+  @IsNotEmpty()
+  razorpay_payment_id: string;
 
   @IsString()
-  payment_details: string;
-
-  @IsDateString()
-  payment_date: string;
+  @IsNotEmpty()
+  razorpay_signature: string;
 }
