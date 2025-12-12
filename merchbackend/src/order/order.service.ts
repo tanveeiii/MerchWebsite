@@ -73,6 +73,7 @@ export class OrderService {
           shipping_address: true,
           subtotal: true,
           user_id: true,
+          order_id: true
         },
       });
 
@@ -82,13 +83,12 @@ export class OrderService {
     }
   }
 
-  // --- NEW: Add this method to fetch orders ---
+  // --- USER: Get Specific User Orders ---
   async findAll(userId: number) {
     try {
       const orders = await this.prisma.order.findMany({
         where: { user_id: userId },
         include: {
-          // We include OrderItems to get the product details (like image) for the card
           OrderItem: { 
             include: {
               product: true 
@@ -96,7 +96,7 @@ export class OrderService {
           }
         },
         orderBy: {
-          created_at: 'desc' // Newest orders first
+          created_at: 'desc' 
         }
       });
       return { code: 200, data: orders };
@@ -104,5 +104,23 @@ export class OrderService {
       throw new InternalServerErrorException({ code: 500, message: 'Failed to fetch orders', error: e.message });
     }
   }
-}
 
+  // --- ADMIN: Get ALL Orders (New) ---
+  async findAllForAdmin() {
+    return await this.prisma.order.findMany({
+      include: {
+        OrderItem: { include: { product: true } },
+        user: { select: { first_name: true, last_name: true, email: true } }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+  }
+
+  // --- ADMIN: Update Order Status (New) ---
+  async updateStatus(orderId: number, status: string) {
+    return await this.prisma.order.update({
+      where: { order_id: orderId },
+      data: { order_status: status }
+    });
+  }
+}

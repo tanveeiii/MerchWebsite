@@ -34,6 +34,7 @@ model User {
   Review           Review[]
   UserNotification UserNotification[]
   Wishlist         Wishlist[]
+  Complaint        Complaint[]
 }
 
 model Address {
@@ -327,6 +328,7 @@ model Complaint {
   message        String
   attachment_url String
   created_at     DateTime
+  user           User     @relation(fields: [sender_id], references: [user_id])
 }
 
 model Analytics {

@@ -34,4 +34,14 @@ export class ComplaintService {
 
     return cart;
   }
+
+  // --- ADMIN: Get All Complaints (New) ---
+  async findAll() {
+    return await this.prisma.complaint.findMany({
+      include:{
+        user: { select: { first_name: true, last_name: true, email: true } }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+  }
 }
