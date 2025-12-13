@@ -1,16 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Loader2, CheckCircle, Clock, Truck } from "lucide-react";
+import { Loader2, CheckCircle, Clock, Truck, Eye } from "lucide-react"; // Added Eye
+import { useRouter } from "next/navigation"; // Added useRouter
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // Initialize router
 
   const fetchOrders = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/order/admin/all");
       const json = await res.json();
-      if (Array.isArray(json)) setOrders(json); // Assuming backend returns array directly or modify based on response structure
+      if (Array.isArray(json)) setOrders(json);
     } catch (e) { console.error(e); } 
     finally { setLoading(false); }
   };
@@ -67,9 +69,19 @@ export default function AdminOrders() {
                     {order.order_status}
                   </span>
                 </td>
-                <td className="p-4">
+                <td className="p-4 flex items-center gap-3">
+                  {/* --- NEW VIEW BUTTON --- */}
+                  <button 
+                    onClick={() => router.push(`/admin/orders/${order.order_id}`)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="View Details & Customization"
+                  >
+                    <Eye size={20} />
+                  </button>
+                  
+                  {/* Status Dropdown */}
                   <select 
-                    className="border rounded p-1 text-sm bg-white"
+                    className="border rounded p-1 text-sm bg-white cursor-pointer"
                     value={order.order_status}
                     onChange={(e) => handleStatusUpdate(order.order_id, e.target.value)}
                   >
