@@ -1,12 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { CreateAdminDto } from './admin.dto';
+import { CreateAdminDto, AdminLoginDto } from './admin.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
+  // 1. Create Admin
   async create(createAdminDTO: CreateAdminDto) {
     const existingAdmin = await this.prisma.admin.findUnique({
       where: { email: createAdminDTO.email },
@@ -16,8 +17,11 @@ export class AdminService {
         code: 400,
         message: 'Admin already exists',
       });
+    
+    // Hash password before saving
     const hashed = await bcrypt.hash(createAdminDTO.password, 10);
     const now = new Date();
+    
     const admin = await this.prisma.admin.create({
       data: {
         first_name: createAdminDTO.first_name,
@@ -39,5 +43,34 @@ export class AdminService {
     });
 
     return admin;
+  }
+
+  // 2. Admin Login (NEW)
+  async login(loginDto: AdminLoginDto) {
+    const admin = await this.prisma.admin.findUnique({
+      where: { email: loginDto.email },
+    });
+
+    if (!admin) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Compare plain text password with hashed password in DB
+    const isMatch = await bcrypt.compare(loginDto.password, admin.password);
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Return admin info (excluding password)
+    return {
+      message: 'Login successful',
+      admin: {
+        id: admin.admin_id,
+        name: `${admin.first_name} ${admin.last_name}`,
+        email: admin.email,
+        role: 'SUPER_ADMIN'
+      }
+    };
   }
 }

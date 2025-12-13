@@ -20,3 +20,12 @@ export class CreateAdminDto {
   @IsString()
   access_token?: string;
 }
+
+// --- ADDED THIS CLASS ---
+export class AdminLoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  password: string;
+}

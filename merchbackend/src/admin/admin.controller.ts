@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { CreateAdminDto } from './admin.dto';
+import { CreateAdminDto, AdminLoginDto } from './admin.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -9,5 +9,11 @@ export class AdminController {
   @Post('create')
   async create(@Body() dto: CreateAdminDto) {
     return this.adminService.create(dto);
+  }
+
+  // --- ADDED THIS ENDPOINT ---
+  @Post('login')
+  async login(@Body() dto: AdminLoginDto) {
+    return this.adminService.login(dto);
   }
 }

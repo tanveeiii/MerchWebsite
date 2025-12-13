@@ -327,6 +327,9 @@ model Complaint {
   sender_id      Int
   sender_type    String
   message        String
+  status         String    @default("OPEN") 
+  admin_reply    String?
+  resolved_at    DateTime?                
   attachment_url String
   created_at     DateTime
   user           User     @relation(fields: [sender_id], references: [user_id])
