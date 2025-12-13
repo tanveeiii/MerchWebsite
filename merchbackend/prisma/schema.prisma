@@ -174,8 +174,8 @@ model Cart {
   product_id         Int
   product_variant_id Int?
   quantity           Int
-  created_at         DateTime
-  updated_at         DateTime
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @updatedAt
   product            Product        @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant? @relation(fields: [product_variant_id], references: [product_variant_id])
   user               User           @relation(fields: [user_id], references: [user_id])
