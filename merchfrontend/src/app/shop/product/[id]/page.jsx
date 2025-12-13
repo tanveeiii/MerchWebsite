@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useState, use } from 'react'; // Import 'use'
+import React, { useEffect, useState, use } from 'react';
 import { NavbarFinal } from "@/components/Navbar";
-import { Loader2, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
+import { Loader2, ShoppingCart, Heart, Minus, Plus, Type, Palette } from 'lucide-react';
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ReviewsSection from "@/components/ReviewsSection"; 
+import { trackEvent } from "@/utils/analytics";
 
 const ProductPage = ({ params }) => {
   // FIX: In Next.js 15, params is a Promise. Unwrap it with React.use()
@@ -17,6 +18,12 @@ const ProductPage = ({ params }) => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState("");
+
+  // --- NEW: Customization States ---
+  const [customText, setCustomText] = useState("");
+  const [textColor, setTextColor] = useState("#000000");
+  const [fontStyle, setFontStyle] = useState("Sans-serif");
+  // --------------------------------
 
   // Loading States for Actions
   const [addingCart, setAddingCart] = useState(false);
@@ -57,6 +64,7 @@ const ProductPage = ({ params }) => {
 
     setAddingCart(true);
     try {
+      // 1. Create Cart Item
       const res = await fetch("http://localhost:5000/api/cart/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,8 +75,37 @@ const ProductPage = ({ params }) => {
           quantity: quantity
         }),
       });
-      if (res.ok) alert("Added to Cart!");
-      else throw new Error("Failed to add");
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // 2. If Customization exists, link it to the Cart Item
+        if (customText.trim() !== "") {
+            // Note: The backend cart creation usually returns the created object. 
+            // We need the 'cart_id' from 'data' or 'data.data' depending on your backend response structure.
+            // Assuming 'data' is the cart object directly based on previous code.
+            const cartId = data.cart_id || (data.data && data.data.cart_id);
+
+            if (cartId) {
+                await fetch("http://localhost:5000/api/customization/create", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        cart_id: Number(cartId),
+                        custom_text: customText,
+                        text_color: textColor,
+                        font_style: fontStyle
+                        // image_urls can be added here if you implement file upload logic
+                    })
+                });
+            }
+        }
+        await trackEvent("ADD_TO_CART", `Added ${quantity} x ${product.name} to cart`, product.id);
+
+        alert("Added to Cart!");
+      } else {
+        throw new Error(data.message || "Failed to add");
+      }
     } catch (e) { 
         console.error(e); 
         alert("Error adding to cart");
@@ -115,8 +152,20 @@ const ProductPage = ({ params }) => {
             
             {/* Left: Image Gallery */}
             <div className="space-y-4">
-                <div className="aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                <div className="aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative">
                     <img src={activeImage} alt={product.name} className="w-full h-full object-cover" />
+                    
+                    {/* Live Preview Overlay (Optional Fun Feature) */}
+                    {customText && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-80">
+                            <span 
+                                style={{ color: textColor, fontFamily: fontStyle }} 
+                                className="text-4xl font-bold drop-shadow-md"
+                            >
+                                {customText}
+                            </span>
+                        </div>
+                    )}
                 </div>
                 {/* Thumbnails */}
                 {product.images.length > 1 && (
@@ -178,6 +227,61 @@ const ProductPage = ({ params }) => {
                         </div>
                     </div>
                 )}
+
+                {/* --- CUSTOMIZATION SECTION (NEW) --- */}
+                <div className="mt-6 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Palette size={20} className="text-blue-600"/> Personalize Your Item
+                    </h3>
+                    
+                    <div className="space-y-4">
+                        {/* Text Input */}
+                        <div>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Custom Text</label>
+                            <div className="relative">
+                                <Type className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter name or text to print..." 
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    value={customText}
+                                    onChange={(e) => setCustomText(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Controls Row */}
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Font Style</label>
+                                <select 
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                                    value={fontStyle}
+                                    onChange={(e) => setFontStyle(e.target.value)}
+                                >
+                                    <option value="Sans-serif">Modern (Sans)</option>
+                                    <option value="Serif">Classic (Serif)</option>
+                                    <option value="Cursive">Handwritten</option>
+                                    <option value="Monospace">Tech (Mono)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Text Color</label>
+                                <div className="flex items-center gap-2 border border-gray-300 p-2 rounded-xl bg-white h-[50px]">
+                                    <input 
+                                        type="color" 
+                                        className="w-10 h-full cursor-pointer rounded border-none bg-transparent p-0"
+                                        value={textColor}
+                                        onChange={(e) => setTextColor(e.target.value)}
+                                    />
+                                    <span className="text-sm font-mono text-gray-500 w-16">{textColor}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* ----------------------------------- */}
 
                 {/* Actions Row */}
                 <div className="mt-8 flex gap-4">
