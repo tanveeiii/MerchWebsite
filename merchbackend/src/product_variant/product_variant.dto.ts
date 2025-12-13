@@ -1,9 +1,10 @@
-import { IsInt, IsString, IsBoolean, IsOptional, IsDecimal, IsDateString } from 'class-validator';
+import { IsInt, IsString, IsBoolean, IsOptional, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductVariantDto {
+  @IsOptional() // Make Optional for Nested Creation
   @IsInt()
-  product_id: number;
+  product_id?: number;
 
   @IsString()
   size: string;
@@ -18,7 +19,7 @@ export class CreateProductVariantDto {
   sku: string;
 
   @Type(() => Number)
-  @IsDecimal()
+  @IsNumber() // Changed from IsDecimal to IsNumber for better DTO handling
   price: number;
 
   @IsInt()
@@ -28,7 +29,7 @@ export class CreateProductVariantDto {
   low_stock_threshold: number;
 
   @Type(() => Number)
-  @IsDecimal()
+  @IsNumber() // Changed from IsDecimal to IsNumber
   weight: number;
 
   @IsOptional()
