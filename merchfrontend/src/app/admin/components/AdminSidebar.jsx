@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingBag, Tag, Folder, MessageSquare, LogOut, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Tag, Folder, MessageSquare, LogOut, ClipboardList,Activity } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -18,6 +18,7 @@ export default function AdminSidebar() {
 
   const menu = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/admin" },
+    { name: "Analytics", icon: <Activity size={20} />, path: "/admin/analytics" },
     { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
     { name: "Orders", icon: <ShoppingBag size={20} />, path: "/admin/orders" },
     { name: "Inventory", icon: <ClipboardList size={20} />, path: "/admin/inventory" },
