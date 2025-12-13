@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { Loader2, TrendingUp, Eye, Activity } from 'lucide-react';
+import { Loader2, TrendingUp, Eye, Activity, ShoppingCart, CreditCard } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export default function AnalyticsDashboard() {
@@ -35,6 +35,27 @@ export default function AnalyticsDashboard() {
 
     fetchData();
   }, []);
+
+  // --- Helper for Activity Styles ---
+  const getEventStyle = (type) => {
+    switch (type) {
+      case 'PURCHASE':
+        return { 
+          bg: 'bg-green-100', text: 'text-green-700', label: 'Purchased', 
+          icon: <CreditCard size={14} className="mr-1 inline" /> 
+        };
+      case 'ADD_TO_CART':
+        return { 
+          bg: 'bg-amber-100', text: 'text-amber-700', label: 'Added to Cart', 
+          icon: <ShoppingCart size={14} className="mr-1 inline" /> 
+        };
+      default: // VIEW
+        return { 
+          bg: 'bg-blue-50', text: 'text-blue-600', label: 'Viewed', 
+          icon: <Eye size={14} className="mr-1 inline" /> 
+        };
+    }
+  };
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center">
@@ -108,7 +129,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* 3. RECENT ACTIVITY LOG */}
+        {/* 3. RECENT ACTIVITY LOG (UPDATED) */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
             <Activity size={20} className="text-orange-500" /> Recent User Activity
@@ -123,22 +144,30 @@ export default function AnalyticsDashboard() {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                    {recentActivity.map((log) => (
-                        <tr key={log.analytics_id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3">
-                                {log.user ? log.user.first_name : 'Unknown'}
-                            </td>
-                            <td className="px-4 py-3">
-                                <span className={`px-2 py-0.5 rounded text-xs font-bold ${log.event_type === 'PURCHASE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                    {log.event_type}
-                                </span>
-                                {log.product && <span className="ml-2 text-gray-400 text-xs">on {log.product.product_name}</span>}
-                            </td>
-                            <td className="px-4 py-3 text-xs">
-                                {new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </td>
-                        </tr>
-                    ))}
+                    {recentActivity.map((log) => {
+                        const style = getEventStyle(log.event_type);
+                        return (
+                          <tr key={log.analytics_id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-4 py-3 font-medium text-gray-900">
+                                  {log.user ? log.user.first_name : 'Guest'}
+                              </td>
+                              <td className="px-4 py-3">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${style.bg} ${style.text}`}>
+                                      {style.icon}
+                                      {style.label}
+                                  </span>
+                                  {log.product && (
+                                    <span className="ml-2 text-gray-400 text-xs">
+                                      on {log.product.product_name}
+                                    </span>
+                                  )}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-gray-400">
+                                  {new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              </td>
+                          </tr>
+                        );
+                    })}
                 </tbody>
              </table>
              {recentActivity.length === 0 && <p className="p-4 text-center text-gray-400">No recent activity.</p>}
