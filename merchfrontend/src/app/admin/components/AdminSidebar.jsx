@@ -23,6 +23,7 @@ export default function AdminSidebar() {
     { name: "Inventory", icon: <ClipboardList size={20} />, path: "/admin/inventory" },
     { name: "Categories", icon: <Folder size={20} />, path: "/admin/categories" },
     { name: "Tags", icon: <Tag size={20} />, path: "/admin/tags" },
+    { name: "Coupons", icon: <Tag size={20} />, path: "/admin/coupons" },
     { name: "Complaints", icon: <MessageSquare size={20} />, path: "/admin/complaints" },
   ];
 
