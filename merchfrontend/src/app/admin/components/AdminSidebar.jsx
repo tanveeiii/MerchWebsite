@@ -1,12 +1,20 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingBag, Tag, Folder, MessageSquare, LogOut } from "lucide-react";
-import { ClipboardList } from "lucide-react"; // Import icon
-
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Package, ShoppingBag, Tag, Folder, MessageSquare, LogOut, ClipboardList } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // 1. Clear Admin Session
+    localStorage.removeItem("adminAuthenticated");
+    localStorage.removeItem("adminName");
+    
+    // 2. Redirect to Login or Home
+    router.push("/admin/login"); 
+  };
 
   const menu = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/admin" },
@@ -19,7 +27,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className="w-64 h-screen bg-gray-900 text-white p-6 flex flex-col fixed left-0 top-0">
+    <div className="w-64 h-screen bg-gray-900 text-white p-6 flex flex-col fixed left-0 top-0 z-50">
       <div className="text-2xl font-bold mb-10 tracking-wider text-center border-b border-gray-700 pb-4">
         ADMIN PANEL
       </div>
@@ -39,9 +47,13 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
-      <button className="flex items-center gap-3 p-3 text-red-400 hover:bg-red-900/20 rounded-lg mt-auto transition-colors" onClick={() => window.location.href = '/'}>
+      {/* Logout Button */}
+      <button 
+        onClick={handleLogout}
+        className="flex items-center gap-3 p-3 text-red-400 hover:bg-red-900/20 rounded-lg mt-auto transition-colors w-full"
+      >
         <LogOut size={20} />
-        <span>Exit Admin</span>
+        <span>Log Out</span>
       </button>
     </div>
   );
