@@ -1,5 +1,5 @@
 // src/app.module.ts
-import { Module } from '@nestjs/common';
+import { ConfigurableModuleBuilder, Module } from '@nestjs/common';
 import { PrismaModule } from './prisma.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -28,6 +28,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { CartModule } from './cart/cart.module';
 import { OrderStatusHistoryModule } from './order_status_history/order_status_history.module';
 import { CustomizationModule } from './customization/customization.module';
+import { RazorpayModule } from './razorpay/razorpay.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { CustomizationModule } from './customization/customization.module';
     UserModule,
     UserNotificationModule,
     WishlistModule,
+    RazorpayModule,
   ],
 })
 export class AppModule {}

@@ -5,6 +5,7 @@ import CartItems from './components/cartItems';
 import PriceDetails from './components/priceDetails';
 import { handleRazorpayPayment } from './utils/handlePayment'; 
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 
 const Cart = () => {
   const router = useRouter();
@@ -22,22 +23,17 @@ const Cart = () => {
 
   // --- 1. Load User & Fetch Data ---
   useEffect(() => {
-    // Get ID from Storage safely
     const storedUserId = localStorage.getItem("userId");
     
     if (!storedUserId) {
         setLoading(false);
-        // Optional: Redirect to login if cart requires auth
-        // router.push('/auth/login');
         return;
     }
-
     setUserId(storedUserId);
 
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch Cart
         const cartRes = await fetch(`http://localhost:5000/api/cart/${storedUserId}`);
         const cartData = await cartRes.json();
         
@@ -137,88 +133,54 @@ const Cart = () => {
     }
   };
 
-  // --- 5. Checkout Handler ---
-  const handleCheckout = async () => {
+  const handleCheckout  = async () => {
     if (!userId) return alert("Please log in to checkout.");
     if (items.length === 0) return alert("Your cart is empty");
-
-    await handleRazorpayPayment(
-        total,
-        userProfile,
-        async (response) => {
-            // SUCCESS
-            try {
-                // Create Order
-                const orderRes = await fetch('http://localhost:5000/api/order/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        order_number: `ORD-${Date.now()}`,
-                        shipping_address: 1, // Placeholder
-                        subtotal: subtotal,
-                        tax_amount: tax,
-                        shipping_cost: 0,
-                        discount_amount: couponDiscount,
-                        total_amount: total,
-                        payment_type: "Razorpay",
-                        order_status: "PAID",
-                        user_id: Number(userId)
-                    })
-                });
-                
-                const orderData = await orderRes.json();
-                
-                // Record Coupon Usage
-                if (appliedCoupon && orderData.order) {
-                    await fetch('http://localhost:5000/api/coupon_usage/create', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            coupon_id: appliedCoupon.id,
-                            user_id: Number(userId),
-                            order_id: orderData.order.order_id,
-                            discount_applied: couponDiscount
-                        })
-                    });
-                }
-
-                // Create Payment Record (Optional, if you have a Payment Table)
-                /*
-                await fetch('http://localhost:5000/api/payment/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        order_id: orderData.order.order_id,
-                        payment_method: 'Razorpay',
-                        transaction_id: response.razorpay_payment_id,
-                        amount: total,
-                        payment_status: 'SUCCESS',
-                        payment_date: new Date().toISOString(),
-                        payment_details: JSON.stringify(response)
-                    })
-                });
-                */
-
-                alert(`Order Placed Successfully! ID: ${orderData.order.order_number}`);
-                setItems([]); // Clear Cart UI
-                window.location.href = "/account"; 
-
-            } catch (e) {
-                console.error("Order creation failed:", e);
-                alert("Payment successful but order creation failed. Contact support.");
-            }
+    try{
+      const response = await fetch('http://localhost:5000/api/razorpay/checkout',{
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: Math.floor(total*83),
+          current: "INT",
+          user: userProfile,
+          product: items
+        })
+    })
+    const res = await response.json()
+    console.log(res)
+    const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_ID,
+        amount: Math.floor(total*83), 
+        currency: 'INR',
+        name: 'Suryansh Nagar',
+        description: 'Test Transaction',
+        order_id: res.id, 
+        callback_url: 'http://localhost:5000/api/razorpay/payment-success',
+        prefill: {
+          name: 'Suryansh Nagar',
+          email: 'nagar.suryansh@gmail.com',
+          contact: '9082388554'
         },
-        (errorMessage) => {
-            // FAILURE
-            alert(`Payment Failed: ${errorMessage}`);
-        }
-    );
-  };
+        theme: {
+          color: '#F37254'
+        },
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }catch(e){
+      alert(`Payment Failed: ${e}`);
+    }
+  }
 
   if (loading) return <div className="h-screen flex items-center justify-center text-gray-500">Loading Cart...</div>;
 
   return (
     <div className="bg-white min-h-screen">
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+      />
       <NavbarFinal />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
