@@ -3,9 +3,10 @@ import { instance } from "src/main";
 import { PrismaService } from "src/prisma.service";
 import crypto from 'crypto'
 import { OrderService } from "src/order/order.service";
+import orders from "razorpay/dist/types/orders";
 @Injectable()
 export class RazorpayService {
-    constructor(private prisma: PrismaService, private orderService: OrderService) { }
+    constructor(private prisma: PrismaService, ) { }
 
     async checkout(data: any) {
         const order = await instance.orders.create({
@@ -20,7 +21,7 @@ export class RazorpayService {
 
     async payment_success(data: any) {
         const body = `${data.razorpay_order_id}|${data.razorpay_payment_id}`;
-
+        console.log("DATA PAYEMTN", data)
         const expectedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_SECRET_KEY!)
             .update(body)
@@ -34,7 +35,24 @@ export class RazorpayService {
             }
             // throw new Error('Payment verification failed');
         }
-        // const order = await this.orderService.create(details)
+        // const order = await fetch("http://localhost:5000/api/order/create",{
+        //     headers: {'Content-Type': 'application/json'},
+        //     body: JSON.stringify({
+        //         order_number:
+        //         shipping_address:
+        //         subtotal:
+        //         tax_amount:
+        //         shipping_cost:
+        //         discount_amount:
+        //         total_amount:
+        //         payment_type:
+        //         order_status:
+        //         user_id:
+        //         razorpay_order_id:
+        //         razorpay_payment_id:
+        //     })
+        // }
+        // )
 
         return {
             success: true,
@@ -44,9 +62,58 @@ export class RazorpayService {
         };
     }
 }
-
-// {
-// "razorpay_payment_id": "pay_Rs1YSfqTgPhwLW",
-// "razorpay_order_id": "order_Rs1YOFN1DgaNVF",
-// "razorpay_signature": "f096c3f7c878066392f0a44f0e7cf6eab8b8fe9b4aee3549c3b07ab20ccc3755"
+// DATA PAYEMTN {
+//   razorpay_payment_id: 'pay_RsPJKebjLQ3CWl',
+//   razorpay_order_id: 'order_RsPJ6BBiykdQO8',
+//   razorpay_signature: 'c03c3a668a6753b788e0ce7bc577184b45768cb3e41bdcd9d80adfa162165923',
+//   userId: '1',
+//   items: [
+//     {
+//       id: 8,
+//       name: 'test',
+//       price: 100,
+//       quantity: 5,
+//       product_id: 1,
+//       product_variant_id: 1
+//     }
+//   ],
+//   amount: 525,
+//   coupon: null
 // }
+
+// DATA checkout {
+//   amount: 43575,
+//   current: 'INR',
+//   user: {
+//     name: 'Suryansh Nagar',
+//     email: 'me230003077@iiti.ac.in',
+//     mobile: '9082388554'
+//   },
+//   product: [
+//     {
+//       id: 8,
+//       name: 'test',
+//       price: 100,
+//       quantity: 5,
+//       product_id: 1,
+//       product_variant_id: 1
+//     }
+//   ]
+// }
+// ORder:  {
+//   amount: 4357500,
+//   amount_due: 4357500,
+//   amount_paid: 0,
+//   attempts: 0,
+//   created_at: 1765915227,
+//   currency: 'INR',
+//   entity: 'order',
+//   id: 'order_RsPJ6BBiykdQO8',
+//   notes: {
+//     merchant_order_id: '[{"id":8,"name":"test","price":100,"quantity":5,"product_id":1,"product_variant_id":1}]'
+//   },
+//   offer_id: null,
+//   receipt: null,
+//   status: 'created'
+// }
+// 

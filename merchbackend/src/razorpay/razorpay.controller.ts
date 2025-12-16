@@ -15,8 +15,8 @@ export class RazorpayController {
     }
 
     @Post('payment-success')
-    async paymentSuccessfulControl(@Body() data: any, @Res() res: Response) {
-        const res_obj = await this.razorpayService.payment_success(data)
-        return res.redirect(res_obj.url);
+    async paymentSuccessfulControl(@Body() data: any) {
+        return await this.razorpayService.payment_success(data);
     }
+
 }
