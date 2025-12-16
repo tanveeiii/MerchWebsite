@@ -204,6 +204,8 @@ model Order {
   payment_type       String
   order_status       String
   user_id            Int
+  razorpay_order_od  String?
+  razorpay_payment_id String?
   created_at         DateTime
   updated_at         DateTime
   CouponUsage        CouponUsage[]
