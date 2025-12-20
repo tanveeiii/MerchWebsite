@@ -8,41 +8,52 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // --- 1. Form State Structure ---
+  // --- NEW: Store fetched Categories & Tags ---
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+
   const initialFormState = {
     product_name: "",
     description: "",
     base_price: "",
     sku: "",
-    category_id: "",
-    tag_id: "",
-    image_url: "", // For primary image
-    
-    // Variant Temp State
+    category_id: "", // Will be selected via Dropdown
+    tag_id: "",      // Will be selected via Dropdown
+    image_url: "", 
     variants: [] 
   };
 
   const [formData, setFormData] = useState(initialFormState);
   
-  // Temp state for adding a variant row
   const [newVariant, setNewVariant] = useState({
     size: "M", color: "Black", material: "Cotton", sku: "", 
     price: "", stock_quantity: 10, weight: 0.5
   });
 
-  // --- 2. Fetch Products ---
-  const fetchProducts = async () => {
+  // --- 1. Fetch Data (Products, Categories, Tags) ---
+  const fetchAllData = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/product/fetch");
-      const json = await res.json();
-      if (json.data) setProducts(json.data);
+      const [prodRes, catRes, tagRes] = await Promise.all([
+        fetch("http://localhost:5000/api/product/fetch"),
+        fetch("http://localhost:5000/api/category/fetch"),
+        fetch("http://localhost:5000/api/tag/fetch")
+      ]);
+
+      const prodData = await prodRes.json();
+      const catData = await catRes.json();
+      const tagData = await tagRes.json();
+
+      if (prodData.data) setProducts(prodData.data);
+      if (Array.isArray(catData)) setCategories(catData);
+      if (Array.isArray(tagData)) setTags(tagData);
+
     } catch (e) { console.error(e); } 
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchAllData(); }, []);
 
-  // --- 3. Helper Functions ---
+  // --- Helper Functions ---
   const addVariant = (e) => {
     e.preventDefault();
     if (!newVariant.sku || !newVariant.price) return alert("SKU and Price are required for variants");
@@ -51,8 +62,6 @@ export default function AdminProducts() {
       ...formData,
       variants: [...formData.variants, { ...newVariant, price: Number(newVariant.price) }]
     });
-
-    // Reset temp variant
     setNewVariant({ ...newVariant, sku: "", price: "" }); 
   };
 
@@ -61,13 +70,15 @@ export default function AdminProducts() {
     setFormData({ ...formData, variants: updated });
   };
 
-  // --- 4. Submit Handler (Single Request) ---
+  // --- Submit Handler ---
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.category_id || !formData.tag_id) {
+        return alert("Please select a Category and a Tag");
+    }
     setSubmitting(true);
 
     try {
-      // Construct the Deep Insert Payload
       const payload = {
         product_name: formData.product_name,
         description: formData.description,
@@ -76,16 +87,12 @@ export default function AdminProducts() {
         category_id: Number(formData.category_id),
         tag_id: Number(formData.tag_id),
         is_active: true,
-
-        // Map Images (Creating an array with one primary image for now)
         images: formData.image_url ? [{
           image_url: formData.image_url,
           alt_text: formData.product_name,
           display_order: 1,
           is_primary: true
         }] : [],
-
-        // Map Variants
         variants: formData.variants.map(v => ({
           ...v,
           stock_quantity: Number(v.stock_quantity),
@@ -107,7 +114,7 @@ export default function AdminProducts() {
         alert("Product Created Successfully!");
         setFormData(initialFormState);
         setShowForm(false);
-        fetchProducts();
+        fetchAllData(); // Refresh list
       } else {
         alert(data.message || "Failed to create product");
       }
@@ -136,7 +143,6 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      {/* --- CREATE FORM --- */}
       {showForm && (
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 mb-10 animate-in fade-in slide-in-from-top-4">
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -159,14 +165,39 @@ export default function AdminProducts() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Base Price ($)</label>
                         <input type="number" className="w-full border p-2.5 rounded-lg" placeholder="0.00" value={formData.base_price} onChange={e => setFormData({...formData, base_price: e.target.value})} required />
                     </div>
+                    
+                    {/* --- CATEGORY DROPDOWN --- */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Category ID</label>
-                        <input type="number" className="w-full border p-2.5 rounded-lg" placeholder="e.g. 1" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} required />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select 
+                            className="w-full border p-2.5 rounded-lg bg-white" 
+                            value={formData.category_id} 
+                            onChange={e => setFormData({...formData, category_id: e.target.value})} 
+                            required
+                        >
+                            <option value="">Select Category...</option>
+                            {categories.map(c => (
+                                <option key={c.category_id} value={c.category_id}>{c.category_name}</option>
+                            ))}
+                        </select>
                     </div>
+
+                    {/* --- TAG DROPDOWN --- */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tag ID</label>
-                        <input type="number" className="w-full border p-2.5 rounded-lg" placeholder="e.g. 1" value={formData.tag_id} onChange={e => setFormData({...formData, tag_id: e.target.value})} required />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+                        <select 
+                            className="w-full border p-2.5 rounded-lg bg-white" 
+                            value={formData.tag_id} 
+                            onChange={e => setFormData({...formData, tag_id: e.target.value})} 
+                            required
+                        >
+                            <option value="">Select Tag...</option>
+                            {tags.map(t => (
+                                <option key={t.tag_id} value={t.tag_id}>{t.tag_name}</option>
+                            ))}
+                        </select>
                     </div>
+
                     <div className="col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea className="w-full border p-2.5 rounded-lg h-24" placeholder="Product details..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
@@ -175,7 +206,6 @@ export default function AdminProducts() {
             </div>
 
             <hr className="border-gray-100" />
-
             {/* Section 2: Media */}
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -184,16 +214,12 @@ export default function AdminProducts() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Primary Image URL</label>
                 <input className="w-full border p-2.5 rounded-lg" placeholder="https://..." value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} required />
             </div>
-
             <hr className="border-gray-100" />
-
             {/* Section 3: Variants */}
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Layers size={20} className="text-orange-600" /> Variants
                 </h3>
-                
-                {/* Variant List */}
                 {formData.variants.length > 0 && (
                     <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <table className="w-full text-sm text-left">
@@ -224,8 +250,6 @@ export default function AdminProducts() {
                         </table>
                     </div>
                 )}
-
-                {/* Add Variant Form */}
                 <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
                     <div>
                         <label className="text-xs font-bold text-gray-500">Size</label>
@@ -257,7 +281,6 @@ export default function AdminProducts() {
                 </div>
             </div>
 
-            {/* Submit */}
             <button 
                 type="submit" 
                 disabled={submitting}
@@ -292,9 +315,14 @@ export default function AdminProducts() {
               
               <div className="mt-3 flex justify-between items-end">
                   <p className="font-bold text-lg text-gray-900">${p.base_price}</p>
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                      {p.ProductVariant?.length || 0} Variants
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded border">
+                          {p.category?.category_name || 'No Category'}
+                      </span>
+                      <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                          {p.tag?.tag_name || 'No Tag'}
+                      </span>
+                  </div>
               </div>
             </div>
           </div>
