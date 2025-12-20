@@ -23,16 +23,20 @@ export default function ChatWidget() {
     if (!input.trim()) return;
 
     const userMsg = input.trim();
+    const userId = localStorage.getItem("userId");
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg }),
-      });
+    const res = await fetch("http://localhost:5000/api/chat/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+          message: userMsg,
+          userId: userId ? Number(userId) : null // <--- SEND THIS
+      }),
+    });
       const data = await res.json();
       
       setMessages(prev => [...prev, { role: "bot", text: data.response }]);

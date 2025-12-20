@@ -6,5 +6,5 @@ export class ChatMessageDto {
 
   @IsOptional()
   @IsInt()
-  userId?: number; // Optional: To look up specific user orders later if needed
+  userId?: number; // <--- This allows the User Context
 }

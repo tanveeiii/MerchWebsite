@@ -10,7 +10,6 @@ export class ChatService {
 
   constructor(private prisma: PrismaService) {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    // Using the auto-updating alias for best free model access
     this.model = this.genAI.getGenerativeModel({ model: "gemini-flash-latest" });
   }
 
@@ -18,97 +17,112 @@ export class ChatService {
     try {
       const userQuery = dto.message.toLowerCase();
 
-      // --- STEP 1: FETCH DATA (Products & Categories) ---
-      const [allProducts, categories] = await Promise.all([
-        this.prisma.product.findMany({
-          where: { is_active: true },
-          include: { 
-            ProductVariant: true,
-            category: true // Include Category Name
-          }
-        }),
-        this.prisma.category.findMany()
-      ]);
+      // --- 1. FETCH GLOBAL DATA (Products) ---
+      const allProducts = await this.prisma.product.findMany({
+        where: { is_active: true },
+        include: { ProductVariant: true, category: true }
+      });
 
-      // --- STEP 2: BUILD "BROAD" KNOWLEDGE (Store Overview) ---
-      const categoryList = categories.map(c => c.category_name).join(', ');
+      // --- 2. FETCH PERSONAL DATA (If User is Logged In) ---
+      let userContextString = "The user is currently a GUEST (not logged in).";
       
-      const staticInfo = `
-        You are the intelligent support assistant for "TeeCustoms".
-        
-        **Store Overview:**
-        - We sell: ${categoryList}.
-        - Policies: Returns within 30 days. Free shipping over $50.
-        - Support: support@teecustoms.com
-      `;
+      if (dto.userId) {
+        // A. Get Basic Info
+        const user = await this.prisma.user.findUnique({
+            where: { user_id: dto.userId },
+            select: { first_name: true }
+        });
 
-      // --- STEP 3: FIND RELEVANT PRODUCTS (Smart Search) ---
-      // We explicitly look for matches in Name, Description, Category, OR Color
+        // B. Get Recent Orders (Last 3)
+        const orders = await this.prisma.order.findMany({
+            where: { user_id: dto.userId },
+            orderBy: { created_at: 'desc' },
+            take: 3,
+            include: { OrderItem: { include: { product: true } } }
+        });
+
+        // C. Get Cart
+        const cart = await this.prisma.cart.findMany({
+            where: { user_id: dto.userId },
+            include: { product: true }
+        });
+
+        // Format Order History
+        const orderSummary = orders.map(o => 
+            `- Order #${o.order_number} (${o.order_status}): ${o.OrderItem.map(i => i.product.product_name).join(", ")}`
+        ).join("\n");
+
+        // Format Cart
+        const cartSummary = cart.map(c => c.product.product_name).join(", ");
+
+        userContextString = `
+        User Name: ${user?.first_name || 'Customer'}
+        
+        **Recent Orders:**
+        ${orderSummary || "No recent orders."}
+        
+        **Current Cart Items:**
+        ${cartSummary || "Cart is empty."}
+        `;
+      }
+
+      // --- 3. FILTER RELEVANT PRODUCTS (Same as before) ---
       let relevantProducts = allProducts.filter(p => {
         const q = userQuery;
         return (
           p.product_name.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
           p.category?.category_name.toLowerCase().includes(q) ||
-          p.ProductVariant.some(v => v.color.toLowerCase().includes(q)) // Search by color too
+          p.ProductVariant.some(v => v.color.toLowerCase().includes(q))
         );
       });
 
-      // Fallback: If query is very generic (e.g., "what do you have?", "show me items"), show top 5 items
-      if (relevantProducts.length === 0 && (userQuery.includes('have') || userQuery.includes('sell') || userQuery.includes('product') || userQuery.includes('show'))) {
+      if (relevantProducts.length === 0 && (userQuery.includes('have') || userQuery.includes('show'))) {
         relevantProducts = allProducts.slice(0, 5);
       } else {
-        relevantProducts = relevantProducts.slice(0, 5); // Limit to top 5 specific matches
+        relevantProducts = relevantProducts.slice(0, 5);
       }
 
-      // --- STEP 4: FORMAT PRODUCT DETAILS (The "Accuracy" Part) ---
       const productContext = relevantProducts.map(p => {
-        // Group variants to be readable: "Red (S, M), Blue (L)"
         const stockSummary = p.ProductVariant.map(v => 
-          `${v.color} [${v.size}]: ${v.stock_quantity > 0 ? v.stock_quantity + ' left' : 'OUT OF STOCK'}`
+          `${v.color} [${v.size}]: ${v.stock_quantity > 0 ? v.stock_quantity + ' left' : 'OUT'}`
         ).join(', ');
-
-        return `
-        ---
-        ID: ${p.product_id}
-        Name: ${p.product_name}
-        Category: ${p.category?.category_name}
-        Price: $${p.base_price}
-        Description: ${p.description}
-        Inventory Details: ${stockSummary}
-        ---`;
+        return `ID: ${p.product_id} | ${p.product_name} ($${p.base_price}) | Stock: ${stockSummary}`;
       }).join('\n');
 
-      // --- STEP 5: CONSTRUCT PROMPT ---
+      // --- 4. CONSTRUCT THE SUPER PROMPT ---
       const prompt = `
-        System Instructions: ${staticInfo}
+        You are the AI Assistant for "TeeCustoms". Be friendly and concise.
 
-        Here is the detailed inventory data based on the user's search:
-        ${productContext || "No specific products found match this query."}
+        **USER CONTEXT (Very Important):**
+        ${userContextString}
 
-        User Question: "${dto.message}"
+        **STORE INVENTORY (Relevant Matches):**
+        ${productContext || "No specific products found for this query."}
 
-        Response Guidelines:
-        1. Be precise. If the user asks for "Red Hoodie", look at the Inventory Details for that item.
-        2. If a specific size/color is marked "OUT OF STOCK", explicitly tell the user.
-        3. If the user asks generally ("What hoodies do you have?"), list the names and prices of the matching items found above.
-        4. Keep it friendly and concise.
+        **STORE POLICIES:**
+        - Returns: 30 days.
+        - Shipping: Free over $50.
+
+        **USER QUESTION:** "${dto.message}"
+
+        **INSTRUCTIONS:**
+        1. If the user asks "Where is my order?", look at the **Recent Orders** section above.
+        2. If the user asks "What's in my cart?", look at **Current Cart Items**.
+        3. If the user says "Hi", greet them by their Name if available.
+        4. If asking about products, use the Inventory Data.
       `;
 
-      // --- STEP 6: CALL AI ---
+      // --- 5. CALL AI ---
       const result = await this.model.generateContent(prompt);
-      const response = await result.response;
       return { 
-        response: response.text(),
+        response: result.response.text(),
         timestamp: new Date()
       };
 
     } catch (e) {
       console.error("Chat Error:", e);
-      return { 
-        response: "I'm checking the inventory but hit a snag. Please ask again in a moment!",
-        error: true 
-      };
+      return { response: "I'm having a little trouble thinking right now. Try again!", error: true };
     }
   }
 }
