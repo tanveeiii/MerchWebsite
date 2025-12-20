@@ -6,12 +6,19 @@ import { CreateInventoryLogDto } from './inventory_log.dto';
 export class InventoryLogController {
   constructor(private readonly inventoryLogService: InventoryLogService) {}
 
+  // Standard Create (Internal use)
   @Post('create')
   async create(@Body() dto: CreateInventoryLogDto) {
     return this.inventoryLogService.create(dto);
   }
 
-  // --- ADMIN: Fetch All Logs ---
+  // --- NEW: Manual Stock Adjustment Endpoint ---
+  @Post('adjust')
+  async adjustStock(@Body() dto: CreateInventoryLogDto) {
+    return this.inventoryLogService.adjustStock(dto);
+  }
+
+  // Admin List
   @Get('admin/all')
   async findAll() {
     return this.inventoryLogService.findAll();
