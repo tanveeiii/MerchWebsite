@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { CreateComplaintDto } from './complaint.dto';
+import { CreateComplaintDto, ResolveComplaintDto } from './complaint.dto';
 
 @Injectable()
 export class ComplaintService {
@@ -16,32 +16,45 @@ export class ComplaintService {
         message: 'User does not exist',
       });
     const now = new Date();
-    const cart = await this.prisma.complaint.create({
+    const complaint = await this.prisma.complaint.create({
       data: {
         sender_id: user.user_id,
         sender_type: createComplaintDto.sender_type,
         message: createComplaintDto.message,
         attachment_url: createComplaintDto.attachment_url || '',
+        status: 'OPEN', // Default status
         created_at: now,
-      },
-      select: {
-        sender_id: true,
-        sender_type: true,
-        message: true,
-        attachment_url: true,
       },
     });
 
-    return cart;
+    return complaint;
   }
 
-  // --- ADMIN: Get All Complaints (New) ---
+  // --- ADMIN: Get All Complaints ---
   async findAll() {
     return await this.prisma.complaint.findMany({
       include:{
         user: { select: { first_name: true, last_name: true, email: true } }
       },
       orderBy: { created_at: 'desc' }
+    });
+  }
+
+  // --- ADMIN: Resolve Complaint (NEW) ---
+  async resolve(id: number, dto: ResolveComplaintDto) {
+    const complaint = await this.prisma.complaint.findUnique({
+      where: { message_id: id }
+    });
+
+    if (!complaint) throw new NotFoundException("Complaint ID not found");
+
+    return await this.prisma.complaint.update({
+      where: { message_id: id },
+      data: {
+        admin_reply: dto.admin_reply,
+        status: dto.status,
+        resolved_at: new Date()
+      }
     });
   }
 }
