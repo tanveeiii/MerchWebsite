@@ -2,6 +2,7 @@
 import { ConfigurableModuleBuilder, Module } from '@nestjs/common';
 import { PrismaModule } from './prisma.module';
 import { UserModule } from './user/user.module';
+import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
@@ -37,6 +38,7 @@ import { RazorpayModule } from './razorpay/razorpay.module';
     AnalyticsModule,
     AuthModule,
     CartModule,
+    ChatModule,
     CategoryModule,
     ComplaintModule,
     CouponModule,
