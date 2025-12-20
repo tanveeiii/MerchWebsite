@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Tag, Edit2, Check, X } from 'lucide-react';
+import { Tag, Edit2, Check, X, Trash2 } from 'lucide-react';
 
 const TagManager = () => {
     const [tags, setTags] = useState([]);
     const [tagName, setTagName] = useState("");
     const [loading, setLoading] = useState(false);
-    const [editingId, setEditingId] = useState(null); // Track ID if editing
+    const [editingId, setEditingId] = useState(null);
 
     const fetchTags = async () => {
         try {
@@ -26,6 +26,25 @@ const TagManager = () => {
     const handleCancel = () => {
         setEditingId(null);
         setTagName("");
+    };
+
+    const handleDelete = async (id, e) => {
+        // Prevent triggering edit click if delete button is clicked inside the tag chip
+        if (e) e.stopPropagation(); 
+        
+        if (!confirm("Are you sure you want to delete this tag?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/tag/delete/${id}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                if (editingId === id) handleCancel();
+                fetchTags();
+            } else {
+                alert("Failed to delete tag. It might be used by products.");
+            }
+        } catch (e) { alert("Error deleting tag"); }
     };
 
     const handleSubmit = async (e) => {
@@ -69,9 +88,19 @@ const TagManager = () => {
                 />
                 
                 {editingId && (
-                    <button type="button" onClick={handleCancel} className="bg-gray-200 text-gray-700 px-3 rounded-lg hover:bg-gray-300">
-                        <X size={20} />
-                    </button>
+                    <>
+                        <button 
+                            type="button" 
+                            onClick={(e) => handleDelete(editingId, e)}
+                            className="bg-red-50 text-red-600 px-3 rounded-lg hover:bg-red-100 border border-red-200"
+                            title="Delete Tag"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                        <button type="button" onClick={handleCancel} className="bg-gray-200 text-gray-700 px-3 rounded-lg hover:bg-gray-300">
+                            <X size={20} />
+                        </button>
+                    </>
                 )}
                 
                 <button 
@@ -85,15 +114,25 @@ const TagManager = () => {
 
             <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                    <button 
+                    <div 
                         key={tag.tag_id} 
                         onClick={() => handleEditClick(tag)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors flex items-center gap-2 ${editingId === tag.tag_id ? 'bg-blue-50 border-blue-300 text-blue-700 ring-1 ring-blue-300' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                        className={`group px-3 py-1 rounded-full text-sm font-medium border transition-colors flex items-center gap-2 cursor-pointer ${editingId === tag.tag_id ? 'bg-blue-50 border-blue-300 text-blue-700 ring-1 ring-blue-300' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                         title="Click to Edit"
                     >
                         {tag.tag_name}
-                        {editingId !== tag.tag_id && <Edit2 size={10} className="opacity-30" />}
-                    </button>
+                        {/* Hover Icons */}
+                        <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100">
+                            {editingId !== tag.tag_id && <Edit2 size={10} />}
+                            <button 
+                                onClick={(e) => handleDelete(tag.tag_id, e)}
+                                className="hover:text-red-600 p-0.5 rounded-full hover:bg-red-100 transition-colors"
+                                title="Delete"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    </div>
                 ))}
                 {tags.length === 0 && <p className="text-gray-500 text-sm">No tags found.</p>}
             </div>

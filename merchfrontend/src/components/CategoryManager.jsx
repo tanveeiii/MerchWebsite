@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FolderPlus, Loader2, Image as ImageIcon, Edit2, X } from 'lucide-react';
+import { FolderPlus, Loader2, Image as ImageIcon, Edit2, X, Trash2 } from 'lucide-react';
 
 const CategoryManager = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [editingId, setEditingId] = useState(null); // Track ID if editing
+    const [editingId, setEditingId] = useState(null);
 
     const [formData, setFormData] = useState({
         category_name: "",
@@ -43,6 +43,29 @@ const CategoryManager = () => {
         setFormData({ category_name: "", description: "", image_url: "" });
     };
 
+    // --- Delete Function ---
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this category?")) return;
+        
+        try {
+            const res = await fetch(`http://localhost:5000/api/category/delete/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (res.ok) {
+                // If editing the one we just deleted, cancel edit mode
+                if (editingId === id) handleCancelEdit();
+                fetchCategories();
+                alert("Category deleted successfully.");
+            } else {
+                alert("Failed to delete. It might contain products.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error deleting category");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -56,7 +79,6 @@ const CategoryManager = () => {
         const payload = { 
             ...formData, 
             is_active: true,
-            // If editing, add the ID
             ...(editingId && { category_id: editingId }) 
         };
 
@@ -69,7 +91,7 @@ const CategoryManager = () => {
             
             if (res.ok) {
                 alert(editingId ? "Category Updated!" : "Category Created!");
-                handleCancelEdit(); // Reset form
+                handleCancelEdit();
                 fetchCategories();
             } else {
                 alert("Failed to save category");
@@ -95,7 +117,7 @@ const CategoryManager = () => {
                 )}
             </div>
             
-            {/* Form */}
+            {/* Create/Edit Form */}
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 border-b pb-10">
                 <div className="space-y-4">
                     <div>
@@ -142,19 +164,29 @@ const CategoryManager = () => {
                 </div>
             </form>
 
-            {/* List */}
+            {/* Category List */}
             <h3 className="text-lg font-bold mb-4">Existing Categories</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {categories.map((cat) => (
-                    <div key={cat.category_id} className="border rounded-lg overflow-hidden flex flex-col group relative">
-                        {/* Edit Button Overlay */}
-                        <button 
-                            onClick={() => handleEditClick(cat)}
-                            className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-800"
-                            title="Edit Category"
-                        >
-                            <Edit2 size={16} />
-                        </button>
+                    <div key={cat.category_id} className="border rounded-lg overflow-hidden flex flex-col group relative bg-white hover:shadow-md transition-shadow">
+                        
+                        {/* --- FIXED: Actions are now always visible --- */}
+                        <div className="absolute top-2 right-2 flex gap-2 z-10">
+                            <button 
+                                onClick={() => handleEditClick(cat)}
+                                className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm text-blue-600 hover:text-blue-800 border border-gray-100 hover:bg-blue-50 transition-colors"
+                                title="Edit"
+                            >
+                                <Edit2 size={16} />
+                            </button>
+                            <button 
+                                onClick={() => handleDelete(cat.category_id)}
+                                className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm text-red-500 hover:text-red-700 border border-gray-100 hover:bg-red-50 transition-colors"
+                                title="Delete"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
 
                         <div className="h-32 bg-gray-100 overflow-hidden relative">
                             {cat.image_url ? (

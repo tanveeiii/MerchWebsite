@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateCategoryDto } from './category.dto';
@@ -27,7 +28,7 @@ export class CategoryService {
         category_name: category_name,
         slug: slug,
         description: description,
-        is_active: Boolean(is_active ?? true), // Default to true if undefined
+        is_active: Boolean(is_active ?? true),
         image_url: image_url,
         created_at: new Date(),
         updated_at: new Date(),
@@ -79,10 +80,31 @@ export class CategoryService {
     return category;
   }
 
-  // 3. NEW: FETCH ALL CATEGORIES
+  // 3. FETCH ALL CATEGORIES
   async findAll() {
     return await this.prisma.category.findMany({
         orderBy: { category_name: 'asc' }
     });
+  }
+
+  // 4. DELETE CATEGORY
+  async delete(id: number) {
+    const category = await this.prisma.category.findUnique({
+      where: { category_id: id },
+    });
+
+    if (!category) throw new NotFoundException('Category not found');
+
+    try {
+      await this.prisma.category.delete({
+        where: { category_id: id },
+      });
+      return { code: 200, message: 'Category deleted successfully' };
+    } catch (e) {
+      // Handle Foreign Key constraint (if products exist in this category)
+      throw new InternalServerErrorException(
+        'Cannot delete category. It might contain products.',
+      );
+    }
   }
 }
