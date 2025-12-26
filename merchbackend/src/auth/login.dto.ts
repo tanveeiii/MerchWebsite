@@ -1,4 +1,4 @@
-import { IsOptional } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional } from 'class-validator';
 import {
   IsEmail,
   IsNotEmpty,
@@ -44,6 +44,8 @@ export class resetRequestDto{
 }
 
 export class resetDto {
-  @IsString() token: string;
+  @IsString() @IsOptional() token: string;
   @IsString() newPassword: string;
+  @IsBoolean() isLoggedIn: boolean;
+  @IsInt() @IsOptional() user_id: number;
 }

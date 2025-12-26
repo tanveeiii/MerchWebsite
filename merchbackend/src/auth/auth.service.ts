@@ -196,30 +196,37 @@ export class AuthService {
   async resetPassword(dto: resetDto) {
     const token = dto.token
     const newPassword = dto.newPassword
-    console.log("Token: ", token)
-    const user = await this.prisma.user.findFirst({
-      where: { reset_token: token },
-    });
+    const isLoggedIn = dto.isLoggedIn
+    let user_id: number;
+    if (!isLoggedIn) {
+      console.log("Token: ", token)
+      const user = await this.prisma.user.findFirst({
+        where: { reset_token: token },
+      });
 
-    if (!user)
-      throw new BadRequestException({ code: 400, message: 'Invalid token' });
-    console.log(user)
-    if (!user.reset_token_expiry) {
-      throw new BadRequestException({ code: 400, message: "Token expired go to reset email" });
+      if (!user)
+        throw new BadRequestException({ code: 400, message: 'Invalid token' });
+      console.log(user)
+      if (!user.reset_token_expiry) {
+        throw new BadRequestException({ code: 400, message: "Token expired go to reset email" });
+      }
+
+      const expiry = new Date(user.reset_token_expiry).getTime();
+      const now = Date.now();
+      
+      if (now > expiry) {
+        throw new BadRequestException({ code: 400, message: "Token expired" });
+      }
+      user_id = user.user_id
     }
+    else {
 
-    const expiry = new Date(user.reset_token_expiry).getTime();
-    const now = Date.now();
-
-    if (now > expiry) {
-      throw new BadRequestException({ code: 400, message: "Token expired" });
+      user_id = dto.user_id
     }
-
-
     const hashed = await bcrypt.hash(newPassword, 10);
 
     await this.prisma.user.update({
-      where: { user_id: user.user_id },
+      where: { user_id: user_id },
       data: {
         password: hashed,
         reset_token: null,
@@ -229,6 +236,7 @@ export class AuthService {
     });
 
     return { code: 200, message: 'Password reset successfully' };
+
   }
 
 }

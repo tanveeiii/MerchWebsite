@@ -39,17 +39,17 @@ export class RazorpayService {
         //     headers: {'Content-Type': 'application/json'},
         //     body: JSON.stringify({
         //         order_number:
-        //         shipping_address:
-        //         subtotal:
-        //         tax_amount:
+        //         shipping_address: 
+        //         subtotal: data.amount
+        //         tax_amount: data.aamount
         //         shipping_cost:
         //         discount_amount:
-        //         total_amount:
-        //         payment_type:
-        //         order_status:
-        //         user_id:
-        //         razorpay_order_id:
-        //         razorpay_payment_id:
+        //         total_amount: data.amount
+        //         payment_type: "Razorpay",
+        //         order_status: "Delivery Pending",
+        //         user_id: data.userId,
+        //         razorpay_order_id: data.razorpay_order_id,
+        //         razorpay_payment_id: data.razorpay_payment_id
         //     })
         // }
         // )
