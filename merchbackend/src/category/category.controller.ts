@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Delete, Param, ParseIntPipe } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './category.dto';
 
@@ -16,9 +16,13 @@ export class CategoryController {
     return this.categoryService.update(dto);
   }
 
-  // --- NEW Endpoint ---
   @Get('fetch')
   async findAll() {
     return this.categoryService.findAll();
+  }
+
+  @Delete('delete/:id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.categoryService.delete(id);
   }
 }

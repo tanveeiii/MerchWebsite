@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateTagDto } from './tag.dto';
@@ -22,7 +23,6 @@ export class TagService {
     
     const slug = slugify(tag_name, { lower: true, strict: true });
     
-    // Added 'await' here
     const tag = await this.prisma.tag.create({
       data: {
         tag_name: tag_name,
@@ -43,7 +43,7 @@ export class TagService {
     const { tag_id, tag_name } = dto;
     const tag_int = Number(tag_id);
     
-    const existingTag = await this.prisma.tag.findUnique({ // Changed findFirst to findUnique for ID
+    const existingTag = await this.prisma.tag.findUnique({
       where: { tag_id: tag_int },
     });
 
@@ -62,10 +62,30 @@ export class TagService {
     return tag;
   }
 
-  // 3. NEW: FETCH ALL TAGS (Required for frontend integration)
+  // 3. FETCH ALL TAGS
   async findAll() {
     return await this.prisma.tag.findMany({
         orderBy: { tag_name: 'asc' }
     });
+  }
+
+  // 4. DELETE TAG
+  async delete(id: number) {
+    const tag = await this.prisma.tag.findUnique({
+      where: { tag_id: id },
+    });
+
+    if (!tag) throw new NotFoundException('Tag not found');
+
+    try {
+      await this.prisma.tag.delete({
+        where: { tag_id: id },
+      });
+      return { code: 200, message: 'Tag deleted successfully' };
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Cannot delete tag. It might be used by products.',
+      );
+    }
   }
 }

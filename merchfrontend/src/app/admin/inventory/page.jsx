@@ -1,33 +1,122 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Loader2, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, ClipboardList, Plus, X } from "lucide-react";
 
 export default function AdminInventory() {
   const [logs, setLogs] = useState([]);
+  const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true);
+  
+  // Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    product_id: "",
+    product_variant_id: "",
+    action_type: "RESTOCK",
+    quantity_change: ""
+  });
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/inventory_log/admin/all");
-        const json = await res.json();
-        if (Array.isArray(json)) setLogs(json);
-      } catch (error) {
-        console.error("Failed to fetch inventory logs:", error);
-      } finally {
-        setLoading(false);
+  // Derived State
+  // We strictly convert to Number() to ensure type matching (String "1" vs Number 1)
+  const selectedProduct = products.find(p => p.product_id === Number(formData.product_id));
+
+  // Fetch Logs & Products
+  const fetchData = async () => {
+    try {
+      const [logsRes, prodRes] = await Promise.all([
+        fetch("http://localhost:5000/api/inventory_log/admin/all"),
+        fetch("http://localhost:5000/api/product/fetch")
+      ]);
+      
+      const logsData = await logsRes.json();
+      const prodData = await prodRes.json();
+
+      console.log("Inventory API Response:", { logsData, prodData }); // DEBUGGING
+
+      // Robust handling: Check if it's an array OR an object with a .data array
+      if (Array.isArray(logsData)) {
+        setLogs(logsData);
+      } else if (logsData.data && Array.isArray(logsData.data)) {
+        setLogs(logsData.data);
       }
-    };
-    fetchLogs();
-  }, []);
+
+      if (Array.isArray(prodData)) {
+        setProducts(prodData);
+      } else if (prodData.data && Array.isArray(prodData.data)) {
+        setProducts(prodData.data);
+      }
+
+    } catch (error) {
+      console.error("Failed to fetch inventory data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  // Handle Submit
+  const handleAdjust = async (e) => {
+    e.preventDefault();
+    if(!formData.product_id || !formData.product_variant_id) {
+        return alert("Please select a product and variant.");
+    }
+    
+    setSubmitting(true);
+
+    try {
+        // Determine sign based on action (Restock/Return = +, Damage/Correction = -)
+        let qty = Number(formData.quantity_change);
+        if (formData.action_type === 'DAMAGE' || formData.action_type === 'CORRECTION') {
+            qty = -Math.abs(qty); // Ensure negative
+        } else {
+            qty = Math.abs(qty);  // Ensure positive
+        }
+
+        const res = await fetch("http://localhost:5000/api/inventory_log/adjust", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                product_variant_id: Number(formData.product_variant_id),
+                action_type: formData.action_type,
+                quantity_change: qty,
+                quantity_after: 0 // Backend calculates this
+            })
+        });
+
+        if (res.ok) {
+            alert("Stock Adjusted Successfully!");
+            setShowModal(false);
+            setFormData({ product_id: "", product_variant_id: "", action_type: "RESTOCK", quantity_change: "" });
+            fetchData(); // Refresh logs
+        } else {
+            const err = await res.json();
+            alert(err.message || "Failed to adjust stock");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error occurred");
+    } finally {
+        setSubmitting(false);
+    }
+  };
 
   if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="w-full">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Inventory Logs</h1>
-        <p className="text-gray-500 mt-2">Track stock movements, restocks, and sales.</p>
+    <div className="w-full relative">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+            <h1 className="text-3xl font-bold text-gray-900">Inventory Logs</h1>
+            <p className="text-gray-500 mt-2">Track stock movements, restocks, and sales.</p>
+        </div>
+        <button 
+            onClick={() => setShowModal(true)}
+            className="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition shadow-sm"
+        >
+            <Plus size={20}/> Adjust Stock
+        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -59,7 +148,7 @@ export default function AdminInventory() {
                   <span className={`px-2 py-1 rounded text-xs font-bold border ${
                     log.action_type === 'RESTOCK' ? 'bg-green-50 text-green-700 border-green-200' :
                     log.action_type === 'ORDER' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                    'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    'bg-red-50 text-red-700 border-red-200'
                   }`}>
                     {log.action_type}
                   </span>
@@ -83,6 +172,100 @@ export default function AdminInventory() {
           </tbody>
         </table>
       </div>
+
+      {/* --- ADJUST STOCK MODAL --- */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                        <ClipboardList size={20} className="text-blue-600"/> Adjust Stock
+                    </h3>
+                    <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+                </div>
+                
+                <form onSubmit={handleAdjust} className="p-6 space-y-4">
+                    {/* 1. Select Product */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Product</label>
+                        <select 
+                            className="w-full border p-2 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                            value={formData.product_id}
+                            onChange={(e) => setFormData({...formData, product_id: e.target.value, product_variant_id: ""})}
+                            required
+                        >
+                            <option value="">
+                                {products.length === 0 ? "No Products Found (Create One First)" : "-- Choose Product --"}
+                            </option>
+                            {products.map(p => (
+                                <option key={p.product_id} value={p.product_id}>{p.product_name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* 2. Select Variant */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Variant</label>
+                        <select 
+                            className="w-full border p-2 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            value={formData.product_variant_id}
+                            onChange={(e) => setFormData({...formData, product_variant_id: e.target.value})}
+                            required
+                            disabled={!formData.product_id}
+                        >
+                            <option value="">
+                                {selectedProduct ? "-- Choose Variant --" : "Select a product first"}
+                            </option>
+                            {selectedProduct?.ProductVariant?.map(v => (
+                                <option key={v.product_variant_id} value={v.product_variant_id}>
+                                    {v.size} / {v.color} (Current: {v.stock_quantity})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* 3. Action Type */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                            <select 
+                                className="w-full border p-2 rounded-lg bg-white"
+                                value={formData.action_type}
+                                onChange={(e) => setFormData({...formData, action_type: e.target.value})}
+                            >
+                                <option value="RESTOCK">Restock (+)</option>
+                                <option value="DAMAGE">Damaged (-)</option>
+                                <option value="CORRECTION">Correction (-)</option>
+                                <option value="RETURN">Return (+)</option>
+                            </select>
+                        </div>
+
+                        {/* 4. Quantity */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                            <input 
+                                type="number" 
+                                min="1"
+                                className="w-full border p-2 rounded-lg"
+                                placeholder="10"
+                                value={formData.quantity_change}
+                                onChange={(e) => setFormData({...formData, quantity_change: e.target.value})}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        disabled={submitting}
+                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition flex justify-center items-center gap-2 mt-2"
+                    >
+                        {submitting ? <Loader2 className="animate-spin" /> : "Update Stock"}
+                    </button>
+                </form>
+            </div>
+        </div>
+      )}
     </div>
   );
 }

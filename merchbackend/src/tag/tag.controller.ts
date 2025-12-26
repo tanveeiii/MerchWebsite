@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Delete, Param, ParseIntPipe } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './tag.dto';
 
@@ -16,9 +16,13 @@ export class TagController {
     return this.tagService.update(dto);
   }
 
-  // --- NEW Endpoint ---
   @Get('fetch')
   async findAll() {
     return this.tagService.findAll();
+  }
+
+  @Delete('delete/:id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.tagService.delete(id);
   }
 }

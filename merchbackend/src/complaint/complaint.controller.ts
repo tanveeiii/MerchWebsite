@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
-import { CreateComplaintDto } from './complaint.dto';
+import { CreateComplaintDto, ResolveComplaintDto } from './complaint.dto';
 
 @Controller('complaint')
 export class ComplaintController {
@@ -15,5 +15,14 @@ export class ComplaintController {
   @Get('admin/all')
   async findAll() {
     return this.complaintService.findAll();
+  }
+
+  // --- ADMIN: Resolve Complaint (NEW) ---
+  @Patch('resolve/:id')
+  async resolve(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() dto: ResolveComplaintDto
+  ) {
+    return this.complaintService.resolve(id, dto);
   }
 }
