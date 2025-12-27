@@ -35,24 +35,25 @@ export class RazorpayService {
             }
             // throw new Error('Payment verification failed');
         }
-        // const order = await fetch("http://localhost:5000/api/order/create",{
-        //     headers: {'Content-Type': 'application/json'},
-        //     body: JSON.stringify({
-        //         order_number:
-        //         shipping_address: 
-        //         subtotal: data.amount
-        //         tax_amount: data.aamount
-        //         shipping_cost:
-        //         discount_amount:
-        //         total_amount: data.amount
-        //         payment_type: "Razorpay",
-        //         order_status: "Delivery Pending",
-        //         user_id: data.userId,
-        //         razorpay_order_id: data.razorpay_order_id,
-        //         razorpay_payment_id: data.razorpay_payment_id
-        //     })
-        // }
-        // )
+        const order = await fetch("http://localhost:5000/api/order/create",{
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                order_number: "11001",  
+                shipping_address: 0,
+                subtotal: data.amount,
+                tax_amount: data.aamount,
+                shipping_cost: 0,
+                discount_amount: 0,
+                total_amount: data.amount,
+                payment_type: "Razorpay",
+                order_status: "Delivery Pending",
+                user_id: data.userId,
+                razorpay_order_id: data.razorpay_order_id,
+                razorpay_payment_id: data.razorpay_payment_id
+            })
+        }
+        )
+        console.log("order", order)
 
         return {
             success: true,
