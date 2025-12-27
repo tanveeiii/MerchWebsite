@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Package, Image as ImageIcon, Layers, Save, Loader2 } from "lucide-react";
+import { Plus, Trash2, Package, Image as ImageIcon, Layers, Save, Loader2, Star, CheckCircle } from "lucide-react";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -8,29 +8,34 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // --- NEW: Store fetched Categories & Tags ---
+  // --- Data for Dropdowns ---
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
 
+  // --- Form State ---
   const initialFormState = {
     product_name: "",
     description: "",
     base_price: "",
     sku: "",
-    category_id: "", // Will be selected via Dropdown
-    tag_id: "",      // Will be selected via Dropdown
-    image_url: "", 
+    category_id: "",
+    tag_id: "",
+    
+    // IMAGE STATE: Array of objects
+    images: [{ url: "", is_primary: true }], 
+    
     variants: [] 
   };
 
   const [formData, setFormData] = useState(initialFormState);
   
+  // Temp variant state
   const [newVariant, setNewVariant] = useState({
     size: "M", color: "Black", material: "Cotton", sku: "", 
     price: "", stock_quantity: 10, weight: 0.5
   });
 
-  // --- 1. Fetch Data (Products, Categories, Tags) ---
+  // --- Fetch Data ---
   const fetchAllData = async () => {
     try {
       const [prodRes, catRes, tagRes] = await Promise.all([
@@ -53,7 +58,40 @@ export default function AdminProducts() {
 
   useEffect(() => { fetchAllData(); }, []);
 
-  // --- Helper Functions ---
+  // --- Image Handlers ---
+  const addImageSlot = () => {
+    setFormData({
+      ...formData,
+      images: [...formData.images, { url: "", is_primary: false }]
+    });
+  };
+
+  const removeImageSlot = (index) => {
+    if (formData.images.length === 1) return alert("You must have at least one image.");
+    const updated = formData.images.filter((_, i) => i !== index);
+    
+    // If we removed the primary image, make the first one primary
+    if (formData.images[index].is_primary && updated.length > 0) {
+        updated[0].is_primary = true;
+    }
+    setFormData({ ...formData, images: updated });
+  };
+
+  const updateImageUrl = (index, value) => {
+    const updated = [...formData.images];
+    updated[index].url = value;
+    setFormData({ ...formData, images: updated });
+  };
+
+  const setPrimaryImage = (index) => {
+    const updated = formData.images.map((img, i) => ({
+      ...img,
+      is_primary: i === index // Only the clicked one is true
+    }));
+    setFormData({ ...formData, images: updated });
+  };
+
+  // --- Variant Handlers ---
   const addVariant = (e) => {
     e.preventDefault();
     if (!newVariant.sku || !newVariant.price) return alert("SKU and Price are required for variants");
@@ -73,9 +111,12 @@ export default function AdminProducts() {
   // --- Submit Handler ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.category_id || !formData.tag_id) {
-        return alert("Please select a Category and a Tag");
-    }
+    if (!formData.category_id || !formData.tag_id) return alert("Please select a Category and a Tag");
+    
+    // Filter out empty image URLs
+    const validImages = formData.images.filter(img => img.url.trim() !== "");
+    if (validImages.length === 0) return alert("Please add at least one valid image URL");
+
     setSubmitting(true);
 
     try {
@@ -87,12 +128,15 @@ export default function AdminProducts() {
         category_id: Number(formData.category_id),
         tag_id: Number(formData.tag_id),
         is_active: true,
-        images: formData.image_url ? [{
-          image_url: formData.image_url,
+        
+        // Map images to Backend DTO structure
+        images: validImages.map((img, index) => ({
+          image_url: img.url,
           alt_text: formData.product_name,
-          display_order: 1,
-          is_primary: true
-        }] : [],
+          display_order: index + 1,
+          is_primary: img.is_primary
+        })),
+
         variants: formData.variants.map(v => ({
           ...v,
           stock_quantity: Number(v.stock_quantity),
@@ -114,7 +158,7 @@ export default function AdminProducts() {
         alert("Product Created Successfully!");
         setFormData(initialFormState);
         setShowForm(false);
-        fetchAllData(); // Refresh list
+        fetchAllData(); 
       } else {
         alert(data.message || "Failed to create product");
       }
@@ -166,35 +210,19 @@ export default function AdminProducts() {
                         <input type="number" className="w-full border p-2.5 rounded-lg" placeholder="0.00" value={formData.base_price} onChange={e => setFormData({...formData, base_price: e.target.value})} required />
                     </div>
                     
-                    {/* --- CATEGORY DROPDOWN --- */}
+                    {/* Categories & Tags */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                        <select 
-                            className="w-full border p-2.5 rounded-lg bg-white" 
-                            value={formData.category_id} 
-                            onChange={e => setFormData({...formData, category_id: e.target.value})} 
-                            required
-                        >
+                        <select className="w-full border p-2.5 rounded-lg bg-white" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} required>
                             <option value="">Select Category...</option>
-                            {categories.map(c => (
-                                <option key={c.category_id} value={c.category_id}>{c.category_name}</option>
-                            ))}
+                            {categories.map(c => <option key={c.category_id} value={c.category_id}>{c.category_name}</option>)}
                         </select>
                     </div>
-
-                    {/* --- TAG DROPDOWN --- */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Tag</label>
-                        <select 
-                            className="w-full border p-2.5 rounded-lg bg-white" 
-                            value={formData.tag_id} 
-                            onChange={e => setFormData({...formData, tag_id: e.target.value})} 
-                            required
-                        >
+                        <select className="w-full border p-2.5 rounded-lg bg-white" value={formData.tag_id} onChange={e => setFormData({...formData, tag_id: e.target.value})} required>
                             <option value="">Select Tag...</option>
-                            {tags.map(t => (
-                                <option key={t.tag_id} value={t.tag_id}>{t.tag_name}</option>
-                            ))}
+                            {tags.map(t => <option key={t.tag_id} value={t.tag_id}>{t.tag_name}</option>)}
                         </select>
                     </div>
 
@@ -206,15 +234,54 @@ export default function AdminProducts() {
             </div>
 
             <hr className="border-gray-100" />
-            {/* Section 2: Media */}
+
+            {/* Section 2: Product Images (Multiple) */}
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <ImageIcon size={20} className="text-purple-600" /> Media
+                    <ImageIcon size={20} className="text-purple-600" /> Product Images
                 </h3>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Primary Image URL</label>
-                <input className="w-full border p-2.5 rounded-lg" placeholder="https://..." value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} required />
+                <div className="space-y-3">
+                    {formData.images.map((img, index) => (
+                        <div key={index} className="flex gap-3 items-center">
+                            <div className="flex-1">
+                                <input 
+                                    className="w-full border p-2.5 rounded-lg" 
+                                    placeholder="Image URL (https://...)" 
+                                    value={img.url} 
+                                    onChange={e => updateImageUrl(index, e.target.value)} 
+                                    required 
+                                />
+                            </div>
+                            {/* Primary Toggle */}
+                            <button 
+                                type="button"
+                                onClick={() => setPrimaryImage(index)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${img.is_primary ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                                title="Set as Primary Cover Image"
+                            >
+                                {img.is_primary ? <CheckCircle size={18} /> : <Star size={18} />}
+                                <span className="text-xs font-bold">{img.is_primary ? 'Primary' : 'Set Primary'}</span>
+                            </button>
+                            
+                            {/* Remove Button */}
+                            <button 
+                                type="button" 
+                                onClick={() => removeImageSlot(index)} 
+                                className="p-2.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    ))}
+                    
+                    <button type="button" onClick={addImageSlot} className="text-sm text-blue-600 font-bold hover:underline flex items-center gap-1">
+                        <Plus size={16} /> Add Another Image
+                    </button>
+                </div>
             </div>
+
             <hr className="border-gray-100" />
+
             {/* Section 3: Variants */}
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -293,40 +360,50 @@ export default function AdminProducts() {
         </div>
       )}
 
-      {/* --- PRODUCT LIST --- */}
+      {/* --- PRODUCT LIST (Updated to show primary image) --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map(p => (
-          <div key={p.product_id} className="bg-white p-4 rounded-xl border flex gap-4 hover:shadow-md transition">
-            <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border">
-               <img 
-                 src={p.ProductImage?.[0]?.image_url || "https://readymadeui.com/images/product14.webp"} 
-                 className="w-full h-full object-cover" 
-                 alt={p.product_name}
-               />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-gray-900 line-clamp-1">{p.product_name}</h3>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${p.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {p.is_active ? 'ACTIVE' : 'DRAFT'}
-                  </span>
-              </div>
-              <p className="text-gray-500 text-xs mt-1">SKU: {p.sku}</p>
-              
-              <div className="mt-3 flex justify-between items-end">
-                  <p className="font-bold text-lg text-gray-900">${p.base_price}</p>
-                  <div className="flex flex-col items-end gap-1">
-                      <span className="text-[10px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded border">
-                          {p.category?.category_name || 'No Category'}
-                      </span>
-                      <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                          {p.tag?.tag_name || 'No Tag'}
+        {products.map(p => {
+          // Logic to find primary image, fallback to first image, fallback to placeholder
+          const coverImage = p.ProductImage?.find(img => img.is_primary)?.image_url 
+                             || p.ProductImage?.[0]?.image_url 
+                             || "https://readymadeui.com/images/product14.webp";
+          
+          return (
+            <div key={p.product_id} className="bg-white p-4 rounded-xl border flex gap-4 hover:shadow-md transition">
+                <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border relative">
+                   <img 
+                     src={coverImage} 
+                     className="w-full h-full object-cover" 
+                     alt={p.product_name}
+                   />
+                   {/* Badge for multiple images */}
+                   {p.ProductImage?.length > 1 && (
+                      <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Layers size={8} /> {p.ProductImage.length}
+                      </div>
+                   )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-gray-900 line-clamp-1">{p.product_name}</h3>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${p.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {p.is_active ? 'ACTIVE' : 'DRAFT'}
                       </span>
                   </div>
-              </div>
+                  <p className="text-gray-500 text-xs mt-1">SKU: {p.sku}</p>
+                  
+                  <div className="mt-3 flex justify-between items-end">
+                      <p className="font-bold text-lg text-gray-900">${p.base_price}</p>
+                      <div className="flex flex-col items-end gap-1">
+                          <span className="text-[10px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded border">
+                              {p.category?.category_name || 'No Category'}
+                          </span>
+                      </div>
+                  </div>
+                </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
