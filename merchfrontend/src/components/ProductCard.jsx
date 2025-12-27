@@ -7,14 +7,27 @@ const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingWish, setLoadingWish] = useState(false);
 
+  // --- LOGIC: Select the best image ---
+  // 1. Try to find the image marked 'is_primary'
+  // 2. Fallback to the first image in the array
+  // 3. Fallback to product.img (if using old data format)
+  // 4. Final Fallback to a placeholder
+  const displayImage = product.ProductImage?.find(img => img.is_primary)?.image_url 
+                       || product.ProductImage?.[0]?.image_url 
+                       || product.img 
+                       || "https://readymadeui.com/images/product14.webp";
+
+  const originalPrice = product.originalPrice; // Adjust if your backend sends this differently
+  const defaultVariantId = product.ProductVariant?.[0]?.product_variant_id; // Auto-select first variant
+
   // --- Handlers ---
   const handleAddToCart = async (e) => {
-    e.preventDefault(); // Prevent navigating to details page
+    e.preventDefault(); 
     e.stopPropagation();
 
     const userId = localStorage.getItem("userId");
     if (!userId) return alert("Please login to add to cart");
-    if (!product.defaultVariantId) return alert("Select size in details page");
+    if (!defaultVariantId) return alert("Select size in details page");
 
     setLoadingCart(true);
     try {
@@ -23,8 +36,8 @@ const ProductCard = ({ product }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: Number(userId),
-          product_id: product.id,
-          product_variant_id: product.defaultVariantId,
+          product_id: product.product_id || product.id, // Handle both ID formats
+          product_variant_id: defaultVariantId,
           quantity: 1
         }),
       });
@@ -52,8 +65,8 @@ const ProductCard = ({ product }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: Number(userId),
-          product_id: product.id,
-          product_variant_id: product.defaultVariantId || 0 // Handle edge case
+          product_id: product.product_id || product.id,
+          product_variant_id: defaultVariantId || 0
         }),
       });
       if (res.ok) alert("Added to Wishlist!");
@@ -71,13 +84,13 @@ const ProductCard = ({ product }) => {
       {/* Image Area */}
       <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
         <img
-          src={product.img}
-          alt={product.name}
+          src={displayImage}
+          alt={product.product_name || product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         
         {/* Sale Tag */}
-        {product.originalPrice && (
+        {originalPrice && (
           <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
             SALE
           </div>
@@ -102,7 +115,7 @@ const ProductCard = ({ product }) => {
             >
                 {loadingWish ? <Loader2 className="animate-spin" size={18}/> : <Heart size={18} />}
             </button>
-            <Link href={`/shop/product/${product.id}`} className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors">
+            <Link href={`/shop/product/${product.product_id || product.id}`} className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors">
                 <Eye size={18} />
             </Link>
           </div>
@@ -112,19 +125,19 @@ const ProductCard = ({ product }) => {
       {/* Product Details */}
       <div className="p-4 flex flex-col flex-1">
         <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 truncate" title={product.name}>
-            <Link href={`/shop/product/${product.id}`}>
-                {product.name}
+            <h3 className="text-lg font-bold text-gray-900 truncate" title={product.product_name || product.name}>
+            <Link href={`/shop/product/${product.product_id || product.id}`}>
+                {product.product_name || product.name}
             </Link>
             </h3>
-            <p className="text-sm text-gray-500 mt-1">{product.category}</p>
+            <p className="text-sm text-gray-500 mt-1">{product.category?.category_name || product.category}</p>
         </div>
         
         <div className="mt-3 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-gray-900">${product.price}</span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-400 line-through">${product.originalPrice}</span>
+            <span className="text-xl font-bold text-gray-900">${product.base_price || product.price}</span>
+            {originalPrice && (
+              <span className="text-sm text-gray-400 line-through">${originalPrice}</span>
             )}
           </div>
         </div>
