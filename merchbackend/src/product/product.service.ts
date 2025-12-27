@@ -18,7 +18,7 @@ export class ProductService {
       sku,
       is_active,
       variants, // Extract variants
-      images,   // Extract images
+      images, // Extract images
     } = dto;
 
     if (
@@ -100,6 +100,9 @@ export class ProductService {
       },
       orderBy: { created_at: 'desc' }
     });
-    return { code: 200, message: 'Products fetched successfully', data: products };
+    return {code: 200, 
+      message: 'Products fetched successfully',
+      data: products3zXzX
+    };
   }
 }

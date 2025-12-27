@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Added for redirection
+import { useRouter } from "next/navigation"; 
 import { NavbarFinal } from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import {
@@ -17,7 +17,7 @@ import {
   Upload,
   Droplet,
   Shirt,
-  Loader2, // Added for loading state
+  Loader2,
 } from "lucide-react";
 
 // --- DYNAMIC SVG COMPONENTS (Unchanged) ---
@@ -135,7 +135,6 @@ const CustomizedPage = () => {
     neck: "polo",   
   });
 
-  const [activePart, setActivePart] = useState("body");
   const [activeSide, setActiveSide] = useState("front");
   const [activeTab, setActiveTab] = useState("style"); 
 
@@ -163,13 +162,6 @@ const CustomizedPage = () => {
   
   const fonts = ["Arial", "Verdana", "Impact", "Courier New", "Georgia", "Times New Roman", "Comic Sans MS"];
   
-  const shirtParts = [
-    { id: "body", name: "Body" },
-    { id: "leftSleeve", name: "Left Sleeve" },
-    { id: "rightSleeve", name: "Right Sleeve" },
-    { id: "collar", name: shirtConfig.neck === "polo" ? "Collar" : "Neck Trim" },
-  ];
-
   // --- Helper Functions ---
   const resetCustomization = () => {
     setCustomizations({
@@ -188,15 +180,27 @@ const CustomizedPage = () => {
     });
     setActiveSide("front");
     setActiveTab("style");
-    setActivePart("body");
   };
 
+  // UPDATED: Apply color to ALL parts
   const handleSwatchColorChange = (hex) => {
-    setShirtColors(prev => ({ ...prev, [activePart]: hex }));
+    setShirtColors({
+        body: hex,
+        leftSleeve: hex,
+        rightSleeve: hex,
+        collar: hex,
+    });
   };
 
+  // UPDATED: Apply color to ALL parts
   const handlePartColorChange = (e) => {
-    setShirtColors(prev => ({ ...prev, [activePart]: e.target.value }));
+    const hex = e.target.value;
+    setShirtColors({
+        body: hex,
+        leftSleeve: hex,
+        rightSleeve: hex,
+        collar: hex,
+    });
   };
   
   const handleSliderChange = (property, value) => {
@@ -309,15 +313,11 @@ const CustomizedPage = () => {
         if (!cartResponse.ok) throw new Error("Failed to add base item to cart");
         const cartData = await cartResponse.json();
         
-        // NOTE: cartData must return an ID. Based on your schema, if it returns 'cart_id',
-        // and CustomizationService needs 'order_item_id', this NEXT STEP WILL FAIL 
-        // unless you fix the backend to accept cart_id or treat them as same.
         const createdId = cartData.cart_id || cartData.order_item_id || cartData.id;
 
         // 2. Add Customization Details
-        // We are sending the FRONT side text customization as per your DTO structure
         const customizationPayload = {
-        cart_id: createdId, // <--- CHANGED: Send 'cart_id' to match backend DTO
+        cart_id: createdId, 
         front_image_url: "https://placeholder.com/custom-shirt-front.png", 
         back_image_url: "https://placeholder.com/custom-shirt-back.png",
         custom_text: customizations.front.text.content || "",
@@ -348,7 +348,7 @@ const CustomizedPage = () => {
     }
   };
 
-  // --- Render Functions (Unchanged logic, just inserted into layout) ---
+  // --- Render Functions ---
   const renderStyleSelector = () => (
     <div className="space-y-6">
         <div>
@@ -368,18 +368,11 @@ const CustomizedPage = () => {
     </div>
   );
 
+  // UPDATED: No individual part selection, just whole shirt color
   const renderColorPicker = () => (
     <div className="space-y-6">
-       <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">Select Part to Color</label>
-        <div className="grid grid-cols-2 gap-2">
-          {shirtParts.map(part => (
-            <button key={part.id} onClick={() => setActivePart(part.id)} className={`px-3 py-2 text-sm rounded-lg border transition-colors ${activePart === part.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}>{part.name}</button>
-          ))}
-        </div>
-      </div>
       <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">Preset Colors</label>
+        <label className="text-sm font-medium text-gray-500 block mb-3">T-Shirt Color</label>
         <div className="grid grid-cols-8 gap-2">
           {colorSwatches.map((color) => (
             <button key={color.name} title={color.name} onClick={() => handleSwatchColorChange(color.hex)} className="w-9 h-9 rounded-full border border-gray-200 transition-all hover:scale-110" style={{ backgroundColor: color.hex }} />
@@ -390,7 +383,8 @@ const CustomizedPage = () => {
         <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <Droplet className="w-5 h-5 text-gray-500" />
           <span className="text-sm font-medium text-gray-800 capitalize flex-1">Custom Color</span>
-          <input type="color" value={shirtColors[activePart]} onChange={handlePartColorChange} className="w-10 h-10 p-0 border-none rounded-md cursor-pointer" />
+          {/* Using shirtColors.body as representative value since all are same */}
+          <input type="color" value={shirtColors.body} onChange={handlePartColorChange} className="w-10 h-10 p-0 border-none rounded-md cursor-pointer" />
         </div>
       </div>
     </div>
