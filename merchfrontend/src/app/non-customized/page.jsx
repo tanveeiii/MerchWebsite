@@ -1,98 +1,76 @@
 "use client";
-
-import React, { useState } from "react";
-import { NavbarFinal } from "../../components/Navbar"; // 3 levels up to src/
-import Footer from "../../components/Footer"; // 3 levels up to src/
-import { Tag, Shirt, Filter, ShoppingBag, Wind } from "lucide-react";
-
-// Mock data for non-customized products
-const allProducts = [
-  {
-    id: 1,
-    category: "T-Shirts",
-    name: "Classic Crewneck Tee",
-    price: "$25.00",
-    image:
-      "https://placehold.co/600x600/f0f0f0/333?text=Classic+Tee",
-  },
-  {
-    id: 2,
-    category: "Hoodies",
-    name: "Cozy Fleece Hoodie",
-    price: "$55.00",
-    image:
-      "https://placehold.co/600x600/e0e0e0/333?text=Fleece+Hoodie",
-  },
-  {
-    id: 3,
-    category: "Jackets",
-    name: "Lightweight Windbreaker",
-    price: "$65.00",
-    image:
-      "https://placehold.co/600x600/d0d0d0/333?text=Windbreaker",
-  },
-  {
-    id: 4,
-    category: "T-Shirts",
-    name: "V-Neck Graphic Tee",
-    price: "$30.00",
-    image:
-      "https://placehold.co/600x600/f0f0f0/333?text=Graphic+Tee",
-  },
-  {
-    id: 5,
-    category: "Hoodies",
-    name: "Zip-Up Hoodie",
-    price: "$60.00",
-    image:
-      "https://placehold.co/600x600/e0e0e0/333?text=Zip-Up+Hoodie",
-  },
-  {
-    id: 6,
-    category: "T-Shirts",
-    name: "Vintage Wash Tee",
-    price: "$35.00",
-    image:
-      "https://placehold.co/600x600/f0f0f0/333?text=Vintage+Tee",
-  },
-  {
-    id: 7,
-    category: "Jackets",
-    name: "Denim Jacket",
-    price: "$85.00",
-    image:
-      "https://placehold.co/600x600/d0d0d0/333?text=Denim+Jacket",
-  },
-  {
-    id: 8,
-    category: "Hoodies",
-    name: "Pullover Sweatshirt",
-    price: "$50.00",
-    image:
-      "https://placehold.co/600x600/e0e0e0/333?text=Sweatshirt",
-  },
-];
-
-const categories = [
-  { name: "All", icon: <Filter className="w-4 h-4" /> },
-  { name: "T-Shirts", icon: <Shirt className="w-4 h-4" /> },
-  { name: "Hoodies", icon: <Tag className="w-4 h-4" /> },
-  { name: "Jackets", icon: <Wind className="w-4 h-4" /> },
-];
+import React, { useState, useEffect } from "react";
+import { NavbarFinal } from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ProductCard from "@/components/ProductCard"; // Import the robust component
+import { Tag, Shirt, Filter, Wind, Layers, Loader2 } from "lucide-react";
 
 export default function NonCustomizedPage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
 
+  // --- FETCH DATA ---
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          fetch("http://localhost:5000/api/product/fetch"),
+          fetch("http://localhost:5000/api/category/fetch"),
+        ]);
+
+        const prodJson = await prodRes.json();
+        const catJson = await catRes.json();
+
+        // 1. Filter out "Customized" products
+        // We assume any category containing 'custom' is a customized category
+        const nonCustomProducts = (prodJson.data || []).filter((p) => {
+          // Check if ANY category of this product is "Custom*"
+          const isCustom = p.categories?.some((c) =>
+            c.category_name.toLowerCase().includes("custom")
+          );
+          return !isCustom && p.is_active; // Only show non-custom and active products
+        });
+
+        // 2. Filter out "Customized" categories for the tabs
+        const nonCustomCategories = (Array.isArray(catJson) ? catJson : []).filter(
+          (c) => !c.category_name.toLowerCase().includes("custom")
+        );
+
+        setProducts(nonCustomProducts);
+        setCategories(nonCustomCategories);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // --- FILTER LOGIC ---
   const filteredProducts =
     activeCategory === "All"
-      ? allProducts
-      : allProducts.filter((p) => p.category === activeCategory);
+      ? products
+      : products.filter((p) =>
+          p.categories?.some((c) => c.category_name === activeCategory)
+        );
+
+  // Helper to pick an icon based on category name (Optional visual flair)
+  const getCategoryIcon = (name) => {
+    const lower = name.toLowerCase();
+    if (lower.includes("hoodie")) return <Tag className="w-4 h-4" />;
+    if (lower.includes("jacket") || lower.includes("wind")) return <Wind className="w-4 h-4" />;
+    if (lower.includes("shirt") || lower.includes("tee")) return <Shirt className="w-4 h-4" />;
+    return <Layers className="w-4 h-4" />;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavbarFinal />
 
-      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-12 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-12">
@@ -105,85 +83,74 @@ export default function NonCustomizedPage() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex justify-center gap-2 sm:gap-4 mb-10">
-          {categories.map((category) => (
-            <button
-              key={category.name}
-              onClick={() => setActiveCategory(category.name)}
-              className={`flex items-center gap-2 px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-3 font-semibold rounded-full transition-all duration-300 ease-in-out
-                ${
-                  activeCategory === category.name
-                    ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white shadow-lg scale-105"
-                    : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm border border-gray-200"
-                }
-              `}
-            >
-              {category.icon}
-              {category.name}
-            </button>
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin text-blue-600 w-10 h-10" />
+          </div>
+        ) : (
+          <>
+            {/* Dynamic Category Filters */}
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-10">
+              {/* 'All' Button */}
+              <button
+                onClick={() => setActiveCategory("All")}
+                className={`flex items-center gap-2 px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-3 font-semibold rounded-full transition-all duration-300 ease-in-out
+                  ${
+                    activeCategory === "All"
+                      ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white shadow-lg scale-105"
+                      : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm border border-gray-200"
+                  }
+                `}
+              >
+                <Filter className="w-4 h-4" />
+                All
+              </button>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+              {/* Dynamic Categories from DB */}
+              {categories.map((cat) => (
+                <button
+                  key={cat.category_id}
+                  onClick={() => setActiveCategory(cat.category_name)}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-3 font-semibold rounded-full transition-all duration-300 ease-in-out
+                    ${
+                      activeCategory === cat.category_name
+                        ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white shadow-lg scale-105"
+                        : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm border border-gray-200"
+                    }
+                  `}
+                >
+                  {getCategoryIcon(cat.category_name)}
+                  {cat.category_name}
+                </button>
+              ))}
+            </div>
+
+            {/* Product Grid */}
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+                {filteredProducts.map((product) => (
+                  // We map the backend data to the structure ProductCard expects if necessary
+                  // Assuming ProductCard accepts the raw product object from DB directly
+                  <ProductCard key={product.product_id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-500">
+                <p className="text-xl font-medium">No products found in this category.</p>
+                <button 
+                    onClick={() => setActiveCategory("All")}
+                    className="mt-4 text-blue-600 hover:underline"
+                >
+                    View all products
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-// Product Card Component
-function ProductCard({ product }) {
-  const [isAdded, setIsAdded] = useState(false);
-
-  const handleAddToCart = () => {
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000); // Reset after 2s
-  };
-
-  return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-      <div className="relative w-full aspect-square overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "https://placehold.co/600x600/f87171/white?text=Image+Error";
-          }}
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
-      </div>
-      <div className="p-5">
-        <p className="text-sm text-gray-500 mb-1">{product.category}</p>
-        <h3 className="text-lg font-bold text-gray-900 truncate">
-          {product.name}
-        </h3>
-        <p className="text-lg font-semibold text-pink-500 mt-1">
-          {product.price}
-        </p>
-        <button
-          onClick={handleAddToCart}
-          disabled={isAdded}
-          className={`w-full flex items-center justify-center gap-2 mt-4 px-4 py-2.5 font-semibold rounded-lg text-white transition-all duration-200 ease-in-out
-            ${
-              isAdded
-                ? "bg-green-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 hover:shadow-lg hover:scale-105"
-            }
-          `}
-        >
-          <ShoppingBag className="w-5 h-5" />
-          {isAdded ? "Added to Cart!" : "Add to Cart"}
-        </button>
-      </div>
     </div>
   );
 }

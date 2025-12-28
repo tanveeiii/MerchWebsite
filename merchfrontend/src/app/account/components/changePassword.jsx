@@ -31,6 +31,7 @@ const ChangePassword = ({ userId }) => {
       if (response.ok) {
         CustomToast("Password changed successfully!");
       } else {
+        CustomToast("Some error occurred!!");
         console.log(data);
       }
     } catch (err) {

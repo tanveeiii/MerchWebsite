@@ -75,7 +75,7 @@ model Category {
   is_active     Boolean   @default(true)
   created_at    DateTime
   updated_at    DateTime
-  Product       Product[]
+  products      Product[] 
 }
 
 model Product {
@@ -84,7 +84,6 @@ model Product {
   slug            String            @unique
   tag_id          Int
   description     String
-  category_id     Int
   base_price      Decimal
   sku             String
   is_active       Boolean           @default(true)
@@ -96,7 +95,7 @@ model Product {
   Analytics       Analytics[]
   Cart            Cart[]
   OrderItem       OrderItem[]
-  category        Category          @relation(fields: [category_id], references: [category_id])
+  categories      Category[]        
   tag             Tag               @relation(fields: [tag_id], references: [tag_id])
   ProductDiscount ProductDiscount[]
   ProductImage    ProductImage[]
@@ -406,8 +405,18 @@ model Customization {
   text_color       String?
   created_at       DateTime @default(now())
 }
+
 enum Gender {
   MALE   @map("Male")
   FEMALE @map("Female")
   OTHER  @map("Other")
+}
+
+model CustomizationTemplate {
+  template_id   Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  preview_image String   // URL of the template preview
+  data          Json     // Stores: { shirtColors, shirtConfig, customizations }
+  created_at    DateTime @default(now())
 }

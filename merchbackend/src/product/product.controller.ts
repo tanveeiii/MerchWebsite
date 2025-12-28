@@ -16,9 +16,14 @@ export class ProductController {
     return this.productService.fetch();
   }
 
-  // --- NEW: Fast Search Index Endpoint ---
+  // Used by the "Fast" Search Bar
   @Get('search-index')
   async getSearchIndex() {
     return this.productService.getSearchIndex();
+  }
+
+  @Get('search')
+  async search(@Query('q') q: string) {
+    return this.productService.search(q);
   }
 }

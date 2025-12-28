@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 
 const CustomToast = (text) => {
   toast.dismiss();
-  return CustomToast(text, {
+  return toast(text, {
     position: "bottom-right",
     autoClose: 3000,
     hideProgressBar: false,

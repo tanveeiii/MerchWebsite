@@ -30,6 +30,7 @@ import { CartModule } from './cart/cart.module';
 import { OrderStatusHistoryModule } from './order_status_history/order_status_history.module';
 import { CustomizationModule } from './customization/customization.module';
 import { RazorpayModule } from './razorpay/razorpay.module';
+import { CustomizationTemplateModule } from './customization_template/template.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { RazorpayModule } from './razorpay/razorpay.module';
     CategoryModule,
     ComplaintModule,
     CouponModule,
+    CustomizationTemplateModule,
     CouponUsageModule,
     CustomizationModule,
     InventoryLogModule,

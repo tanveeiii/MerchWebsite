@@ -22,9 +22,10 @@ export class CreateProductDto {
   @IsString()
   description: string;
 
-  @Type(() => Number)
-  @IsInt()
-  category_id: number;
+  // --- CHANGED: Accept Array of IDs ---
+  @IsArray()
+  @IsInt({ each: true })
+  category_ids: number[];
 
   @IsNumber()
   base_price: number;
@@ -37,7 +38,6 @@ export class CreateProductDto {
   @IsBoolean()
   is_active?: boolean = true;
 
-  // --- NEW: Allow Nested Creation ---
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
