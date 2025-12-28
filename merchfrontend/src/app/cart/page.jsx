@@ -242,17 +242,17 @@ const Cart = () => {
               onRemove={handleRemove}
             />
           </div>
-          {/* <div className="lg:w-1/3">
+          <div className="lg:w-1/3">
             <PriceDetails
               subtotal={subtotal}
               discount={couponDiscount}
-              tax={tax}
+              // tax={tax}
               total={total}
               onCheckout={handleCheckout}
               onApplyCoupon={handleApplyCoupon}
               couponError={couponMessage}
             />
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
