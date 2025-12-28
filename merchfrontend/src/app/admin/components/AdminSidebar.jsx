@@ -25,6 +25,7 @@ export default function AdminSidebar() {
     { name: "Categories", icon: <Folder size={20} />, path: "/admin/categories" },
     { name: "Tags", icon: <Tag size={20} />, path: "/admin/tags" },
     { name: "Coupons", icon: <Tag size={20} />, path: "/admin/coupons" },
+    { name: "Templates", icon: <Activity size={20} />, path: "/admin/templates" },
     { name: "Reviews", icon: <MessageSquare size={20} />, path: "/admin/reviews" },
     { name: "Complaints", icon: <MessageSquare size={20} />, path: "/admin/complaints" },
   ];
