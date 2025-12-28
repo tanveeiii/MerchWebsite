@@ -8,7 +8,8 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class ProductService {
   constructor(private prisma: PrismaService) {}
 
-  // --- 1. CREATE ---
+  // ... (Keep existing create and fetch methods as they are) ...
+
   async create(dto: CreateProductDto) {
     const {
       product_name,
@@ -83,7 +84,6 @@ export class ProductService {
     return { code: 200, message: 'Product created successfully', product };
   }
 
-  // --- 2. FETCH ---
   async fetch() {
     const products = await this.prisma.product.findMany({
       include: {
@@ -102,29 +102,24 @@ export class ProductService {
     };
   }
 
-  // --- 3. SEARCH (The Fix) ---
-  async search(query: string) {
-    if (!query || query.trim().length === 0) return [];
-
-    return await this.prisma.product.findMany({
-      where: {
-        is_active: true,
-        OR: [
-          { product_name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-          {
-            category: {
-              category_name: { contains: query, mode: 'insensitive' },
-            },
-          },
-          { tag: { tag_name: { contains: query, mode: 'insensitive' } } },
-        ],
+  // --- NEW: Optimized Search Index (Lightweight) ---
+  async getSearchIndex() {
+    const products = await this.prisma.product.findMany({
+      where: { is_active: true },
+      select: {
+        product_id: true,
+        product_name: true,
+        base_price: true,
+        category: { select: { category_name: true } },
+        tag: { select: { tag_name: true } },
+        ProductImage: {
+          where: { is_primary: true },
+          take: 1,
+          select: { image_url: true },
+        },
       },
-      include: {
-        ProductImage: { where: { is_primary: true }, take: 1 },
-        category: true,
-      },
-      take: 10,
+      orderBy: { view_count: 'desc' }, // Show popular items first
     });
+    return products;
   }
 }
