@@ -21,16 +21,16 @@ import NotificationDropdown from "./NotificationDropdown"; // <--- 1. Import Add
 export function NavbarFinal() {
   const navItems = [
     {
-      name: "Lowers",
-      link: "#features",
+      name: "Home",
+      link: "/discover",
     },
     {
-      name: "Customized",
+      name: "Custom Merch",
       link: "/customized", 
     },
     {
-      name: "Non-Customized",
-      link: "non-customized", 
+      name: "Our Products",
+      link: "/non-customized", 
     },
   ];
 
