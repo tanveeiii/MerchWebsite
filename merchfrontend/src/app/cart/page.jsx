@@ -242,7 +242,7 @@ const Cart = () => {
               onRemove={handleRemove}
             />
           </div>
-          <div className="lg:w-1/3">
+          {/* <div className="lg:w-1/3">
             <PriceDetails
               subtotal={subtotal}
               discount={couponDiscount}
@@ -252,7 +252,7 @@ const Cart = () => {
               onApplyCoupon={handleApplyCoupon}
               couponError={couponMessage}
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
