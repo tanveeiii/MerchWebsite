@@ -1,29 +1,33 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, Heart, Eye, Loader2 } from "lucide-react";
-import { toast } from "react-toastify";
-import CustomToast from "./CustomToast";
+import { ShoppingCart, Heart, Eye, Loader2, Palette } from "lucide-react";
+import CustomToast from "./CustomToast"; // Ensure this path is correct based on your folder structure
 
 const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
   const [loadingWish, setLoadingWish] = useState(false);
 
-  // --- LOGIC: Select the best image ---
-  // 1. Try to find the image marked 'is_primary'
-  // 2. Fallback to the first image in the array
-  // 3. Fallback to product.img (if using old data format)
-  // 4. Final Fallback to a placeholder
+  // --- 1. Image Logic ---
+  // Prioritize Primary Image -> First Image -> Placeholder
   const displayImage =
     product.ProductImage?.find((img) => img.is_primary)?.image_url ||
     product.ProductImage?.[0]?.image_url ||
     product.img ||
     "https://readymadeui.com/images/product14.webp";
 
-  const originalPrice = product.originalPrice; // Adjust if your backend sends this differently
-  const defaultVariantId = product.ProductVariant?.[0]?.product_variant_id; // Auto-select first variant
+  const originalPrice = product.originalPrice;
+  const defaultVariantId = product.ProductVariant?.[0]?.product_variant_id;
 
-  // --- Handlers ---
+  // --- 2. Customization Logic ---
+  // Check if ANY of the product's categories contain the word "Custom" (Case insensitive)
+  // Example: "Customized T-Shirts", "Custom Hoodies" will return TRUE.
+  // "Men's Wear", "Essentials" will return FALSE.
+  const isCustomizable = product.categories?.some((c) =>
+    c.category_name.toLowerCase().includes("custom")
+  );
+
+  // --- 3. Handlers ---
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -39,7 +43,7 @@ const ProductCard = ({ product }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: Number(userId),
-          product_id: product.product_id || product.id, // Handle both ID formats
+          product_id: product.product_id || product.id,
           product_variant_id: defaultVariantId,
           quantity: 1,
         }),
@@ -84,7 +88,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
-      {/* Image Area */}
+      {/* --- Image Section --- */}
       <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
         <img
           src={displayImage}
@@ -99,12 +103,13 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* Hover Actions Overlay */}
+        {/* Hover Overlay Actions */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3">
+          {/* Standard Add to Cart */}
           <button
             onClick={handleAddToCart}
             disabled={loadingCart}
-            className="flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
+            className="flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg"
           >
             {loadingCart ? (
               <Loader2 className="animate-spin" size={18} />
@@ -114,11 +119,25 @@ const ProductCard = ({ product }) => {
             {loadingCart ? "Adding..." : "Add to Cart"}
           </button>
 
-          <div className="flex gap-3 translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75">
+          {/* --- CONDITIONAL CUSTOMIZE BUTTON --- */}
+          {/* Only shows if product category includes "Custom" */}
+          {isCustomizable && (
+            <Link
+              href={`/customized?product_id=${
+                product.product_id || product.id
+              }`}
+              className="flex items-center gap-2 bg-blue-600 text-white font-bold px-6 py-3 rounded-full hover:bg-blue-700 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 shadow-lg"
+            >
+              <Palette size={18} /> Customize
+            </Link>
+          )}
+
+          {/* Secondary Actions (Wishlist / View) */}
+          <div className="flex gap-3 translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100">
             <button
               onClick={handleAddToWishlist}
               disabled={loadingWish}
-              className="p-3 bg-white text-gray-900 rounded-full hover:text-red-500 hover:bg-gray-50 transition-colors"
+              className="p-3 bg-white text-gray-900 rounded-full hover:text-red-500 hover:bg-gray-50 transition-colors shadow-lg"
             >
               {loadingWish ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -128,7 +147,7 @@ const ProductCard = ({ product }) => {
             </button>
             <Link
               href={`/shop/product/${product.product_id || product.id}`}
-              className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors"
+              className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors shadow-lg"
             >
               <Eye size={18} />
             </Link>
@@ -136,7 +155,7 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Product Details */}
+      {/* --- Product Details Section --- */}
       <div className="p-4 flex flex-col flex-1">
         <div className="flex-1">
           <h3
@@ -147,9 +166,22 @@ const ProductCard = ({ product }) => {
               {product.product_name || product.name}
             </Link>
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
-            {product.category?.category_name || product.category}
-          </p>
+
+          {/* Display Categories as Tags */}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {product.categories?.map((cat, idx) => (
+              <span
+                key={idx}
+                className={`text-[10px] px-2 py-0.5 rounded border ${
+                  cat.category_name.toLowerCase().includes("custom")
+                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : "bg-gray-100 text-gray-600 border-gray-200"
+                }`}
+              >
+                {cat.category_name}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="mt-3 flex items-center justify-between">

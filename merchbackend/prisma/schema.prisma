@@ -75,7 +75,7 @@ model Category {
   is_active     Boolean   @default(true)
   created_at    DateTime
   updated_at    DateTime
-  Product       Product[]
+  products      Product[] 
 }
 
 model Product {
@@ -84,7 +84,6 @@ model Product {
   slug            String            @unique
   tag_id          Int
   description     String
-  category_id     Int
   base_price      Decimal
   sku             String
   is_active       Boolean           @default(true)
@@ -96,7 +95,7 @@ model Product {
   Analytics       Analytics[]
   Cart            Cart[]
   OrderItem       OrderItem[]
-  category        Category          @relation(fields: [category_id], references: [category_id])
+  categories      Category[]        
   tag             Tag               @relation(fields: [tag_id], references: [tag_id])
   ProductDiscount ProductDiscount[]
   ProductImage    ProductImage[]
