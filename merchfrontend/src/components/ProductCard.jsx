@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, Heart, Eye, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
+import CustomToast from "./CustomToast";
 
 const ProductCard = ({ product }) => {
   const [loadingCart, setLoadingCart] = useState(false);
@@ -12,22 +14,23 @@ const ProductCard = ({ product }) => {
   // 2. Fallback to the first image in the array
   // 3. Fallback to product.img (if using old data format)
   // 4. Final Fallback to a placeholder
-  const displayImage = product.ProductImage?.find(img => img.is_primary)?.image_url 
-                       || product.ProductImage?.[0]?.image_url 
-                       || product.img 
-                       || "https://readymadeui.com/images/product14.webp";
+  const displayImage =
+    product.ProductImage?.find((img) => img.is_primary)?.image_url ||
+    product.ProductImage?.[0]?.image_url ||
+    product.img ||
+    "https://readymadeui.com/images/product14.webp";
 
   const originalPrice = product.originalPrice; // Adjust if your backend sends this differently
   const defaultVariantId = product.ProductVariant?.[0]?.product_variant_id; // Auto-select first variant
 
   // --- Handlers ---
   const handleAddToCart = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
 
     const userId = localStorage.getItem("userId");
-    if (!userId) return alert("Please login to add to cart");
-    if (!defaultVariantId) return alert("Select size in details page");
+    if (!userId) return CustomToast("Please login to add to cart");
+    if (!defaultVariantId) return CustomToast("Select size in details page");
 
     setLoadingCart(true);
     try {
@@ -38,14 +41,14 @@ const ProductCard = ({ product }) => {
           user_id: Number(userId),
           product_id: product.product_id || product.id, // Handle both ID formats
           product_variant_id: defaultVariantId,
-          quantity: 1
+          quantity: 1,
         }),
       });
-      if (res.ok) alert("Added to Cart!");
+      if (res.ok) CustomToast("Added to Cart!");
       else throw new Error("Failed");
     } catch (err) {
       console.error(err);
-      alert("Error adding to cart");
+      CustomToast("Error adding to cart");
     } finally {
       setLoadingCart(false);
     }
@@ -56,7 +59,7 @@ const ProductCard = ({ product }) => {
     e.stopPropagation();
 
     const userId = localStorage.getItem("userId");
-    if (!userId) return alert("Please login to use wishlist");
+    if (!userId) return CustomToast("Please login to use wishlist");
 
     setLoadingWish(true);
     try {
@@ -66,14 +69,14 @@ const ProductCard = ({ product }) => {
         body: JSON.stringify({
           user_id: Number(userId),
           product_id: product.product_id || product.id,
-          product_variant_id: defaultVariantId || 0
+          product_variant_id: defaultVariantId || 0,
         }),
       });
-      if (res.ok) alert("Added to Wishlist!");
+      if (res.ok) CustomToast("Added to Wishlist!");
       else throw new Error("Failed");
     } catch (err) {
       console.error(err);
-      alert("Error adding to wishlist");
+      CustomToast("Error adding to wishlist");
     } finally {
       setLoadingWish(false);
     }
@@ -88,7 +91,7 @@ const ProductCard = ({ product }) => {
           alt={product.product_name || product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        
+
         {/* Sale Tag */}
         {originalPrice && (
           <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
@@ -103,20 +106,31 @@ const ProductCard = ({ product }) => {
             disabled={loadingCart}
             className="flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300"
           >
-            {loadingCart ? <Loader2 className="animate-spin" size={18}/> : <ShoppingCart size={18} />}
+            {loadingCart ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <ShoppingCart size={18} />
+            )}
             {loadingCart ? "Adding..." : "Add to Cart"}
           </button>
-          
+
           <div className="flex gap-3 translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75">
-            <button 
-                onClick={handleAddToWishlist}
-                disabled={loadingWish}
-                className="p-3 bg-white text-gray-900 rounded-full hover:text-red-500 hover:bg-gray-50 transition-colors"
+            <button
+              onClick={handleAddToWishlist}
+              disabled={loadingWish}
+              className="p-3 bg-white text-gray-900 rounded-full hover:text-red-500 hover:bg-gray-50 transition-colors"
             >
-                {loadingWish ? <Loader2 className="animate-spin" size={18}/> : <Heart size={18} />}
+              {loadingWish ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <Heart size={18} />
+              )}
             </button>
-            <Link href={`/shop/product/${product.product_id || product.id}`} className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors">
-                <Eye size={18} />
+            <Link
+              href={`/shop/product/${product.product_id || product.id}`}
+              className="p-3 bg-white text-gray-900 rounded-full hover:text-blue-500 hover:bg-gray-50 transition-colors"
+            >
+              <Eye size={18} />
             </Link>
           </div>
         </div>
@@ -125,19 +139,28 @@ const ProductCard = ({ product }) => {
       {/* Product Details */}
       <div className="p-4 flex flex-col flex-1">
         <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 truncate" title={product.product_name || product.name}>
+          <h3
+            className="text-lg font-bold text-gray-900 truncate"
+            title={product.product_name || product.name}
+          >
             <Link href={`/shop/product/${product.product_id || product.id}`}>
-                {product.product_name || product.name}
+              {product.product_name || product.name}
             </Link>
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">{product.category?.category_name || product.category}</p>
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {product.category?.category_name || product.category}
+          </p>
         </div>
-        
+
         <div className="mt-3 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-gray-900">${product.base_price || product.price}</span>
+            <span className="text-xl font-bold text-gray-900">
+              ${product.base_price || product.price}
+            </span>
             {originalPrice && (
-              <span className="text-sm text-gray-400 line-through">${originalPrice}</span>
+              <span className="text-sm text-gray-400 line-through">
+                ${originalPrice}
+              </span>
             )}
           </div>
         </div>

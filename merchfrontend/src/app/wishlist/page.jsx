@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { NavbarFinal } from '@/components/Navbar';
 import { Loader2, Trash2, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
+import CustomToast from '@/components/CustomToast';
 
 const Wishlist = () => {
   const [items, setItems] = useState([]);
@@ -68,7 +70,7 @@ const Wishlist = () => {
     } catch (error) {
       console.error("Error deleting item:", error);
       setItems(previousItems);
-      alert("Failed to remove item.");
+      CustomToast("Failed to remove item.");
     }
   };
 
@@ -77,6 +79,7 @@ const Wishlist = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavbarFinal />
+      <ToastContainer />
       <main className="max-w-6xl mx-auto px-4 py-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Your Wishlist</h1>

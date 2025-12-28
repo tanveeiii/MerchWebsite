@@ -9,6 +9,8 @@ import Overview from "./components/overview";
 import AddressBook from "./components/addressBook";
 import ComplaintModal from "./components/ComplaintModal";
 import ChangePassword from "./components/changePassword";
+import { ToastContainer, toast } from "react-toastify";
+import CustomToast from "@/components/CustomToast";
 
 const Account = () => {
   const router = useRouter();
@@ -87,15 +89,15 @@ const Account = () => {
         body: JSON.stringify(updatedData),
       });
       if (res.ok) {
-        alert("Profile Updated Successfully!");
+        CustomToast("Profile Updated Successfully!");
         window.location.reload();
       } else {
         const err = await res.json();
-        alert(`Update failed: ${err.message}`);
+        CustomToast(`Update failed: ${err.message}`);
       }
     } catch (e) {
       console.error(e);
-      alert("Network error updating profile");
+      CustomToast("Network error updating profile");
     }
   };
 
@@ -107,15 +109,15 @@ const Account = () => {
         body: JSON.stringify(addressData),
       });
       if (res.ok) {
-        alert("Address Added Successfully!");
+        CustomToast("Address Added Successfully!");
         window.location.reload();
       } else {
         const err = await res.json();
-        alert(`Failed to add address: ${err.message}`);
+        CustomToast(`Failed to add address: ${err.message}`);
       }
     } catch (e) {
       console.error(e);
-      alert("Network error adding address");
+      CustomToast("Network error adding address");
     }
   };
 
@@ -140,22 +142,23 @@ const Account = () => {
       });
 
       if (res.ok) {
-        alert(
+        CustomToast(
           "Complaint ticket raised successfully. Our support team will contact you."
         );
         setShowComplaintModal(false);
       } else {
         const err = await res.json();
-        alert(`Failed to raise complaint: ${err.message}`);
+        CustomToast(`Failed to raise complaint: ${err.message}`);
       }
     } catch (e) {
       console.error(e);
-      alert("Network error raising complaint.");
+      CustomToast("Network error raising complaint.");
     }
   };
 
   return (
     <div>
+      <ToastContainer />
       <NavbarFinal />
       <div className="flex bg-gray-50 min-h-screen">
         <Sidebar

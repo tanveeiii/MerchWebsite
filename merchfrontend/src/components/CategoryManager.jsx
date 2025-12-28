@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { FolderPlus, Loader2, Image as ImageIcon, Edit2, X, Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
+import CustomToast from './CustomToast';
 
 const CategoryManager = () => {
     const [categories, setCategories] = useState([]);
@@ -56,13 +58,13 @@ const CategoryManager = () => {
                 // If editing the one we just deleted, cancel edit mode
                 if (editingId === id) handleCancelEdit();
                 fetchCategories();
-                alert("Category deleted successfully.");
+                CustomToast("Category deleted successfully.");
             } else {
-                alert("Failed to delete. It might contain products.");
+                CustomToast("Failed to delete. It might contain products.");
             }
         } catch (e) {
             console.error(e);
-            alert("Error deleting category");
+            CustomToast("Error deleting category");
         }
     };
 
@@ -90,15 +92,15 @@ const CategoryManager = () => {
             });
             
             if (res.ok) {
-                alert(editingId ? "Category Updated!" : "Category Created!");
+                CustomToast(editingId ? "Category Updated!" : "Category Created!");
                 handleCancelEdit();
                 fetchCategories();
             } else {
-                alert("Failed to save category");
+                CustomToast("Failed to save category");
             }
         } catch (e) { 
             console.error(e);
-            alert("Error occurred"); 
+            CustomToast("Error occurred"); 
         } finally { 
             setLoading(false); 
         }

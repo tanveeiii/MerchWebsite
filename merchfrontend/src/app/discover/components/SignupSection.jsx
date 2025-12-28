@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const SignupSection = () => {
   return (
-    <section className="my-20 mx-auto max-w-7xl p-10 flex flex-col md:flex-row justify-between items-center gap-8 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 rounded-xl shadow-lg">
+    <section className="my-20 mx-auto max-w-7xl p-10 flex flex-col md:flex-row justify-between items-center gap-8 bg-gray-50 rounded-xl shadow-lg">
       <div className="flex-1 w-full">
         <div className="rounded-xl overflow-hidden aspect-video shadow-md">
           <img
@@ -21,7 +21,7 @@ const SignupSection = () => {
         </div>
         <Link
           href="/auth/signup"
-          className="inline-block px-8 py-3 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105"
+          className="inline-block px-8 py-3 bg-black text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105"
         >
           Sign up
         </Link>
