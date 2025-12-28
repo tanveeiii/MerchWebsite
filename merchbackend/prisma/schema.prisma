@@ -8,33 +8,33 @@ datasource db {
 }
 
 model User {
-  user_id          Int                @id @default(autoincrement())
-  first_name       String
-  last_name        String
-  email            String             @unique
-  mobile           String             @unique
-  dob              DateTime
-  password         String
-  gender           Gender
-  created_at       DateTime
-  updated_at       DateTime
-  last_login       DateTime
-  access_token     String
-  otp_expiry       DateTime?
-  otp_hashed       String?
-  reset_token      String?
+  user_id            Int                @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  email              String             @unique
+  mobile             String             @unique
+  dob                DateTime
+  password           String
+  gender             Gender
+  created_at         DateTime
+  updated_at         DateTime
+  last_login         DateTime
+  access_token       String
+  otp_expiry         DateTime?
+  otp_hashed         String?
+  reset_token        String?
   reset_token_expiry DateTime?
-  Address          Address[]
-  Analytics        Analytics[]
-  Cart             Cart[]
-  CouponUsage      CouponUsage[]
-  Order            Order[]
-  Return           Return[]
-  ReturnRequest    ReturnRequest[]
-  Review           Review[]
-  UserNotification UserNotification[]
-  Wishlist         Wishlist[]
-  Complaint        Complaint[]
+  Address            Address[]
+  Analytics          Analytics[]
+  Cart               Cart[]
+  CouponUsage        CouponUsage[]
+  Order              Order[]
+  Return             Return[]
+  ReturnRequest      ReturnRequest[]
+  Review             Review[]
+  UserNotification   UserNotification[]
+  Wishlist           Wishlist[]
+  Complaint          Complaint[]
 }
 
 model Address {
@@ -75,7 +75,7 @@ model Category {
   is_active     Boolean   @default(true)
   created_at    DateTime
   updated_at    DateTime
-  products      Product[] 
+  products      Product[]
 }
 
 model Product {
@@ -95,7 +95,7 @@ model Product {
   Analytics       Analytics[]
   Cart            Cart[]
   OrderItem       OrderItem[]
-  categories      Category[]        
+  categories      Category[]
   tag             Tag               @relation(fields: [tag_id], references: [tag_id])
   ProductDiscount ProductDiscount[]
   ProductImage    ProductImage[]
@@ -155,7 +155,7 @@ model InventoryLog {
   quantity_change    Int
   quantity_after     Int
   product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
-  created_at         DateTime @default(now())
+  created_at         DateTime       @default(now())
   logged_at          DateTime       @default(now())
 }
 
@@ -168,54 +168,54 @@ model Tag {
 }
 
 model Cart {
-  cart_id            Int            @id @default(autoincrement())
+  cart_id            Int             @id @default(autoincrement())
   user_id            Int
   product_id         Int
   product_variant_id Int?
   quantity           Int
   created_at         DateTime        @default(now())
   updated_at         DateTime        @updatedAt
-  product            Product        @relation(fields: [product_id], references: [product_id])
+  product            Product         @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant? @relation(fields: [product_variant_id], references: [product_variant_id])
-  user               User           @relation(fields: [user_id], references: [user_id])
-  customization Customization?
+  user               User            @relation(fields: [user_id], references: [user_id])
+  customization      Customization?
 }
 
 model Wishlist {
-  wishlist_id        Int            @id @default(autoincrement())
+  wishlist_id        Int             @id @default(autoincrement())
   user_id            Int
   product_id         Int
   product_variant_id Int?
-  product            Product        @relation(fields: [product_id], references: [product_id])
+  product            Product         @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant? @relation(fields: [product_variant_id], references: [product_variant_id])
-  user               User           @relation(fields: [user_id], references: [user_id])
+  user               User            @relation(fields: [user_id], references: [user_id])
 }
 
 model Order {
-  order_id           Int                  @id @default(autoincrement())
-  order_number       String
-  shipping_address   Int
-  subtotal           Decimal
-  tax_amount         Decimal?
-  shipping_cost      Decimal?
-  discount_amount    Decimal
-  total_amount       Decimal
-  payment_type       String
-  order_status       String
-  user_id            Int
-  razorpay_order_od  String?
+  order_id            Int                  @id @default(autoincrement())
+  order_number        String
+  shipping_address    Int
+  subtotal            Decimal
+  tax_amount          Decimal?             @default(0)
+  shipping_cost       Decimal?             @default(0)
+  discount_amount     Decimal
+  total_amount        Decimal
+  payment_type        String
+  order_status        String
+  user_id             Int
+  razorpay_order_id   String?
   razorpay_payment_id String?
-  created_at         DateTime
-  updated_at         DateTime
-  CouponUsage        CouponUsage[]
-  s_address          Address              @relation("shipping", fields: [shipping_address], references: [address_id])
-  user               User                 @relation(fields: [user_id], references: [user_id])
-  OrderItem          OrderItem[]
-  OrderStatusHistory OrderStatusHistory[]
-  Payment            Payment[]
-  Return             Return[]
-  ReturnRequest      ReturnRequest[]
-  Review             Review[]
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @default(now())
+  CouponUsage         CouponUsage[]
+  s_address           Address              @relation("shipping", fields: [shipping_address], references: [address_id])
+  user                User                 @relation(fields: [user_id], references: [user_id])
+  OrderItem           OrderItem[]
+  OrderStatusHistory  OrderStatusHistory[]
+  Payment             Payment[]
+  Return              Return[]
+  ReturnRequest       ReturnRequest[]
+  Review              Review[]
 }
 
 model OrderItem {
@@ -228,7 +228,7 @@ model OrderItem {
   discount_amount    Decimal?
   tax_amount         Decimal?
   total_price        Decimal
-  created_at         DateTime
+  created_at         DateTime       @default(now())
   order              Order          @relation(fields: [order_id], references: [order_id])
   product            Product        @relation(fields: [product_id], references: [product_id])
   product_variant    ProductVariant @relation(fields: [product_variant_id], references: [product_variant_id])
@@ -324,16 +324,16 @@ model Admin {
 }
 
 model Complaint {
-  message_id     Int      @id @default(autoincrement())
+  message_id     Int       @id @default(autoincrement())
   sender_id      Int
   sender_type    String
   message        String
-  status         String    @default("OPEN") 
+  status         String    @default("OPEN")
   admin_reply    String?
-  resolved_at    DateTime?                
+  resolved_at    DateTime?
   attachment_url String
   created_at     DateTime
-  user           User     @relation(fields: [sender_id], references: [user_id])
+  user           User      @relation(fields: [sender_id], references: [user_id])
 }
 
 model Analytics {
@@ -390,20 +390,20 @@ model ReturnItem {
 }
 
 model Customization {
-  customization_id Int      @id @default(autoincrement())
-  
-  order_item_id    Int?     @unique
-  order_item       OrderItem? @relation(fields: [order_item_id], references: [order_item_id])
+  customization_id Int @id @default(autoincrement())
 
-  cart_id          Int?     @unique
-  cart             Cart?    @relation(fields: [cart_id], references: [cart_id])
+  order_item_id Int?       @unique
+  order_item    OrderItem? @relation(fields: [order_item_id], references: [order_item_id])
 
-  front_image_url  String?
-  back_image_url   String?
-  custom_text      String?
-  font_style       String?
-  text_color       String?
-  created_at       DateTime @default(now())
+  cart_id Int?  @unique
+  cart    Cart? @relation(fields: [cart_id], references: [cart_id])
+
+  front_image_url String?
+  back_image_url  String?
+  custom_text     String?
+  font_style      String?
+  text_color      String?
+  created_at      DateTime @default(now())
 }
 
 enum Gender {
@@ -416,7 +416,7 @@ model CustomizationTemplate {
   template_id   Int      @id @default(autoincrement())
   name          String
   description   String?
-  preview_image String   // URL of the template preview
-  data          Json     // Stores: { shirtColors, shirtConfig, customizations }
+  preview_image String // URL of the template preview
+  data          Json // Stores: { shirtColors, shirtConfig, customizations }
   created_at    DateTime @default(now())
 }
