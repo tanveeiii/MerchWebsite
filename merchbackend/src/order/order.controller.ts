@@ -12,20 +12,20 @@ export class OrderController {
   }
 
   // --- ADMIN: Fetch ALL Orders ---
-  @Get('admin/all')
-  async findAllForAdmin() {
-    return this.orderService.findAllForAdmin();
-  }
+  // @Get('admin/all')
+  // async findAllForAdmin() {
+  //   return this.orderService.findAllForAdmin();
+  // }
 
-  // --- USER: Fetch My Orders ---
-  @Get(':userId')
-  async findAll(@Param('userId', ParseIntPipe) userId: number) {
-    return this.orderService.findAll(userId);
-  }
+  // // --- USER: Fetch My Orders ---
+  // @Get(':userId')
+  // async findAll(@Param('userId', ParseIntPipe) userId: number) {
+  //   return this.orderService.findAll(userId);
+  // }
 
-  // --- ADMIN: Update Status ---
-  @Patch('update/:id')
-  async updateStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: string) {
-    return this.orderService.updateStatus(id, status);
-  }
+  // // --- ADMIN: Update Status ---
+  // @Patch('update/:id')
+  // async updateStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: string) {
+  //   return this.orderService.updateStatus(id, status);
+  // }
 }

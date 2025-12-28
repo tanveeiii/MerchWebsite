@@ -189,7 +189,7 @@ const Cart = () => {
                   items,
                   subtotal: subtotal,
                   amount: total,
-                  coupon: appliedCoupon,
+                  coupon: couponDiscount,
                 }),
               }
             );
