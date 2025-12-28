@@ -405,8 +405,18 @@ model Customization {
   text_color       String?
   created_at       DateTime @default(now())
 }
+
 enum Gender {
   MALE   @map("Male")
   FEMALE @map("Female")
   OTHER  @map("Other")
+}
+
+model CustomizationTemplate {
+  template_id   Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  preview_image String   // URL of the template preview
+  data          Json     // Stores: { shirtColors, shirtConfig, customizations }
+  created_at    DateTime @default(now())
 }
