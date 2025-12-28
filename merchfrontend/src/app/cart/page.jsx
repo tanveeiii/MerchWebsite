@@ -13,13 +13,9 @@ const Cart = () => {
   const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Coupon State
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState("");
-
-  // User State
   const [userId, setUserId] = useState(null);
   const [userProfile, setUserProfile] = useState({
     name: "User",
@@ -27,7 +23,6 @@ const Cart = () => {
     mobile: "",
   });
 
-  // --- 1. Load User & Fetch Data ---
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
 
@@ -51,7 +46,6 @@ const Cart = () => {
             name: item.product?.product_name || "Unknown Product",
             price: Number(item.product?.base_price) || 0,
             quantity: item.quantity,
-            // Handle different image structures (array or single string)
             image: Array.isArray(item.product?.ProductImage)
               ? item.product.ProductImage[0]?.image_url
               : item.product?.image_url ||
@@ -83,18 +77,14 @@ const Cart = () => {
     fetchData();
   }, []);
 
-  // --- 2. Calculate Totals ---
   const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const tax = subtotal * 0.05;
-  const total = Math.max(0, subtotal - couponDiscount + tax);
+  const total = Math.max(0, subtotal - couponDiscount);
 
-  // --- 3. Handlers ---
   const handleQuantityChange = async (id, newQty) => {
-    if (newQty < 1) return;
-    // Optimistic UI Update
+    if (newQty < 1) return
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity: newQty } : item
@@ -109,7 +99,6 @@ const Cart = () => {
       });
     } catch (error) {
       console.error("Update failed", error);
-      // Ideally revert UI here on failure
     }
   };
 
@@ -123,8 +112,6 @@ const Cart = () => {
       console.error("Remove failed", error);
     }
   };
-
-  // --- 4. Coupon Handler ---
   const handleApplyCoupon = async (code) => {
     setCouponMessage("");
     setCouponDiscount(0);
@@ -200,6 +187,7 @@ const Cart = () => {
                   razorpay_signature: response.razorpay_signature,
                   userId,
                   items,
+                  subtotal: subtotal,
                   amount: total,
                   coupon: appliedCoupon,
                 }),

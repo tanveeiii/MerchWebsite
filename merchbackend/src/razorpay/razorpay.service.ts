@@ -33,7 +33,6 @@ export class RazorpayService {
                 url: "http://localhost:3000/checkout/success",
                 expectedSignature: expectedSignature
             }
-            // throw new Error('Payment verification failed');
         }
         const order = await fetch("http://localhost:5000/api/order/create",{
             headers: {'Content-Type': 'application/json'},
@@ -41,7 +40,7 @@ export class RazorpayService {
                 order_number: "11001",  
                 shipping_address: 0,
                 subtotal: data.amount,
-                tax_amount: data.aamount,
+                tax_amount: 0,
                 shipping_cost: 0,
                 discount_amount: 0,
                 total_amount: data.amount,

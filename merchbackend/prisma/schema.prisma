@@ -197,8 +197,8 @@ model Order {
   order_number       String
   shipping_address   Int
   subtotal           Decimal
-  tax_amount         Decimal
-  shipping_cost      Decimal
+  tax_amount         Decimal?
+  shipping_cost      Decimal?
   discount_amount    Decimal
   total_amount       Decimal
   payment_type       String
@@ -226,8 +226,8 @@ model OrderItem {
   product_variant_id Int
   quantity           Int
   unit_price         Decimal
-  discount_amount    Decimal
-  tax_amount         Decimal
+  discount_amount    Decimal?
+  tax_amount         Decimal?
   total_price        Decimal
   created_at         DateTime
   order              Order          @relation(fields: [order_id], references: [order_id])
