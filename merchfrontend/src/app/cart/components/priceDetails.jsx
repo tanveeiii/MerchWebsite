@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-const PriceDetails = ({ subtotal, discount, tax, total, onCheckout, onApplyCoupon, couponError }) => {
+const PriceDetails = ({ subtotal, discount, total, onCheckout, onApplyCoupon, couponError }) => {
   const [promoCode, setPromoCode] = useState("");
   const [applying, setApplying] = useState(false);
 
@@ -25,9 +25,9 @@ const PriceDetails = ({ subtotal, discount, tax, total, onCheckout, onApplyCoupo
         <li className="flex flex-wrap gap-4 text-sm text-green-600">
           Discount <span className="ml-auto font-semibold">-${discount.toFixed(2)}</span>
         </li>
-        <li className="flex flex-wrap gap-4 text-sm">
+        {/* <li className="flex flex-wrap gap-4 text-sm">
           Tax (5%) <span className="ml-auto text-slate-900 font-semibold">${tax.toFixed(2)}</span>
-        </li>
+        </li> */}
         <li className="flex flex-wrap gap-4 text-sm text-slate-900 border-t pt-4 border-gray-300">
           Total <span className="ml-auto font-bold text-lg">${total.toFixed(2)}</span>
         </li>

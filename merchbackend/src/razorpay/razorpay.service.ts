@@ -33,7 +33,7 @@ export class RazorpayService {
                 url: "http://localhost:3000/checkout/success",
                 expectedSignature: expectedSignature
             }
-        }
+        }try{
         const order = await fetch("http://localhost:5000/api/order/create",{
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -53,6 +53,10 @@ export class RazorpayService {
         }
         )
         console.log("order", order)
+    }catch(e){
+        console.log("An error occur with the code: ", e)
+    }
+        
 
         return {
             success: true,

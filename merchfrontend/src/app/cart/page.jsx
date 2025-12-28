@@ -246,7 +246,7 @@ const Cart = () => {
             <PriceDetails
               subtotal={subtotal}
               discount={couponDiscount}
-              tax={tax}
+              // tax={tax}
               total={total}
               onCheckout={handleCheckout}
               onApplyCoupon={handleApplyCoupon}
