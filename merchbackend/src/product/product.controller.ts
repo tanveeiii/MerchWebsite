@@ -1,19 +1,24 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './product.dto';
 
 @Controller('product')
 export class ProductController {
   constructor(private productService: ProductService) {}
+
   @Post('create')
   async create(@Body() dto: CreateProductDto) {
-    const product = this.productService.create(dto);
-    return product;
+    return this.productService.create(dto);
   }
 
   @Get('fetch')
   async fetch(){
-    const products = this.productService.fetch();
-    return products;
+    return this.productService.fetch();
+  }
+
+  // --- NEW: Search Endpoint ---
+  @Get('search')
+  async search(@Query('q') q: string) {
+    return this.productService.search(q);
   }
 }

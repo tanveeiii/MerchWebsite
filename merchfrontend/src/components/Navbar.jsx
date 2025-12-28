@@ -15,58 +15,44 @@ import Link from "next/link";
 import { useMotionValueEvent } from "motion/react";
 import { User, Heart } from "lucide-react";
 import { LuShoppingBag } from "react-icons/lu";
-import SearchBox from "./SearchBox";
-import NotificationDropdown from "./NotificationDropdown"; // <--- 1. Import Added
+import SearchBar from "./SearchBar";
+import NotificationDropdown from "./NotificationDropdown";
 
 export function NavbarFinal() {
   const navItems = [
-    {
-      name: "Lowers",
-      link: "#features",
-    },
-    {
-      name: "Customized",
-      link: "/customized", 
-    },
-    {
-      name: "Non-Customized",
-      link: "non-customized", 
-    },
+    { name: "Lowers", link: "#features" },
+    { name: "Customized", link: "/customized" },
+    { name: "Non-Customized", link: "non-customized" },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setVisible(window.scrollY < 100);
-    };
-
+    const handleScroll = () => setVisible(window.scrollY < 100);
     handleScroll();
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <Navbar>
-      {/* Desktop Navigation */}
       <NavBody>
-        <div className="flex justify-around w-full">
+        <div className="flex justify-around w-full items-center">
           <NavbarLogo />
-          <NavItems items={navItems} />
-        </div>
-        <div className="flex items-center gap-4">
+
+          {/* Bigger Search Container */}
           {visible && (
-            <div className="transition-opacity duration-500 opacity-100">
-              <SearchBox />
+            <div className="flex-[2] max-w-3xl mx-6 hidden md:block">
+              <SearchBar />
             </div>
           )}
 
-          {/* --- 2. Notification Dropdown Added Here --- */}
-          <NotificationDropdown />
-          {/* ------------------------------------------- */}
+          <NavItems items={navItems} />
+        </div>
 
+        <div className="flex items-center gap-4">
+          <NotificationDropdown />
           <Link className="w-full" href="/cart">
             <NavbarButton variant="secondary">
               <LuShoppingBag size={28} strokeWidth={1.5} />
@@ -85,7 +71,6 @@ export function NavbarFinal() {
         </div>
       </NavBody>
 
-      {/* Mobile Navigation */}
       <MobileNav>
         <MobileNavHeader>
           <NavbarLogo />
@@ -94,7 +79,6 @@ export function NavbarFinal() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           />
         </MobileNavHeader>
-
         <MobileNavMenu
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
@@ -110,8 +94,6 @@ export function NavbarFinal() {
             </a>
           ))}
           <div className="flex w-full flex-col gap-4">
-            {/* Note: Notifications are usually kept in the header for mobile or added as a list item here if needed */}
-            
             <Link href="/cart" className="w-full">
               <NavbarButton
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -122,22 +104,22 @@ export function NavbarFinal() {
               </NavbarButton>
             </Link>
             <Link href="/wishlist" className="w-full">
-                <NavbarButton
+              <NavbarButton
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
                 className="w-full"
-                >
+              >
                 <Heart />
-                </NavbarButton>
+              </NavbarButton>
             </Link>
             <Link href="/account" className="w-full">
-                <NavbarButton
+              <NavbarButton
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
                 className="w-full"
-                >
+              >
                 <User />
-                </NavbarButton>
+              </NavbarButton>
             </Link>
           </div>
         </MobileNavMenu>
