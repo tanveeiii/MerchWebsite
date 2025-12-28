@@ -75,22 +75,22 @@ const AuthForms = ({
   const isSignup = type === "signup";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* ... (Background divs remain the same) ... */}
       
-      <div className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-orange-200 backdrop-blur-sm">
+      <div className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-200 backdrop-blur-sm">
         {/* ... (Header section remains the same) ... */}
         
         <div className="text-center mb-8">
             {/* Header Icon and Title code here... (omitted for brevity, keep your original) */}
-             <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+             <h2 className="text-3xl font-bold mb-2 bg-black bg-clip-text text-transparent">
             {isSignup ? "Create Account" : "Welcome Back"}
           </h2>
         </div>
 
         {/* Toggle Buttons (Login/Signup) */}
         <div className="mb-8">
-          <div className="bg-orange-50 rounded-2xl p-2 border border-orange-200">
+          <div className="bg-gray-50 rounded-2xl p-2 border border-gray-200">
              {/* ... (Keep your original toggle buttons) ... */}
               <div className="flex">
               <button
@@ -98,7 +98,7 @@ const AuthForms = ({
                 onClick={onToggleForm}
                 className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   !isSignup
-                    ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white shadow-lg"
+                    ? "bg-black text-white shadow-lg"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -110,7 +110,7 @@ const AuthForms = ({
                 onClick={onToggleForm}
                 className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   isSignup
-                    ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white shadow-lg"
+                    ? "bg-black text-white shadow-lg"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -126,14 +126,14 @@ const AuthForms = ({
           {isSignup && (
             <div className="space-y-2">
               <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                <User className="w-4 h-4 text-orange-500" /> Full Name
+                <User className="w-4 h-4 text-gray-500" /> Full Name
               </label>
               <div className="relative">
                 <input
                   name="fullName"
                   type="text"
                   placeholder="John Doe"
-                  className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none"
                   value={formData.fullName}
                   onChange={handleChange}
                   required={isSignup}
@@ -146,14 +146,14 @@ const AuthForms = ({
           {/* Email Input */}
           <div className="space-y-2">
             <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-              <Mail className="w-4 h-4 text-pink-500" /> Email Address
+              <Mail className="w-4 h-4 text-black" /> Email Address
             </label>
             <div className="relative">
               <input
                 name="email"
                 type="email"
                 placeholder="Enter your email"
-                className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -168,14 +168,14 @@ const AuthForms = ({
               {/* Mobile Number */}
               <div className="space-y-2">
                 <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-orange-500" /> Mobile Number
+                  <Phone className="w-4 h-4 text-gray-500" /> Mobile Number
                 </label>
                 <div className="relative">
                   <input
                     name="mobile"
                     type="tel"
                     placeholder="1234567890"
-                    className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                    className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none"
                     value={formData.mobile}
                     onChange={handleChange}
                     required={isSignup}
@@ -188,13 +188,13 @@ const AuthForms = ({
                 {/* Date of Birth */}
                 <div className="space-y-2 flex-1">
                   <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-pink-500" /> DOB
+                    <Calendar className="w-4 h-4 text-black" /> DOB
                   </label>
                   <div className="relative">
                     <input
                       name="dob"
                       type="date"
-                      className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none text-gray-500"
+                      className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none text-gray-500"
                       value={formData.dob}
                       onChange={handleChange}
                       required={isSignup}
@@ -206,12 +206,12 @@ const AuthForms = ({
                 {/* Gender Dropdown */}
                 <div className="space-y-2 flex-1">
                   <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                    <Users className="w-4 h-4 text-orange-500" /> Gender
+                    <Users className="w-4 h-4 text-gray-500" /> Gender
                   </label>
                   <div className="relative">
                     <select
                       name="gender"
-                      className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none appearance-none bg-none"
+                      className="w-full p-3 pl-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none appearance-none bg-none"
                       value={formData.gender}
                       onChange={handleChange}
                       required={isSignup}
@@ -232,7 +232,7 @@ const AuthForms = ({
           <div className="space-y-2">
              {/* ... (Keep your original Password Logic) ... */}
               <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-              <Lock className="w-4 h-4 text-orange-500" />
+              <Lock className="w-4 h-4 text-gray-500" />
               Password
             </label>
             <div className="relative">
@@ -240,7 +240,7 @@ const AuthForms = ({
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="w-full p-3 pl-10 pr-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                className="w-full p-3 pl-10 pr-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -265,7 +265,7 @@ const AuthForms = ({
              // ... (Keep your original Confirm Password Logic) ...
              <div className="space-y-2">
               <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                <Lock className="w-4 h-4 text-pink-500" />
+                <Lock className="w-4 h-4 text-black" />
                 Confirm Password
               </label>
               <div className="relative">
@@ -273,7 +273,7 @@ const AuthForms = ({
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-black focus:outline-none"
                   value={formData.confirmPassword || ""}
                   onChange={handleChange}
                   required={isSignup}
@@ -310,7 +310,7 @@ const AuthForms = ({
             disabled={isLoading}
             className={`w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all duration-500 flex items-center justify-center gap-3 ${
               !isLoading
-                ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white hover:shadow-2xl hover:shadow-pink-500/30 hover:scale-[1.02] transform"
+                ? "bg-black text-white hover:shadow-2xl hover:shadow-black/30 hover:scale-[1.02] transform"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
@@ -344,7 +344,7 @@ const AuthForms = ({
             <button
               type="button"
               onClick={onToggleForm}
-              className="text-orange-500 hover:text-orange-600 font-semibold transition-colors"
+              className="text-gray-500 hover:text-gray-600 font-semibold transition-colors"
             >
               {isSignup ? "Sign in here" : "Create one now"}
             </button>

@@ -18,9 +18,9 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-orange-100 relative">
+      <div className="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full border border-gray-100 relative">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 via-pink-500 to-orange-500 rounded-full mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg">
             <RefreshCcw className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -33,7 +33,7 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
         <form onSubmit={handleForgotPassword}>
           <div className="space-y-3">
             <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-              <Mail className="w-4 h-4 text-pink-500" />
+              <Mail className="w-4 h-4 text-black" />
               Email Address
             </label>
             <div className="relative">
@@ -41,7 +41,7 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
                 name="email"
                 type="email"
                 placeholder="Enter your email"
-                className="w-full p-4 pl-12 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white transition-all"
+                className="w-full p-4 pl-12 rounded-xl bg-gray-50 text-gray-900 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -67,7 +67,7 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl font-bold text-white shadow-lg bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 hover:shadow-pink-500/25 transition-all"
+              className="flex-1 py-3 rounded-xl font-bold text-white shadow-lg bg-black hover:shadow-black/25 transition-all"
             >
               Send Link
             </button>

@@ -102,7 +102,7 @@ export class ProductService {
     });
     return {code: 200, 
       message: 'Products fetched successfully',
-      data: products3zXzX
+      data: products
     };
   }
 }

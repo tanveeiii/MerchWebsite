@@ -21,19 +21,19 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-orange-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gray-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-black/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gray-500/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-orange-200 backdrop-blur-sm z-10">
+      <div className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-200 backdrop-blur-sm z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 rounded-full mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-2 bg-black bg-clip-text text-transparent">
             Reset Password
           </h2>
           <p className="text-gray-600">Enter your new password below</p>
@@ -42,14 +42,14 @@ const ResetPasswordPage = () => {
         <form className="space-y-6" onSubmit={handlePasswordReset}>
           <div className="space-y-2">
             <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-              <Lock className="w-4 h-4 text-orange-500" />
+              <Lock className="w-4 h-4 text-gray-500" />
               New Password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your new password"
-                className="w-full p-4 pl-12 pr-12 rounded-xl bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder-gray-400 transition-all duration-300"
+                className="w-full p-4 pl-12 pr-12 rounded-xl bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400 transition-all duration-300"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -71,14 +71,14 @@ const ResetPasswordPage = () => {
 
           <div className="space-y-2">
             <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-              <Lock className="w-4 h-4 text-pink-500" />
+              <Lock className="w-4 h-4 text-black" />
               Confirm New Password
             </label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm your new password"
-                className="w-full p-4 pl-12 pr-12 rounded-xl bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder-gray-400 transition-all duration-300"
+                className="w-full p-4 pl-12 pr-12 rounded-xl bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400 transition-all duration-300"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -103,7 +103,7 @@ const ResetPasswordPage = () => {
             disabled={isLoading}
             className={`w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all duration-500 flex items-center justify-center gap-3 ${
               !isLoading
-                ? "bg-gradient-to-r from-orange-500 via-pink-500 to-orange-500 text-white hover:shadow-2xl hover:shadow-pink-500/30 hover:scale-[1.02] transform"
+                ? "bg-black text-white hover:shadow-2xl hover:shadow-black/30 hover:scale-[1.02] transform"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
@@ -135,7 +135,7 @@ const ResetPasswordPage = () => {
             Remember your password?{" "}
             <button
               onClick={handleBackToLogin}
-              className="text-orange-500 hover:text-orange-600 font-semibold cursor-pointer transition-colors"
+              className="text-gray-500 hover:text-gray-600 font-semibold cursor-pointer transition-colors"
             >
               Login
             </button>
