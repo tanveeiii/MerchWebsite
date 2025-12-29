@@ -9,7 +9,7 @@ import Overview from "./components/overview";
 import AddressBook from "./components/addressBook";
 import ComplaintModal from "./components/ComplaintModal";
 import ChangePassword from "./components/changePassword";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 
 const Account = () => {
@@ -153,6 +153,40 @@ const Account = () => {
     } catch (e) {
       console.error(e);
       CustomToast("Network error raising complaint.");
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/resetPasswordRequest",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            identity: userData.email,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        CustomToast("Reset link successfully sent!");
+      } else {
+        CustomToast(data.message);
+      }
+    } catch (err) {
+      console.error("Password change error:", err);
+      CustomToast("Some error occured!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -321,7 +355,10 @@ const Account = () => {
                 <Lock size={22} />
                 <div>CHANGE PASSWORD</div>
               </h1>
-              <ChangePassword userId={localStorage.getItem("userId") || ""} />
+              <ChangePassword
+                loading={loading}
+                handleChangePassword={handleChangePassword}
+              />
             </div>
           )}
         </div>

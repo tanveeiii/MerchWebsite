@@ -1,23 +1,72 @@
 "use client";
 
+import CustomToast from "@/components/CustomToast";
 import { Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const ResetPasswordPage = () => {
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
-    console.log("Password reset submitted");
+
+    const token = searchParams.get("token");
+
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/auth/resetPassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            newPassword: password,
+            isLoggedIn: false,
+          }),
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        CustomToast("Password reset successful. Redirecting...");
+        setTimeout(() => {
+          router.replace("/auth/login");
+        }, 1500);
+      } else {
+        const errorMessage =
+          data?.message ||
+          data?.error ||
+          (typeof data === "string" ? data : "Unknown error");
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error("Full error object:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBackToLogin = () => {
-    console.log("Navigate to login");
+    router.replace("/auth/login");
   };
 
   return (

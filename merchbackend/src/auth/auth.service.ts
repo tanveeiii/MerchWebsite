@@ -180,7 +180,7 @@ export class AuthService {
       data: { reset_token: token, reset_token_expiry: expiry },
     });
 
-    const resetLink = `http://localhost:3000/reset-password/${token}`;
+    const resetLink = `http://localhost:3000/auth/resetPassword?token=${token}`;
     const subject = "Reset Your Password";
     const message = `Click the following link to reset your password. This link is valid for 10 minutes:\n\n${resetLink}`;
 

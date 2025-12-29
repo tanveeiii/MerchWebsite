@@ -1,46 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Lock } from "lucide-react";
-import { toast } from "react-toastify";
-import CustomToast from "@/components/CustomToast";
 
-const ChangePassword = ({ userId }) => {
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/resetPasswordRequest",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            identity: userId,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        CustomToast("Password changed successfully!");
-      } else {
-        CustomToast("Some error occurred!!");
-        console.log(data);
-      }
-    } catch (err) {
-      console.error("Password change error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const ChangePassword = ({ handleChangePassword, loading }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border">
       <div className="flex flex-col lg:flex-row justify-between">
@@ -52,11 +14,11 @@ const ChangePassword = ({ userId }) => {
         </div>
 
         <button
-          onClick={handleSubmit}
+          onClick={handleChangePassword}
           disabled={loading}
           className="px-6 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
         >
-          {loading ? "Updating..." : "Get Reset Password Link"}
+          {loading ? "Sending..." : "Get Reset Password Link"}
         </button>
       </div>
     </div>
