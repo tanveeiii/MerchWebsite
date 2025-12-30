@@ -31,10 +31,13 @@ import { OrderStatusHistoryModule } from './order_status_history/order_status_hi
 import { CustomizationModule } from './customization/customization.module';
 import { RazorpayModule } from './razorpay/razorpay.module';
 import { CustomizationTemplateModule } from './customization_template/template.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
     PrismaModule,
+    FirebaseModule,
     AdminModule,
     AnalyticsModule,
     AuthModule,
@@ -65,6 +68,7 @@ import { CustomizationTemplateModule } from './customization_template/template.m
     UserNotificationModule,
     WishlistModule,
     RazorpayModule,
+    NotificationsModule
   ],
 })
 export class AppModule {}
