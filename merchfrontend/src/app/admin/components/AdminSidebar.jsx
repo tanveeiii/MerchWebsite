@@ -21,6 +21,7 @@ export default function AdminSidebar() {
     { name: "Analytics", icon: <Activity size={20} />, path: "/admin/analytics" },
     { name: "Products", icon: <Package size={20} />, path: "/admin/products" },
     { name: "Orders", icon: <ShoppingBag size={20} />, path: "/admin/orders" },
+    { name: "Returns", icon: <ShoppingBag size={20} />, path: "/admin/return-requests" },
     { name: "Inventory", icon: <ClipboardList size={20} />, path: "/admin/inventory" },
     { name: "Categories", icon: <Folder size={20} />, path: "/admin/categories" },
     { name: "Tags", icon: <Tag size={20} />, path: "/admin/tags" },

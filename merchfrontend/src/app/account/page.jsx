@@ -8,6 +8,7 @@ import OrderCard from "./components/orderCard";
 import Overview from "./components/overview";
 import AddressBook from "./components/addressBook";
 import ComplaintModal from "./components/ComplaintModal";
+import ReturnModal from "./components/ReturnModal"; // <--- IMPORT ADDED
 import ChangePassword from "./components/changePassword";
 import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
@@ -21,8 +22,13 @@ const Account = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Modals State
   const [showComplaintModal, setShowComplaintModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  
+  // --- RETURN MODAL STATE ---
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnOrderData, setReturnOrderData] = useState(null);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -49,6 +55,10 @@ const Account = () => {
           const json = await res.json();
           if (json.data) {
             const mappedOrders = json.data.map((order) => ({
+              // --- ADDED THESE FIELDS FOR RETURN LOGIC ---
+              order_id: order.order_id, 
+              total_amount: order.total_amount,
+              // -------------------------------------------
               status: order.order_status.toUpperCase(),
               date: new Date(order.created_at).toLocaleDateString("en-GB", {
                 day: "numeric",
@@ -80,6 +90,8 @@ const Account = () => {
 
     fetchData();
   }, [activeSection, router]);
+
+  // --- HANDLERS ---
 
   const handleUpdateProfile = async (updatedData) => {
     try {
@@ -158,25 +170,17 @@ const Account = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
     setLoading(true);
-
     try {
       const response = await fetch(
         "http://localhost:5000/api/auth/resetPasswordRequest",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            identity: userData.email,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identity: userData.email }),
         }
       );
-
       const data = await response.json();
-
       if (response.ok) {
         CustomToast("Reset link successfully sent!");
       } else {
@@ -187,6 +191,42 @@ const Account = () => {
       CustomToast("Some error occured!");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- NEW: RETURN LOGIC HANDLERS ---
+  const handleOpenReturn = (orderData) => {
+    setReturnOrderData(orderData);
+    setShowReturnModal(true);
+  };
+
+  const handleSubmitReturn = async (order, reason) => {
+    const userId = localStorage.getItem("userId");
+    try {
+      const res = await fetch("http://localhost:5000/api/return-request/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          return_name: `REQ-${order.orderNo}`,
+          user_id: Number(userId),
+          order_id: Number(order.orderId), // From OrderCard props
+          reason: reason,
+          return_status: "PENDING",
+          refund_amount: Number(order.totalAmount || 0),
+          requested_at: new Date().toISOString()
+        }),
+      });
+
+      if (res.ok) {
+        CustomToast("Return Request Submitted Successfully! Waiting for Admin Approval.");
+        setShowReturnModal(false);
+      } else {
+        const err = await res.json();
+        CustomToast(`Failed: ${err.message}`);
+      }
+    } catch (e) {
+      console.error(e);
+      CustomToast("Network error submitting return.");
     }
   };
 
@@ -240,6 +280,11 @@ const Account = () => {
                     <OrderCard
                       key={idx}
                       {...order}
+                      // --- Pass Data Needed for Return ---
+                      orderId={order.order_id} 
+                      totalAmount={order.total_amount}
+                      onReturn={handleOpenReturn}
+                      // -----------------------------------
                       onComplaint={handleOpenComplaint}
                     />
                   ))}
@@ -364,11 +409,21 @@ const Account = () => {
         </div>
       </div>
 
+      {/* --- COMPLAINT MODAL --- */}
       {showComplaintModal && selectedOrder && (
         <ComplaintModal
           order={selectedOrder}
           onClose={() => setShowComplaintModal(false)}
           onSubmit={handleSubmitComplaint}
+        />
+      )}
+
+      {/* --- RETURN MODAL (NEW) --- */}
+      {showReturnModal && returnOrderData && (
+        <ReturnModal 
+            order={returnOrderData} 
+            onClose={() => setShowReturnModal(false)} 
+            onSubmit={handleSubmitReturn} 
         />
       )}
     </div>

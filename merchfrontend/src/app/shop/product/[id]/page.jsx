@@ -51,6 +51,7 @@ const ProductPage = ({ params }) => {
           );
           if (found) {
             const mapped = mapProductFromBackend(found);
+            console.log(mapped);
             setProduct(mapped);
             setActiveImage(mapped.img);
             // Default to first variant if available
@@ -73,10 +74,13 @@ const ProductPage = ({ params }) => {
   // --- LOGIC: Check if Product is Customizable ---
   // Checks if ANY category name contains "Custom" (case insensitive)
   // Accessing 'categories' array from the mapped product object
-  const isCustomizable = product?.category?.toLowerCase().includes("custom") || 
-                         // Fallback if your mapper puts categories in a different property like 'categories' array
-                         (Array.isArray(product?.categories) && product.categories.some(c => c.category_name.toLowerCase().includes("custom")));
-
+  const isCustomizable =
+    product?.category?.toLowerCase().includes("custom") ||
+    // Fallback if your mapper puts categories in a different property like 'categories' array
+    (Array.isArray(product?.categories) &&
+      product.categories.some((c) =>
+        c.category_name.toLowerCase().includes("custom")
+      ));
 
   const handleAddToCart = async () => {
     const userId = localStorage.getItem("userId");
@@ -251,7 +255,7 @@ const ProductPage = ({ params }) => {
 
             <div className="mt-6 flex items-baseline gap-4">
               <span className="text-3xl font-bold text-gray-900">
-                ${product.price}
+                ${selectedVariant.price}
               </span>
               {product.originalPrice && (
                 <span className="text-xl text-gray-400 line-through">
@@ -293,8 +297,8 @@ const ProductPage = ({ params }) => {
             {isCustomizable && (
               <div className="mt-6 bg-gray-50 p-6 rounded-2xl border border-gray-200 animate-in fade-in slide-in-from-bottom-2">
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Palette size={20} className="text-blue-600" /> Personalize Your
-                  Item
+                  <Palette size={20} className="text-blue-600" /> Personalize
+                  Your Item
                 </h3>
 
                 <div className="space-y-4">
