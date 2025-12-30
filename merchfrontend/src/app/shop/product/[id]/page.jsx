@@ -40,6 +40,27 @@ const ProductPage = ({ params }) => {
   const [addingWish, setAddingWish] = useState(false);
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const markVisit = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/analytics/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: Number(userId),
+            product_id: productId,
+          }),
+        });
+        const json = await res.json();
+
+        console.log(json);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const fetchDetails = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
@@ -51,7 +72,6 @@ const ProductPage = ({ params }) => {
           );
           if (found) {
             const mapped = mapProductFromBackend(found);
-            console.log(mapped);
             setProduct(mapped);
             setActiveImage(mapped.img);
             // Default to first variant if available
@@ -67,6 +87,7 @@ const ProductPage = ({ params }) => {
     };
 
     if (productId) {
+      markVisit();
       fetchDetails();
     }
   }, [productId]);

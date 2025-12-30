@@ -340,10 +340,6 @@ model Analytics {
   analytics_id Int      @id @default(autoincrement())
   user_id      Int
   product_id   Int
-  event_type   String
-  page_url     String
-  ip_address   String
-  event_data   String
   created_at   DateTime
   product      Product  @relation(fields: [product_id], references: [product_id])
   user         User     @relation(fields: [user_id], references: [user_id])
