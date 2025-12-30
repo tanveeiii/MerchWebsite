@@ -33,10 +33,8 @@ const MostGiftedPage = () => {
 
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-
-          // 1. Filter by Tag "Gift" (Ensure your products have this tag in DB)
+          // Filter by Tag "Gift"
           const gifted = mapped.filter((p) => p.tag === "Gift");
-
           setProducts(gifted);
         }
       } catch (e) {
@@ -48,45 +46,48 @@ const MostGiftedPage = () => {
     fetchProducts();
   }, []);
 
-  // 2. Dynamic Categories based on the "Gift" products found
+  // Dynamic Categories
   const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  // 3. Filter Display Logic
+  // Filter Logic
   const filteredProducts =
     activeCategory === "All"
       ? products
       : products.filter((p) => p.category === activeCategory);
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen flex flex-col">
       <NavbarFinal />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 text-center mb-4 flex justify-center items-center gap-2">
-            <Gift className="text-pink-500" /> Most Gifted Merch
+      
+      <main className="flex-grow mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-10 md:mb-16">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 flex justify-center items-center gap-2">
+            <Gift className="text-pink-500 w-8 h-8 md:w-10 md:h-10" /> 
+            Most Gifted Merch
           </h1>
-          <p className="text-lg text-gray-600 text-center mb-12">
-            Perfect presents everyone loves.
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+            Perfect presents everyone loves. Curated for every occasion.
           </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center p-20">
-            <Loader2 className="animate-spin text-gray-400" size={40} />
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="animate-spin text-gray-400" size={48} />
           </div>
         ) : (
           <>
-            {/* --- Category Filter Buttons --- */}
+            {/* Category Filters */}
             {categories.length > 1 && (
-              <div className="flex justify-center flex-wrap gap-3 mb-12">
+              <div className="flex justify-center flex-wrap gap-2 md:gap-3 mb-10 md:mb-12">
                 {categories.map((category) => (
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+                    className={`px-5 py-2 text-sm md:text-base rounded-full font-medium transition-all duration-200 border ${
                       activeCategory === category
-                        ? "bg-pink-500 text-white shadow-md"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-pink-500 text-white border-pink-500 shadow-md transform scale-105"
+                        : "bg-white text-gray-700 border-gray-200 hover:bg-pink-50 hover:border-pink-200 hover:text-pink-600"
                     }`}
                   >
                     {category}
@@ -96,20 +97,27 @@ const MostGiftedPage = () => {
             )}
 
             {/* Product Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))
               ) : (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  No gifted items found in this category.
+                <div className="col-span-full py-20 text-center">
+                  <p className="text-lg text-gray-500">No gifted items found in this category.</p>
+                  <button 
+                    onClick={() => setActiveCategory("All")}
+                    className="mt-4 text-pink-600 hover:underline text-sm font-medium"
+                  >
+                    View all gifts
+                  </button>
                 </div>
               )}
             </div>
           </>
         )}
       </main>
+      
       <Footer />
     </div>
   );

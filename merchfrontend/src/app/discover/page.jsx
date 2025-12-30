@@ -12,6 +12,12 @@ import { mapProductFromBackend } from "@/utils/productMapper";
 import { Loader2 } from "lucide-react";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
+import {
+  requestNotificationPermission,
+  listenForegroundMessages,
+} from "../../lib/notification";
+
+
 
 const Discover = () => {
   const [loading, setLoading] = useState(true);
@@ -34,6 +40,11 @@ const Discover = () => {
   }, [router]);
 
   useEffect(() => {
+    requestNotificationPermission();
+    listenForegroundMessages();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
@@ -46,7 +57,6 @@ const Discover = () => {
           setTopPick(mapped[0]);
 
           // 2. Trending: Randomize list to show variety
-          // Note: In real app, sort by view_count
           const trending = [...mapped]
             .sort(() => 0.5 - Math.random())
             .slice(0, 10);
@@ -79,9 +89,23 @@ const Discover = () => {
       <NavbarFinal />
       <Hero />
 
-      <div className="flex flex-col md:flex-row max-h-1/4 ml-3">
-        <TopPicks product={topPick} />
-        <MostGifted />
+      {/* --- RESPONSIVE SECTION: Top Picks & Most Gifted --- */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-col lg:flex-row gap-6 w-full lg:min-h-[600px]">
+          
+          {/* Top Picks Container */}
+          {/* Added [&_img]: classes to force internal images to be responsive */}
+          <div className="w-full lg:w-1/2 flex flex-col h-full min-h-[400px] [&_img]:w-full [&_img]:h-full [&_img]:object-cover [&_img]:rounded-xl shadow-sm rounded-xl overflow-hidden">
+            <TopPicks product={topPick} />
+          </div>
+
+          {/* Most Gifted Container */}
+          {/* Added [&_img]: classes to force internal images to be responsive */}
+          <div className="w-full lg:w-1/2 flex flex-col h-full min-h-[400px] [&_img]:w-full [&_img]:h-full [&_img]:object-cover [&_img]:rounded-xl shadow-sm rounded-xl overflow-hidden">
+            <MostGifted />
+          </div>
+
+        </div>
       </div>
 
       {/* --- SCROLLING SECTION 1: TRENDING --- */}

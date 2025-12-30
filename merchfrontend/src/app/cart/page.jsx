@@ -9,6 +9,7 @@ import Script from "next/script";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 import { checkAuth } from "@/utils/checkauth";
+import { Loader2 } from "lucide-react"; // <--- Added missing import
 
 const Cart = () => {
   const [items, setItems] = useState([]);
@@ -22,7 +23,7 @@ const Cart = () => {
     email: "",
     mobile: "",
   });
-  
+
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -232,7 +233,7 @@ const Cart = () => {
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center text-gray-500">
-        Loading Cart...
+        <Loader2 className="animate-spin mr-2" /> Loading Cart...
       </div>
     );
 
@@ -244,26 +245,35 @@ const Cart = () => {
         strategy="afterInteractive"
       />
       <NavbarFinal />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-2/3">
+      
+      {/* Responsive Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 md:mb-8">Shopping Cart</h1>
+        
+        <div className="flex flex-col lg:flex-row gap-8 relative">
+          {/* Cart Items Section - Takes 2/3 on desktop, full width on mobile */}
+          <div className="w-full lg:w-2/3">
             <CartItems
               items={items}
               onQuantityChange={handleQuantityChange}
               onRemove={handleRemove}
             />
           </div>
-          <div className="lg:w-1/3">
-            <PriceDetails
-              subtotal={subtotal}
-              discount={couponDiscount}
-              // tax={tax}
-              total={total}
-              onCheckout={handleCheckout}
-              onApplyCoupon={handleApplyCoupon}
-              couponError={couponMessage}
-            />
+          
+          {/* Price Details Section - Takes 1/3 on desktop, full width on mobile */}
+          <div className="w-full lg:w-1/3">
+            {/* Sticky behavior for desktop */}
+            <div className="lg:sticky lg:top-24">
+              <PriceDetails
+                subtotal={subtotal}
+                discount={couponDiscount}
+                // tax={tax}
+                total={total}
+                onCheckout={handleCheckout}
+                onApplyCoupon={handleApplyCoupon}
+                couponError={couponMessage}
+              />
+            </div>
           </div>
         </div>
       </div>
