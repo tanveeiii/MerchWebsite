@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { cn } from "@/lib/utils";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import {
@@ -7,9 +7,7 @@ import {
   useScroll,
   useMotionValueEvent,
 } from "motion/react";
-
 import React, { useRef, useState } from "react";
-
 
 export const Navbar = ({
   children,
@@ -33,7 +31,6 @@ export const Navbar = ({
   return (
     <motion.div
       ref={ref}
-      // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn("sticky inset-x-0 top-0 z-40 ", className)}>
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
@@ -192,7 +189,7 @@ export const MobileNavToggle = ({
 export const NavbarLogo = () => {
   return (
     <a
-      href="#"
+      href="/"
       className=" z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black justify-items-start">
       <img
         src="https://assets.aceternity.com/logo-dark.png"
@@ -206,7 +203,7 @@ export const NavbarLogo = () => {
 
 export const NavbarButton = ({
   href,
-  as: Tag = "a",
+  as: Tag = undefined,
   children,
   className,
   variant = "primary",
@@ -224,12 +221,27 @@ export const NavbarButton = ({
       "bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]",
   };
 
+  // If an href prop is provided we render an anchor.
+  // If no href (typical case when wrapped by Next <Link>), render a button to avoid nested <a>.
+  if (href) {
+    return (
+      <a
+        href={href}
+        className={cn(baseStyles, variantStyles[variant], className)}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
-    <Tag
-      href={href || undefined}
+    <button
+      type="button"
       className={cn(baseStyles, variantStyles[variant], className)}
-      {...props}>
+      {...props}
+    >
       {children}
-    </Tag>
+    </button>
   );
 };
