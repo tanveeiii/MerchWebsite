@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, ParseIntPipe, Patch, Delete } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './order.dto';
 
@@ -11,21 +11,28 @@ export class OrderController {
     return this.orderService.create(dto);
   }
 
-  // --- ADMIN: Fetch ALL Orders ---
   @Get('admin/all')
   async findAllForAdmin() {
     return this.orderService.findAllForAdmin();
   }
 
-  // // --- USER: Fetch My Orders ---
   @Get(':userId')
   async findAll(@Param('userId', ParseIntPipe) userId: number) {
     return this.orderService.findAll(userId);
   }
 
-  // // --- ADMIN: Update Status ---
   @Patch('update/:id')
   async updateStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: string) {
     return this.orderService.updateStatus(id, status);
+  }
+
+  @Patch('cancel/:id')
+  async cancelOrder(@Param('id', ParseIntPipe) id: number){
+    return this.orderService.cancelOrder(id);
+  }
+
+  @Get('detail/:id')
+  async getOneOrder(@Param('id', ParseIntPipe) id: number){
+    return this.orderService.getOneOrder(id);
   }
 }

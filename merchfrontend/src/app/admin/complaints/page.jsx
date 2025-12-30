@@ -11,7 +11,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 import { checkAuth } from "@/utils/checkauth";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function AdminComplaints() {
   const [complaints, setComplaints] = useState([]);

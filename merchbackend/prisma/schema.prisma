@@ -207,6 +207,7 @@ model Order {
   razorpay_payment_id String?
   created_at          DateTime             @default(now())
   updated_at          DateTime             @default(now())
+  cancelled_at        DateTime?
   CouponUsage         CouponUsage[]
   s_address           Address              @relation("shipping", fields: [shipping_address], references: [address_id])
   user                User                 @relation(fields: [user_id], references: [user_id])

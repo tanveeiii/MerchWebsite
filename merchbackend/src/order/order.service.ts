@@ -1,6 +1,7 @@
 import {
   Injectable,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 import { CreateOrderDto } from "./order.dto";
@@ -102,7 +103,24 @@ export class OrderService {
       },
       orderBy: {
         created_at: "desc",
-      }
+      },
+      include: {
+        OrderItem: {
+          orderBy: {
+            order_item_id: "asc",
+          },
+          include: {
+            product: {
+              include: {
+                ProductImage: {
+                  where: { is_primary: true },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return {
@@ -111,10 +129,13 @@ export class OrderService {
       data: orders,
     };
   }
-  async findAllForAdmin(){
-    const orders = await this.prisma.order.findMany({orderBy:{
-      created_at: "desc",
-    }})
+
+  async findAllForAdmin() {
+    const orders = await this.prisma.order.findMany({
+      orderBy: {
+        created_at: "desc",
+      }
+    })
     return {
       code: 200,
       message: "Orders fetched successfully",
@@ -152,5 +173,72 @@ export class OrderService {
         updatedOrder,
       };
     });
+  }
+
+  async cancelOrder(order_id: number) {
+    if (!order_id) {
+      throw new BadRequestException("Order id is required");
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { order_id },
+    });
+
+    if (!order)
+      throw new NotFoundException("Order not found");
+
+
+    if (order.order_status === "DELIVERED")
+      throw new BadRequestException("Delivered orders cannot be cancelled");
+    if (order.order_status === "CANCELLED")
+      throw new BadRequestException("Order is already cancelled");
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { order_id },
+      data: {
+        order_status: "CANCELLED",
+        cancelled_at: new Date(),
+      },
+    });
+
+    return {
+      code: 200,
+      message: "Order cancelled successfully",
+      data: updatedOrder,
+    };
+  }
+  async getOneOrder(order_id: number) {
+     if (!order_id) {
+      throw new BadRequestException("User id is required");
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: {
+        order_id: order_id,
+      },
+      include: {
+        OrderItem: {
+          orderBy: {
+            order_item_id: "asc",
+          },
+          include: {
+            product: {
+              include: {
+                ProductImage: {
+                  where: { is_primary: true },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      code: 200,
+      message: "Orders fetched successfully",
+      data: order,
+    };
   }
 }
