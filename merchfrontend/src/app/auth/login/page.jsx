@@ -1,8 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthForms from "../AuthForm"; // Check this path matches your folder structure
-import { AlertCircle, Mail, RefreshCcw } from "lucide-react";
+import { AlertCircle, Link, Mail, RefreshCcw } from "lucide-react";
+import { checkAuth } from "@/utils/checkauth";
 
 // Modal Component (No changes needed here)
 const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
@@ -49,7 +50,7 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
               <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mt-4 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
@@ -83,8 +84,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // LOGIC MOVED INSIDE THE COMPONENT
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth)
+        router.replace("/discover");
+      else
+        setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   const handleLogin = async (formData) => {
     setError("");
     setIsLoading(true);
@@ -102,20 +114,13 @@ export default function LoginPage() {
         throw new Error(data.message || data.detail || "Invalid email or password");
       }
 
-      // --- CRITICAL FIX START ---
-      // 1. Save Token
       if (data.token) {
-         localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token);
       }
-
-      // 2. Save User ID (This is what the Account page needs!)
       if (data.id) {
-          localStorage.setItem("userId", data.id);
+        localStorage.setItem("userId", data.id);
       }
-      // --- CRITICAL FIX END ---
-
-      // 3. Redirect
-      router.push("/discover"); 
+      router.push("/discover");
 
     } catch (err) {
       console.error("Login Error:", err);
