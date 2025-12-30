@@ -26,7 +26,7 @@ export function NavbarFinal() {
     },
     {
       name: "Custom Merch",
-      link: "/customized", 
+      link: "/customized/options", 
     },
     {
       name: "Our Products",
