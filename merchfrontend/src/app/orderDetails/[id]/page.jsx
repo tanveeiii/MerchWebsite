@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { NavbarFinal } from "../../../components/Navbar";
 import Footer from "@/components/Footer";
 import { Loader2, ArrowLeft, Package, User, MapPin, Printer, Download, FileText, CheckCircle } from "lucide-react";
-import { InvoicePrint } from "./utils/invoice";
+import { InvoicePrint } from "@/utils/invoice";
 import { useReactToPrint } from "react-to-print";
 
 export default function OrderDetails() {
@@ -63,11 +63,16 @@ export default function OrderDetails() {
         if (!confirm("Are you sure you want to cancel this order?")) return;
         setActionLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_ORIGIN || 'http://localhost:5000'}/api/order/cancel/${id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-            });
-            const json = await res.json();
+            const response = await fetch(
+                `http://localhost:5000/api/order/cancel/${orderId}`,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
+
+            const res = await response.json();
+
             if (!res.ok) {
                 alert(json.message || "Failed to cancel order");
             } else {
