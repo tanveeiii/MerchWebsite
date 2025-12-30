@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 @Injectable()
 export class RazorpayService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async checkout(data: any) {
     const order = await instance.orders.create({
@@ -35,7 +35,6 @@ export class RazorpayService {
     }
 
     try {
-      // normalize user id (frontend sends userId; older callers might send user_id)
       const userId = data.userId ?? data.user_id;
 
       const createOrderRes = await fetch("http://localhost:5000/api/order/create", {
@@ -44,7 +43,7 @@ export class RazorpayService {
         body: JSON.stringify({
           order_number: "11001",
           user_id: Number(userId),
-          shipping_address: 1, // keep as you had it; ensure this address_id exists
+          shipping_address: 1,
           subtotal: data.subtotal,
           tax_amount: 0,
           shipping_cost: 0,
@@ -56,6 +55,14 @@ export class RazorpayService {
           razorpay_payment_id: data.razorpay_payment_id,
         }),
       });
+
+      if (!createOrderRes.ok) {
+        return {
+          success: false,
+          url: "http://localhost:3000/checkout/failure",
+        };
+      }
+
 
       // parse response body (important — a Response object is not the JSON)
       const createOrderJson = await createOrderRes.json().catch(() => null);
