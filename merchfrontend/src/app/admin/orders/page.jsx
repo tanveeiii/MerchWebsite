@@ -25,7 +25,8 @@ export default function AdminOrders() {
     try {
       const res = await fetch("http://localhost:5000/api/order/admin/all");
       const json = await res.json();
-      if (Array.isArray(json)) setOrders(json);
+      if (Array.isArray(json.data)) setOrders(json.data);
+      console.log(json.data)
     } catch (e) {
       console.error(e);
     } finally {
