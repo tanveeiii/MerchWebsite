@@ -12,6 +12,12 @@ import { mapProductFromBackend } from "@/utils/productMapper";
 import { Loader2 } from "lucide-react";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
+import {
+  requestNotificationPermission,
+  listenForegroundMessages,
+} from "../../lib/notification";
+
+
 
 const Discover = () => {
   const [loading, setLoading] = useState(true);
@@ -32,6 +38,11 @@ const Discover = () => {
     };
     check();
   }, [router]);
+
+  useEffect(() => {
+    requestNotificationPermission();
+    listenForegroundMessages();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
