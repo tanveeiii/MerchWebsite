@@ -208,15 +208,19 @@ export class OrderService {
     };
   }
   async getOneOrder(order_id: number) {
-     if (!order_id) {
-      throw new BadRequestException("User id is required");
+    if (!order_id) {
+      throw new BadRequestException("Order id is required");
     }
 
     const order = await this.prisma.order.findUnique({
       where: {
-        order_id: order_id,
+        order_id,
       },
       include: {
+        user: true, // ✅ user information
+
+        s_address: true, // ✅ shipping address (rename if different)
+
         OrderItem: {
           orderBy: {
             order_item_id: "asc",
@@ -230,15 +234,22 @@ export class OrderService {
                 },
               },
             },
+            product_variant: true,
+            Customization: true,   
           },
         },
       },
     });
 
+    if (!order) {
+      throw new NotFoundException("Order not found");
+    }
+
     return {
       code: 200,
-      message: "Orders fetched successfully",
+      message: "Order fetched successfully",
       data: order,
     };
   }
+
 }

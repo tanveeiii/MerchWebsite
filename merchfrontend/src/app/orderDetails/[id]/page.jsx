@@ -265,13 +265,6 @@ export default function OrderDetails() {
 
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><User size={18} className="text-gray-400" /> Customer Details</h3>
-                            <p className="font-medium text-gray-900">{order.user?.first_name} {order.user?.last_name}</p>
-                            <p className="text-sm text-gray-500">{order.user?.email}</p>
-                            <p className="text-sm text-gray-500">{order.user?.mobile}</p>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><MapPin size={18} className="text-gray-400" /> Shipping Address</h3>
                             {order.s_address ? (
                                 <div className="text-sm text-gray-600 space-y-1">

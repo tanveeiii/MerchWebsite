@@ -24,7 +24,7 @@ export default function OrderDetails() {
             try {
                 const res = await fetch(`http://localhost:5000/api/order/detail/${id}`);
                 const json = await res.json();
-
+                console.log("Order DAta", json);
                 if (json.data) {
                     const order = json.data;
 
@@ -62,7 +62,7 @@ export default function OrderDetails() {
         setActionLoading(true);
         try {
             const response = await fetch(
-                `http://localhost:5000/api/order/cancel/${orderId}`,
+                `http://localhost:5000/api/order/cancel/${id}`,
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
