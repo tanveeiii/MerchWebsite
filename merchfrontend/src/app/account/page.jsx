@@ -25,10 +25,15 @@ const Account = () => {
   // Modals State
   const [showComplaintModal, setShowComplaintModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  
+
   // --- RETURN MODAL STATE ---
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returnOrderData, setReturnOrderData] = useState(null);
+
+  // Change Password Modal State
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -56,7 +61,7 @@ const Account = () => {
           if (json.data) {
             const mappedOrders = json.data.map((order) => ({
               // --- ADDED THESE FIELDS FOR RETURN LOGIC ---
-              order_id: order.order_id, 
+              order_id: order.order_id,
               total_amount: order.total_amount,
               // -------------------------------------------
               status: order.order_status.toUpperCase(),
@@ -168,21 +173,61 @@ const Account = () => {
     }
   };
 
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    return null;
+  };
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    setError("");
+    const userId = localStorage.getItem("userId");
+
+    if (!newPassword || !confirmPassword) {
+      setError("All fields are required");
+      return;
+    }
+
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match");
+      return;
+    }
+
     setLoading(true);
+
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/resetPasswordRequest",
+        "http://localhost:5000/api/auth/resetPassword",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identity: userData.email }),
+          body: JSON.stringify({
+            newPassword,
+            isLoggedIn: true,
+            user_id: Number(userId),
+          }),
         }
       );
       const data = await response.json();
       if (response.ok) {
-        CustomToast("Reset link successfully sent!");
+        CustomToast("Password Changed Successfully");
       } else {
         CustomToast(data.message);
       }
@@ -203,22 +248,27 @@ const Account = () => {
   const handleSubmitReturn = async (order, reason) => {
     const userId = localStorage.getItem("userId");
     try {
-      const res = await fetch("http://localhost:5000/api/return-request/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          return_name: `REQ-${order.orderNo}`,
-          user_id: Number(userId),
-          order_id: Number(order.orderId), // From OrderCard props
-          reason: reason,
-          return_status: "PENDING",
-          refund_amount: Number(order.totalAmount || 0),
-          requested_at: new Date().toISOString()
-        }),
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/return-request/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            return_name: `REQ-${order.orderNo}`,
+            user_id: Number(userId),
+            order_id: Number(order.orderId), // From OrderCard props
+            reason: reason,
+            return_status: "PENDING",
+            refund_amount: Number(order.totalAmount || 0),
+            requested_at: new Date().toISOString(),
+          }),
+        }
+      );
 
       if (res.ok) {
-        CustomToast("Return Request Submitted Successfully! Waiting for Admin Approval.");
+        CustomToast(
+          "Return Request Submitted Successfully! Waiting for Admin Approval."
+        );
         setShowReturnModal(false);
       } else {
         const err = await res.json();
@@ -281,7 +331,7 @@ const Account = () => {
                       key={idx}
                       {...order}
                       // --- Pass Data Needed for Return ---
-                      orderId={order.order_id} 
+                      orderId={order.order_id}
                       totalAmount={order.total_amount}
                       onReturn={handleOpenReturn}
                       // -----------------------------------
@@ -401,6 +451,12 @@ const Account = () => {
                 <div>CHANGE PASSWORD</div>
               </h1>
               <ChangePassword
+                newPassword={newPassword}
+                setNewPassword={setNewPassword}
+                confirmPassword={confirmPassword}
+                setConfirmPassword={setConfirmPassword}
+                error={error}
+                setError={setError}
                 loading={loading}
                 handleChangePassword={handleChangePassword}
               />
@@ -420,10 +476,10 @@ const Account = () => {
 
       {/* --- RETURN MODAL (NEW) --- */}
       {showReturnModal && returnOrderData && (
-        <ReturnModal 
-            order={returnOrderData} 
-            onClose={() => setShowReturnModal(false)} 
-            onSubmit={handleSubmitReturn} 
+        <ReturnModal
+          order={returnOrderData}
+          onClose={() => setShowReturnModal(false)}
+          onSubmit={handleSubmitReturn}
         />
       )}
     </div>

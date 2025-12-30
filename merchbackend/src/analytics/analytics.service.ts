@@ -15,7 +15,7 @@ export class AnalyticsService {
     const user = await this.prisma.user.findUnique({
       where: { user_id: Number(createAnalyticsDto.user_id) },
     });
-    console.log(user);
+
     if (!user) {
       return null;
     }

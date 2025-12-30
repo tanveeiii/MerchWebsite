@@ -221,7 +221,7 @@ export class AuthService {
     }
     else {
 
-      user_id = dto.user_id
+      user_id = Number(dto.user_id)
     }
     const hashed = await bcrypt.hash(newPassword, 10);
 
