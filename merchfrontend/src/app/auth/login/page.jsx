@@ -89,10 +89,8 @@ export default function LoginPage() {
   useEffect(() => {
     const check = async () => {
       const isAuth = await checkAuth();
-      if (isAuth)
-        router.replace("/discover");
-      else
-        setCheckingAuth(false);
+      if (isAuth) router.replace("/discover");
+      else setCheckingAuth(false);
     };
     check();
   }, [router]);
@@ -111,7 +109,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || data.detail || "Invalid email or password");
+        throw new Error(
+          data.message || data.detail || "Invalid email or password"
+        );
       }
 
       if (data.token) {
@@ -121,7 +121,6 @@ export default function LoginPage() {
         localStorage.setItem("userId", data.id);
       }
       router.push("/discover");
-
     } catch (err) {
       console.error("Login Error:", err);
       setError(err.message);

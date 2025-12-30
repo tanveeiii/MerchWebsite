@@ -18,7 +18,7 @@ export default function TemplateLibraryPage() {
   useEffect(() => {
     const check = async () => {
       const isAuth = await checkAuth();
-      if (isAuth) router.replace("/auth/login");
+      if (!isAuth) router.replace("/auth/login");
       else setCheckingAuth(false);
     };
     check();

@@ -11,7 +11,7 @@ export default function AdminTags() {
   useEffect(() => {
     const check = async () => {
       const isAuth = await checkAuth();
-      if (isAuth) router.replace("/admin/login");
+      if (!isAuth) router.replace("/admin/login");
       else setCheckingAuth(false);
     };
     check();

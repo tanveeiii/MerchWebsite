@@ -56,7 +56,7 @@ export default function AdminProducts() {
   useEffect(() => {
     const check = async () => {
       const isAuth = await checkAuth();
-      if (isAuth) router.replace("/amdin/login");
+      if (!isAuth) router.replace("/amdin/login");
       else setCheckingAuth(false);
     };
     check();
