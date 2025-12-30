@@ -121,4 +121,36 @@ export class OrderService {
       data: orders,
     };
   }
+
+  async updateStatus(orderId: number, status: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { order_id: orderId },
+      });
+
+      const updatedOrder = await tx.order.update({
+        where: { order_id: orderId },
+        data: {
+          order_status: status,
+          updated_at: new Date(),
+        },
+      });
+
+      await tx.orderStatusHistory.create({
+        data: {
+          order_id: orderId,
+          status,
+          changed_at: new Date(),
+        },
+      });
+
+      return {
+        code: 200,
+        message: "Order status updated successfully",
+        order_id: orderId,
+        status,
+        updatedOrder,
+      };
+    });
+  }
 }

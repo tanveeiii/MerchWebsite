@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { DollarSign, Users, ShoppingBag, Package } from "lucide-react";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 
 const StatCard = ({ title, value, icon, color }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">

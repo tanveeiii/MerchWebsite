@@ -171,6 +171,7 @@ const CustomizationOverlay = ({ customization }) => {
 const CustomizedPage = () => {
   const router = useRouter(); // Initialize Router
   const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
+  
 
   // --- State Variables ---
   const [shirtColors, setShirtColors] = useState({

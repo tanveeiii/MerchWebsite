@@ -24,8 +24,8 @@ export class OrderController {
   }
 
   // // --- ADMIN: Update Status ---
-  // @Patch('update/:id')
-  // async updateStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: string) {
-  //   return this.orderService.updateStatus(id, status);
-  // }
+  @Patch('update/:id')
+  async updateStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: string) {
+    return this.orderService.updateStatus(id, status);
+  }
 }
