@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { NavbarFinal } from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -18,10 +18,8 @@ import {
   Droplet,
   Shirt,
   Loader2,
-  LayoutTemplate,
-  X,
 } from "lucide-react";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 
 // --- DYNAMIC SVG COMPONENTS (Unchanged) ---
@@ -170,15 +168,10 @@ const CustomizationOverlay = ({ customization }) => {
 
 // --- Main Page Component ---
 const CustomizedPage = () => {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter(); // Initialize Router
+  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
-  // --- Template State ---
-  const [templates, setTemplates] = useState([]);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(true);
-  const [loadingTemplates, setLoadingTemplates] = useState(true);
-
-  // --- Config States ---
+  // --- State Variables ---
   const [shirtColors, setShirtColors] = useState({
     body: "#ffffff",
     leftSleeve: "#ffffff",
@@ -212,38 +205,7 @@ const CustomizedPage = () => {
     back: { ...initialCustomization },
   });
 
-  // --- Fetch Templates on Load ---
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/customization-template/fetch");
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setTemplates(data);
-        }
-      } catch (e) {
-        console.error("Failed to fetch templates", e);
-      } finally {
-        setLoadingTemplates(false);
-      }
-    };
-    fetchTemplates();
-  }, []);
-
-  // --- Apply Template Logic ---
-  const applyTemplate = (templateData) => {
-    if (templateData) {
-      // Assuming 'templateData' contains { customizations, shirtColors, shirtConfig }
-      // You can add validation here to ensure the structure matches
-      if (templateData.customizations) setCustomizations(templateData.customizations);
-      if (templateData.shirtColors) setShirtColors(templateData.shirtColors);
-      if (templateData.shirtConfig) setShirtConfig(templateData.shirtConfig);
-      CustomToast("Template applied!");
-    }
-    setShowTemplateSelector(false);
-  };
-
-  // --- Existing Data for Options ---
+  // --- Data for Options ---
   const colorSwatches = [
     { name: "White", hex: "#ffffff" },
     { name: "Black", hex: "#000000" },
@@ -285,6 +247,7 @@ const CustomizedPage = () => {
     setActiveTab("style");
   };
 
+  // UPDATED: Apply color to ALL parts
   const handleSwatchColorChange = (hex) => {
     setShirtColors({
       body: hex,
@@ -294,6 +257,7 @@ const CustomizedPage = () => {
     });
   };
 
+  // UPDATED: Apply color to ALL parts
   const handlePartColorChange = (e) => {
     const hex = e.target.value;
     setShirtColors({
@@ -400,13 +364,15 @@ const CustomizedPage = () => {
     }));
   };
 
+  // --- API INTEGRATION: Add to Cart ---
   const handleAddToCart = async () => {
     setIsSubmitting(true);
     try {
-      const userId = 1; // HARDCODED
-      const product_id = 1; // HARDCODED
-      const product_variant_id = 1; // HARDCODED
+      const userId = 1; // HARDCODED: Replace with actual user ID from Auth context/LocalStorage
+      const product_id = 1; // HARDCODED: Base product ID for "Custom Shirt"
+      const product_variant_id = 1; // HARDCODED: Variant ID
 
+      // 1. Create Base Cart Item
       const cartResponse = await fetch(
         "http://localhost:5000/api/cart/create",
         {
@@ -427,6 +393,7 @@ const CustomizedPage = () => {
       const createdId =
         cartData.cart_id || cartData.order_item_id || cartData.id;
 
+      // 2. Add Customization Details
       const customizationPayload = {
         cart_id: createdId,
         front_image_url: "https://placeholder.com/custom-shirt-front.png",
@@ -450,6 +417,7 @@ const CustomizedPage = () => {
         throw new Error(errorData.message || "Failed to save customization");
       }
 
+      // Success
       CustomToast("Customized Shirt added to cart!");
       router.push("/cart");
     } catch (error) {
@@ -528,6 +496,7 @@ const CustomizedPage = () => {
     </div>
   );
 
+  // UPDATED: No individual part selection, just whole shirt color
   const renderColorPicker = () => (
     <div className="space-y-6">
       <div>
@@ -552,6 +521,7 @@ const CustomizedPage = () => {
           <span className="text-sm font-medium text-gray-800 capitalize flex-1">
             Custom Color
           </span>
+          {/* Using shirtColors.body as representative value since all are same */}
           <input
             type="color"
             value={shirtColors.body}
@@ -735,76 +705,10 @@ const CustomizedPage = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen relative">
+    <div className="bg-gray-100 min-h-screen">
       <ToastContainer />
       <NavbarFinal />
-
-      {/* --- TEMPLATE SELECTOR OVERLAY --- */}
-      {showTemplateSelector && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-          <div className="bg-white w-full max-w-5xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-6 border-b flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <LayoutTemplate className="text-blue-600" /> Choose a Template
-              </h2>
-              <button 
-                onClick={() => setShowTemplateSelector(false)} 
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <X size={28} />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-              {loadingTemplates ? (
-                <div className="flex justify-center items-center h-full">
-                  <Loader2 className="animate-spin w-12 h-12 text-blue-500" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {/* Blank Template */}
-                  <div 
-                    onClick={() => applyTemplate(null)}
-                    className="cursor-pointer group bg-white rounded-xl shadow-sm hover:shadow-xl border-2 border-transparent hover:border-blue-500 transition-all duration-200 overflow-hidden flex flex-col h-full"
-                  >
-                    <div className="h-48 bg-gray-100 flex items-center justify-center">
-                      <Shirt className="w-16 h-16 text-gray-300" />
-                    </div>
-                    <div className="p-4 text-center">
-                        <h3 className="font-bold text-gray-800">Start from Scratch</h3>
-                        <p className="text-sm text-gray-500 mt-1">Design your own shirt</p>
-                    </div>
-                  </div>
-
-                  {/* Fetched Templates */}
-                  {templates.map(template => (
-                    <div 
-                      key={template.template_id}
-                      onClick={() => applyTemplate(template.data)}
-                      className="cursor-pointer group bg-white rounded-xl shadow-sm hover:shadow-xl border-2 border-transparent hover:border-blue-500 transition-all duration-200 overflow-hidden flex flex-col h-full"
-                    >
-                      <div className="h-48 bg-gray-100 overflow-hidden relative">
-                        <img 
-                          src={template.preview_image} 
-                          alt={template.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                      <div className="p-4">
-                          <h3 className="font-bold text-gray-800 line-clamp-1">{template.name}</h3>
-                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{template.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- EDITOR CONTENT (Background) --- */}
-      <div className={`container mx-auto max-w-7xl p-4 lg:p-8 ${showTemplateSelector ? "blur-sm" : ""}`}>
+      <div className="container mx-auto max-w-7xl p-4 lg:p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Create Your Custom T-Shirt
         </h1>
@@ -903,16 +807,10 @@ const CustomizedPage = () => {
                 )}
               </button>
               <button
-                onClick={() => setShowTemplateSelector(true)} // REOPEN SELECTOR
+                onClick={resetCustomization}
                 className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors"
               >
-                <LayoutTemplate className="w-5 h-5" /> Change Template
-              </button>
-              <button
-                onClick={resetCustomization}
-                className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-600 font-medium py-2 px-6 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-              >
-                <RotateCcw className="w-4 h-4" /> Reset Current Design
+                <RotateCcw className="w-5 h-5" /> Reset
               </button>
             </div>
           </div>
