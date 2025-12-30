@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CategoryManager from "@/components/CategoryManager"; // This component handles the logic
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";

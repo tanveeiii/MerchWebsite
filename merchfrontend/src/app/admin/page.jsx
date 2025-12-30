@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { DollarSign, Users, ShoppingBag, Package } from "lucide-react";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";

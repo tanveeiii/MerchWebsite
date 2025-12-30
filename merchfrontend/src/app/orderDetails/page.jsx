@@ -1,6 +1,6 @@
 "use client";
 import { NavbarFinal } from "@/components/Navbar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
