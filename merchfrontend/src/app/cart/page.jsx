@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
 
 const Cart = () => {
-  const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -22,6 +22,18 @@ const Cart = () => {
     email: "",
     mobile: "",
   });
+  
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -84,7 +96,7 @@ const Cart = () => {
   const total = Math.max(0, subtotal - couponDiscount);
 
   const handleQuantityChange = async (id, newQty) => {
-    if (newQty < 1) return
+    if (newQty < 1) return;
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity: newQty } : item

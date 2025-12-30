@@ -12,6 +12,7 @@ import ReturnModal from "./components/ReturnModal"; // <--- IMPORT ADDED
 import ChangePassword from "./components/changePassword";
 import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
 
 const Account = () => {
   const router = useRouter();
@@ -34,6 +35,17 @@ const Account = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -227,6 +239,8 @@ const Account = () => {
       );
       const data = await response.json();
       if (response.ok) {
+        setNewPassword("");
+        setConfirmPassword("");
         CustomToast("Password Changed Successfully");
       } else {
         CustomToast(data.message);

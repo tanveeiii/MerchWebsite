@@ -80,10 +80,10 @@ const ForgotPasswordModal = ({ setShowForgotPasswordModal }) => {
 };
 
 export default function LoginPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {

@@ -5,26 +5,40 @@ import Footer from "@/components/Footer";
 import { Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const NewArrivalsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
-        
+
         if (json.data) {
           // 1. Map Backend Data
           const mapped = json.data.map(mapProductFromBackend);
-          
+
           // 2. Filter by Tag "New Arrival"
           // Ensure your products in the database have this tag
-          const newArrivals = mapped.filter(p => p.tag === "New Arrival");
-          
+          const newArrivals = mapped.filter((p) => p.tag === "New Arrival");
+
           // If you prefer to just show the newest created items regardless of tag, use this instead:
           // const newArrivals = mapped.sort((a, b) => b.id - a.id).slice(0, 20);
 
@@ -40,19 +54,22 @@ const NewArrivalsPage = () => {
   }, []);
 
   // 3. Dynamic Categories (Based on the filtered "New Arrival" products)
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   // 4. Display Filter Logic
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter(p => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
       <NavbarFinal />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">New Arrivals</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            New Arrivals
+          </h1>
           <p className="text-lg text-gray-600">Fresh styles just added.</p>
         </div>
 

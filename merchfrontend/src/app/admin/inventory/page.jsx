@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 export default function AdminInventory() {
   const [logs, setLogs] = useState([]);
@@ -31,6 +33,18 @@ export default function AdminInventory() {
   const selectedProduct = products.find(
     (p) => p.product_id === Number(formData.product_id)
   );
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   // Fetch Logs & Products
   const fetchData = async () => {

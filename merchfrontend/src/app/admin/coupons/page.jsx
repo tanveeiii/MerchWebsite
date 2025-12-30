@@ -12,12 +12,26 @@ import {
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   // Form Initial State
   const initialFormState = {

@@ -4,12 +4,26 @@ import { NavbarFinal } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard"; // Import the robust component
 import { Tag, Shirt, Filter, Wind, Layers, Loader2 } from "lucide-react";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 export default function NonCustomizedPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   // --- FETCH DATA ---
   useEffect(() => {
@@ -34,9 +48,9 @@ export default function NonCustomizedPage() {
         });
 
         // 2. Filter out "Customized" categories for the tabs
-        const nonCustomCategories = (Array.isArray(catJson) ? catJson : []).filter(
-          (c) => !c.category_name.toLowerCase().includes("custom")
-        );
+        const nonCustomCategories = (
+          Array.isArray(catJson) ? catJson : []
+        ).filter((c) => !c.category_name.toLowerCase().includes("custom"));
 
         setProducts(nonCustomProducts);
         setCategories(nonCustomCategories);
@@ -62,8 +76,10 @@ export default function NonCustomizedPage() {
   const getCategoryIcon = (name) => {
     const lower = name.toLowerCase();
     if (lower.includes("hoodie")) return <Tag className="w-4 h-4" />;
-    if (lower.includes("jacket") || lower.includes("wind")) return <Wind className="w-4 h-4" />;
-    if (lower.includes("shirt") || lower.includes("tee")) return <Shirt className="w-4 h-4" />;
+    if (lower.includes("jacket") || lower.includes("wind"))
+      return <Wind className="w-4 h-4" />;
+    if (lower.includes("shirt") || lower.includes("tee"))
+      return <Shirt className="w-4 h-4" />;
     return <Layers className="w-4 h-4" />;
   };
 
@@ -137,12 +153,14 @@ export default function NonCustomizedPage() {
               </div>
             ) : (
               <div className="text-center py-20 text-gray-500">
-                <p className="text-xl font-medium">No products found in this category.</p>
-                <button 
-                    onClick={() => setActiveCategory("All")}
-                    className="mt-4 text-blue-600 hover:underline"
+                <p className="text-xl font-medium">
+                  No products found in this category.
+                </p>
+                <button
+                  onClick={() => setActiveCategory("All")}
+                  className="mt-4 text-blue-600 hover:underline"
                 >
-                    View all products
+                  View all products
                 </button>
               </div>
             )}

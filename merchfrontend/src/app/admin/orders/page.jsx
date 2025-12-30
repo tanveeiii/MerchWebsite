@@ -4,11 +4,22 @@ import { Loader2, CheckCircle, Clock, Truck, Eye } from "lucide-react"; // Added
 import { useRouter } from "next/navigation"; // Added useRouter
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter(); // Initialize router
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   const fetchOrders = async () => {
     try {

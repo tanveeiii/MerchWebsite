@@ -5,25 +5,39 @@ import Footer from "@/components/Footer";
 import { Percent, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const SalePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
-        
+
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          
+
           // 1. Filter by Tag "Sale"
           // This ensures only products explicitly tagged as "Sale" appear here
-          const saleItems = mapped.filter(p => p.tag === "Sale");
-          
+          const saleItems = mapped.filter((p) => p.tag === "Sale");
+
           setProducts(saleItems);
         }
       } catch (e) {
@@ -36,12 +50,13 @@ const SalePage = () => {
   }, []);
 
   // 2. Dynamic Categories (Based on the filtered "Sale" products)
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   // 3. Display Filter Logic
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter(p => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
@@ -51,7 +66,9 @@ const SalePage = () => {
           <h1 className="text-4xl font-bold text-red-600 mb-2 flex items-center justify-center gap-3">
             <Percent size={36} /> On Sale!
           </h1>
-          <p className="text-lg text-gray-600">Grab these styles at a discount.</p>
+          <p className="text-lg text-gray-600">
+            Grab these styles at a discount.
+          </p>
         </div>
 
         {loading ? (

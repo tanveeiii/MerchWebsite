@@ -5,24 +5,38 @@ import Footer from "@/components/Footer";
 import { Star, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const TopPicksPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
-        
+
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          
+
           // 1. Filter by Tag "Top Pick" (Ensure products in DB have this tag)
-          const topPicks = mapped.filter(p => p.tag === "Top Pick");
-          
+          const topPicks = mapped.filter((p) => p.tag === "Top Pick");
+
           setProducts(topPicks);
         }
       } catch (e) {
@@ -35,12 +49,13 @@ const TopPicksPage = () => {
   }, []);
 
   // 2. Dynamic Categories based on the "Top Pick" products found
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   // 3. Filter Display Logic
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
@@ -49,7 +64,8 @@ const TopPicksPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 text-center mb-4 flex justify-center items-center gap-2">
-            <Star size={36} className="text-yellow-500 fill-yellow-500" /> Our Top Picks
+            <Star size={36} className="text-yellow-500 fill-yellow-500" /> Our
+            Top Picks
           </h1>
           <p className="text-lg text-gray-600 text-center">
             Customer favorites and highly-rated items.

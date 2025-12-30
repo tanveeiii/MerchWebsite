@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
 
 // --- DYNAMIC SVG COMPONENTS (Unchanged) ---
 const TShirtFrontSvg = ({ colors, config }) => {
@@ -226,6 +227,17 @@ const CustomizedPage = () => {
     "Times New Roman",
     "Comic Sans MS",
   ];
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   // --- Helper Functions ---
   const resetCustomization = () => {

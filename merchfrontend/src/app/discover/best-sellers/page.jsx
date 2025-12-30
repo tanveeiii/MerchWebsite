@@ -5,24 +5,38 @@ import Footer from "@/components/Footer";
 import { Star, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const BestSellersPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
-        
+
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          
+
           // 1. Filter by Tag "Best Seller" (As per your requirement)
-          const bestSellers = mapped.filter(p => p.tag === "Best Seller");
-          
+          const bestSellers = mapped.filter((p) => p.tag === "Best Seller");
+
           setProducts(bestSellers);
         }
       } catch (e) {
@@ -36,12 +50,13 @@ const BestSellersPage = () => {
 
   // 2. Dynamic Category Logic
   // Extracts unique categories from the loaded 'Best Seller' products
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   // 3. Filter Logic for Display
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
@@ -51,7 +66,9 @@ const BestSellersPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
             <Star size={36} className="text-yellow-500" /> Our Best Sellers
           </h1>
-          <p className="text-lg text-gray-600">Top-rated picks, loved by our customers.</p>
+          <p className="text-lg text-gray-600">
+            Top-rated picks, loved by our customers.
+          </p>
         </div>
 
         {loading ? (

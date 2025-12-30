@@ -5,11 +5,25 @@ import Footer from "@/components/Footer";
 import { Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const HoodiesPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -20,7 +34,7 @@ const HoodiesPage = () => {
           const mapped = json.data.map(mapProductFromBackend);
           // Filter to get only Hoodies based on Tag (or Category name if you prefer)
           // Ensure your products in DB have the tag "Hoodie"
-          const hoodies = mapped.filter(p => p.tag === "Hoodie");
+          const hoodies = mapped.filter((p) => p.tag === "Hoodie");
           setProducts(hoodies);
         }
       } catch (e) {
@@ -33,23 +47,30 @@ const HoodiesPage = () => {
   }, []);
 
   // --- Added Category Logic ---
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">
       <NavbarFinal />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Hoodies Collection</h1>
-          <p className="text-lg text-gray-600">Comfort and style for every season.</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Hoodies Collection
+          </h1>
+          <p className="text-lg text-gray-600">
+            Comfort and style for every season.
+          </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center p-20"><Loader2 className="animate-spin text-gray-400" size={40} /></div>
+          <div className="flex justify-center p-20">
+            <Loader2 className="animate-spin text-gray-400" size={40} />
+          </div>
         ) : (
           <>
             {/* --- Added Category Filter Buttons --- */}

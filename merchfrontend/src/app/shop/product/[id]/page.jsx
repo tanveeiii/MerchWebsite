@@ -15,6 +15,8 @@ import ReviewsSection from "@/components/ReviewsSection";
 import { trackEvent } from "@/utils/analytics";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const ProductPage = ({ params }) => {
   // FIX: In Next.js 15, params is a Promise. Unwrap it with React.use()
@@ -38,6 +40,18 @@ const ProductPage = ({ params }) => {
   // Loading States for Actions
   const [addingCart, setAddingCart] = useState(false);
   const [addingWish, setAddingWish] = useState(false);
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");

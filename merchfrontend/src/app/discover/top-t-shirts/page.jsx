@@ -5,24 +5,38 @@ import Footer from "@/components/Footer";
 import { Star, Loader2 } from "lucide-react";
 import { mapProductFromBackend } from "@/utils/productMapper";
 import ProductCard from "@/components/ProductCard";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/navigation";
 
 const TopTShirtsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/product/fetch");
         const json = await res.json();
-        
+
         if (json.data) {
           const mapped = json.data.map(mapProductFromBackend);
-          
+
           // 1. Filter by Tag "TopTshirts" (Ensure your products have this specific tag in DB)
-          const topTshirts = mapped.filter(p => p.tag === "TopTshirts");
-          
+          const topTshirts = mapped.filter((p) => p.tag === "TopTshirts");
+
           setProducts(topTshirts);
         }
       } catch (e) {
@@ -35,12 +49,13 @@ const TopTShirtsPage = () => {
   }, []);
 
   // 2. Dynamic Categories based on the "TopTshirts" products found
-  const categories = ["All", ...new Set(products.map(p => p.category))];
+  const categories = ["All", ...new Set(products.map((p) => p.category))];
 
   // 3. Filter Display Logic
-  const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   return (
     <div className="bg-white min-h-screen">

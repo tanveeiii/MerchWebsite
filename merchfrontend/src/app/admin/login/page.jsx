@@ -1,36 +1,47 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Lock, Mail, ShieldCheck } from 'lucide-react';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Lock, Mail, ShieldCheck } from "lucide-react";
+import { checkAuth } from "@/utils/checkauth";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost:5000/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || 'Login failed');
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
       // Success: Save Admin Flag
-      localStorage.setItem('adminAuthenticated', 'true');
-      localStorage.setItem('adminName', data.admin.name);
-      
-      router.push('/admin'); // Redirect to Dashboard
+      localStorage.setItem("adminAuthenticated", "true");
+      localStorage.setItem("adminName", data.admin.name);
 
+      router.push("/admin"); // Redirect to Dashboard
     } catch (err) {
       setError(err.message);
     } finally {
@@ -58,29 +69,43 @@ export default function AdminLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
                 <input
                   type="email"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   placeholder="admin@example.com"
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
                 <input
                   type="password"
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   placeholder="••••••••"
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -90,7 +115,7 @@ export default function AdminLogin() {
               disabled={loading}
               className="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? 'Authenticating...' : 'Access Dashboard'}
+              {loading ? "Authenticating..." : "Access Dashboard"}
             </button>
           </form>
         </div>

@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
+import { useRouter } from "next/router";
 
 export default function AdminComplaints() {
   const [complaints, setComplaints] = useState([]);
@@ -18,6 +20,18 @@ export default function AdminComplaints() {
   // State for handling replies
   const [replyText, setReplyText] = useState({}); // Map: { complaintId: "text" }
   const [submitting, setSubmitting] = useState(null); // ID of complaint being submitted
+
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/admin/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   const fetchComplaints = async () => {
     try {

@@ -2,11 +2,23 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import AuthForms from "../AuthForm";
+import { checkAuth } from "@/utils/checkauth";
 
 const SignupPage = () => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) router.replace("/discover");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
 
   const handleSignup = async (formData) => {
     setError("");
@@ -29,7 +41,6 @@ const SignupPage = () => {
 
       // Success! Redirect to login
       router.push("/auth/login");
-      
     } catch (err) {
       setError(err.message);
     } finally {
