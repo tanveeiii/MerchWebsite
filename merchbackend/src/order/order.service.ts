@@ -46,7 +46,7 @@ export class OrderService {
       });
 
       for (const item of cart_items) {
-        if(order_status === "FORCE_FAIL") throw new BadRequestException("Forced failure after cart fetch");
+        if (order_status === "FORCE_FAIL") throw new BadRequestException("Forced failure after cart fetch");
         if (!item.product_variant_id) {
           throw new BadRequestException(
             `Cart item ${item.cart_id} has no product variant`
@@ -89,5 +89,26 @@ export class OrderService {
         order_id: order.order_id,
       };
     });
+  }
+
+  async findAll(userId: number) {
+    if (!userId) {
+      throw new BadRequestException("User id is required");
+    }
+
+    const orders = await this.prisma.order.findMany({
+      where: {
+        user_id: userId,
+      },
+      orderBy: {
+        created_at: "desc",
+      }
+    });
+
+    return {
+      code: 200,
+      message: "Orders fetched successfully",
+      data: orders,
+    };
   }
 }

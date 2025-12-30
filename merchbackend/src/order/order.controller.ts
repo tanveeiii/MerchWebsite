@@ -18,10 +18,10 @@ export class OrderController {
   // }
 
   // // --- USER: Fetch My Orders ---
-  // @Get(':userId')
-  // async findAll(@Param('userId', ParseIntPipe) userId: number) {
-  //   return this.orderService.findAll(userId);
-  // }
+  @Get(':userId')
+  async findAll(@Param('userId', ParseIntPipe) userId: number) {
+    return this.orderService.findAll(userId);
+  }
 
   // // --- ADMIN: Update Status ---
   // @Patch('update/:id')
