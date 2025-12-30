@@ -12,10 +12,10 @@ export class OrderController {
   }
 
   // --- ADMIN: Fetch ALL Orders ---
-  // @Get('admin/all')
-  // async findAllForAdmin() {
-  //   return this.orderService.findAllForAdmin();
-  // }
+  @Get('admin/all')
+  async findAllForAdmin() {
+    return this.orderService.findAllForAdmin();
+  }
 
   // // --- USER: Fetch My Orders ---
   @Get(':userId')

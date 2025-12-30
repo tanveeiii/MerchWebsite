@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { trackEvent } from "@/utils/analytics";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";

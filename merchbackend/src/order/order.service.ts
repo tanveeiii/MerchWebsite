@@ -111,4 +111,14 @@ export class OrderService {
       data: orders,
     };
   }
+  async findAllForAdmin(){
+    const orders = await this.prisma.order.findMany({orderBy:{
+      created_at: "desc",
+    }})
+    return {
+      code: 200,
+      message: "Orders fetched successfully",
+      data: orders,
+    };
+  }
 }
