@@ -11,9 +11,10 @@ export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
 
   // 1. CREATE EVENT
-  async create(createAnalyticsDto: CreateAnalyticsDto) {
+  async create(dto: CreateAnalyticsDto) {
+    const {user_id, product_id} = dto
     const user = await this.prisma.user.findUnique({
-      where: { user_id: Number(createAnalyticsDto.user_id) },
+      where: { user_id: user_id },
     });
 
     if (!user) {
@@ -24,7 +25,7 @@ export class AnalyticsService {
     return await this.prisma.analytics.create({
       data: {
         user_id: user.user_id,
-        product_id: Number(createAnalyticsDto.product_id),
+        product_id: product_id,
         created_at: now,
       },
     });

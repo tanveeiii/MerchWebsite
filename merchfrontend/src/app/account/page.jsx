@@ -69,6 +69,7 @@ const Account = () => {
         if (activeSection === "orders") {
           const res = await fetch(`http://localhost:5000/api/order/${userId}`);
           const json = await res.json();
+          console.log("Order Data", json)
           if (json.data) {
             const mappedOrders = json.data.map((order) => ({
               order_id: order.order_id,
@@ -82,8 +83,8 @@ const Account = () => {
               deliveryDate: "Pending",
               orderNo: order.order_number,
               image:
-                order.order_items?.[0]?.product?.image_url ||
-                "https://readymadeui.com/images/product14.webp",
+                order.OrderItem[0]?.product?.ProductImage[0]?.image_url ||
+                "https://unsplash.com/photos/person-holding-light-bulb-fIq0tET6llw",
               delivered: order.order_status === "DELIVERED",
             }));
             setOrders(mappedOrders);
@@ -290,44 +291,54 @@ const Account = () => {
 
   const handleCancelOrder = async (orderId) => {
     if (!confirm("Are you sure you want to cancel this order?")) return;
+
     try {
-      const res = await fetch(`http://localhost:5000/api/order/update/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CANCELLED" }),
-      });
-      if (res.ok) {
-        CustomToast("Order Cancelled Successfully");
-        setOrders((prev) =>
-          prev.map((o) =>
-            o.order_id === orderId ? { ...o, status: "CANCELLED" } : o
-          )
-        );
-      } else {
-        const err = await res.json();
-        CustomToast(`Failed to cancel: ${err.message}`);
+      const res = await fetch(
+        `http://localhost:5000/api/order/cancel/${orderId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        CustomToast(data.message || "Failed to cancel order");
+        return;
       }
+
+      CustomToast("Order Cancelled Successfully");
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.order_id === orderId
+            ? { ...o, status: "CANCELLED", delivered: false }
+            : o
+        )
+      );
     } catch (e) {
       console.error(e);
       CustomToast("Network error cancelling order");
     }
   };
 
+
   return (
     <div>
       <ToastContainer />
       <NavbarFinal />
-      
+
       {/* RESPONSIVE CONTAINER */}
       <div className="flex flex-col lg:flex-row bg-gray-50 min-h-screen">
-        
+
         {/* Sidebar Container - Adjusts for mobile */}
         <div className="w-full lg:w-auto lg:flex-shrink-0">
-            <Sidebar
+          <Sidebar
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             userData={userData}
-            />
+          />
         </div>
 
         {/* Main Content */}
@@ -396,7 +407,7 @@ const Account = () => {
               </h1>
               {loading ? (
                 <div className="text-center py-12 text-gray-500">
-                  <Loader2 className="animate-spin inline-block mr-2" size={20}/> 
+                  <Loader2 className="animate-spin inline-block mr-2" size={20} />
                   Loading returns...
                 </div>
               ) : returns.length > 0 ? (
@@ -435,29 +446,28 @@ const Account = () => {
                             <div className="text-xs text-gray-500">
                               Requested: <span className="font-medium text-gray-700">{formattedDate}</span>
                             </div>
-                            
+
                             <div className="mt-1 flex flex-wrap items-center gap-2">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase tracking-wide border ${
-                                    ret.return_status === "APPROVED" 
-                                    ? "bg-green-50 text-green-700 border-green-200" 
-                                    : ret.return_status === "REJECTED"
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase tracking-wide border ${ret.return_status === "APPROVED"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : ret.return_status === "REJECTED"
                                     ? "bg-red-50 text-red-700 border-red-200"
                                     : "bg-orange-50 text-orange-700 border-orange-200"
                                 }`}>
                                 {ret.return_status}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                    Refund: <span className="font-bold text-black">${Number(ret.refund_amount).toFixed(2)}</span>
-                                </span>
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                Refund: <span className="font-bold text-black">${Number(ret.refund_amount).toFixed(2)}</span>
+                              </span>
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Right: Action Button */}
                         <div className="w-full md:w-auto">
-                            <button className="w-full md:w-auto border border-gray-300 px-5 py-2 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition rounded active:scale-95 text-center">
+                          <button className="w-full md:w-auto border border-gray-300 px-5 py-2 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition rounded active:scale-95 text-center">
                             VIEW DETAILS
-                            </button>
+                          </button>
                         </div>
                       </div>
                     );
@@ -465,13 +475,13 @@ const Account = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 px-4 bg-white rounded-lg border border-dashed border-gray-300">
-                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
-                        <RotateCcw size={32} />
-                    </div>
-                    <p className="text-gray-900 font-medium mb-1">No returns yet</p>
-                    <p className="text-sm text-gray-500 text-center max-w-xs">
-                        Your return requests will appear here.
-                    </p>
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                    <RotateCcw size={32} />
+                  </div>
+                  <p className="text-gray-900 font-medium mb-1">No returns yet</p>
+                  <p className="text-sm text-gray-500 text-center max-w-xs">
+                    Your return requests will appear here.
+                  </p>
                 </div>
               )}
             </div>
