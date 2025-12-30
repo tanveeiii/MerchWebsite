@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TagManager from "@/components/TagManager"; // This component handles the logic
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";

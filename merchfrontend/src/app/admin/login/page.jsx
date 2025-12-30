@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ShieldCheck } from "lucide-react";
 import { checkAuth } from "@/utils/checkauth";

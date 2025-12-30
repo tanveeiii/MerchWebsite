@@ -7,6 +7,7 @@ import Footer from "../../components/Footer";
 import { NavbarFinal } from "@/components/Navbar";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const HomePage = () => {
   const router = useRouter();
