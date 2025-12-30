@@ -18,7 +18,6 @@ export default function OrderDetails() {
         const res = await fetch(`http://localhost:5000/api/order/${id}`);
         const data = await res.json();
         
-        // Handle different response structures (data.order vs direct object)
         if (data.order) setOrder(data.order);
         else if (data.data) setOrder(data.data);
         else setOrder(data);

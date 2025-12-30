@@ -107,7 +107,7 @@ export class OrderService {
       include: {
         OrderItem: {
           orderBy: {
-            order_item_id: "asc", 
+            order_item_id: "asc",
           },
           include: {
             product: {
@@ -175,37 +175,70 @@ export class OrderService {
     });
   }
 
- async cancelOrder(order_id: number) {
-  if (!order_id) {
-    throw new BadRequestException("Order id is required");
+  async cancelOrder(order_id: number) {
+    if (!order_id) {
+      throw new BadRequestException("Order id is required");
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { order_id },
+    });
+
+    if (!order)
+      throw new NotFoundException("Order not found");
+
+
+    if (order.order_status === "DELIVERED")
+      throw new BadRequestException("Delivered orders cannot be cancelled");
+    if (order.order_status === "CANCELLED")
+      throw new BadRequestException("Order is already cancelled");
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { order_id },
+      data: {
+        order_status: "CANCELLED",
+        cancelled_at: new Date(),
+      },
+    });
+
+    return {
+      code: 200,
+      message: "Order cancelled successfully",
+      data: updatedOrder,
+    };
   }
+  async getOneOrder(order_id: number) {
+     if (!order_id) {
+      throw new BadRequestException("User id is required");
+    }
 
-  const order = await this.prisma.order.findUnique({
-    where: { order_id },
-  });
+    const order = await this.prisma.order.findUnique({
+      where: {
+        order_id: order_id,
+      },
+      include: {
+        OrderItem: {
+          orderBy: {
+            order_item_id: "asc",
+          },
+          include: {
+            product: {
+              include: {
+                ProductImage: {
+                  where: { is_primary: true },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
-  if (!order) 
-    throw new NotFoundException("Order not found");
-  
-
-  if (order.order_status === "DELIVERED") 
-    throw new BadRequestException("Delivered orders cannot be cancelled");
-  if (order.order_status === "CANCELLED") 
-    throw new BadRequestException("Order is already cancelled");
-
-  const updatedOrder = await this.prisma.order.update({
-    where: { order_id },
-    data: {
-      order_status: "CANCELLED",
-      cancelled_at: new Date(), 
-    },
-  });
-
-  return {
-    code: 200,
-    message: "Order cancelled successfully",
-    data: updatedOrder,
-  };
-}
-
+    return {
+      code: 200,
+      message: "Orders fetched successfully",
+      data: order,
+    };
+  }
 }

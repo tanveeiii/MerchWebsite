@@ -30,4 +30,9 @@ export class OrderController {
   async cancelOrder(@Param('id', ParseIntPipe) id: number){
     return this.orderService.cancelOrder(id);
   }
+
+  @Get('detail/:id')
+  async getOneOrder(@Param('id', ParseIntPipe) id: number){
+    return this.orderService.getOneOrder(id);
+  }
 }

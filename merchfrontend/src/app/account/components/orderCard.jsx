@@ -1,7 +1,7 @@
 "use client";
 
 // Added onReturn prop and orderId/totalAmount to props
-export default function OrderCard({ status, date, deliveryDate, orderNo, image, delivered, onComplaint, onReturn, orderId, totalAmount, onCancel }) {
+export default function OrderCard({ status, date, deliveryDate, orderNo, image, delivered, onComplaint, onReturn, orderId, totalAmount, onCancel, onView }) {
     
     const canReturn = delivered && status !== 'RETURNED' && status !== 'PENDING_RETURN';
 
@@ -53,7 +53,9 @@ export default function OrderCard({ status, date, deliveryDate, orderNo, image, 
                     </>
                 ) : (
                     <>
-                        <button className="border border-black px-4 py-2 text-sm hover:bg-black hover:text-white transition rounded-sm">
+                        <button 
+                        onClick={() => onView(orderId)}
+                        className="border border-black px-4 py-2 text-sm hover:bg-black hover:text-white transition rounded-sm">
                             VIEW ORDER
                         </button>
                         

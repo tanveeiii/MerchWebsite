@@ -12,6 +12,7 @@ import ReturnModal from "./components/ReturnModal";
 import ChangePassword from "./components/changePassword";
 import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
+import { checkAuth } from "@/utils/checkauth";
 
 const Account = () => {
   const router = useRouter();
@@ -286,7 +287,7 @@ const Account = () => {
 
   // --- ACTIONS HANDLERS ---
   const handleViewOrder = (orderId) => {
-    router.push(`/orders/${orderId}`);
+    router.push(`/orderDetails/${orderId}`);
   };
 
   const handleCancelOrder = async (orderId) => {
