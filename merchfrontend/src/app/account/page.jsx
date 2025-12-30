@@ -3,16 +3,15 @@ import { NavbarFinal } from "@/components/Navbar";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "./components/sidebar";
-import { User, Package, RotateCcw, MapPin, Lock } from "lucide-react";
+import { User, Package, RotateCcw, MapPin, Lock, Loader2 } from "lucide-react";
 import OrderCard from "./components/orderCard";
 import Overview from "./components/overview";
 import AddressBook from "./components/addressBook";
 import ComplaintModal from "./components/ComplaintModal";
-import ReturnModal from "./components/ReturnModal"; // <--- IMPORT ADDED
+import ReturnModal from "./components/ReturnModal";
 import ChangePassword from "./components/changePassword";
 import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
-import { checkAuth } from "@/utils/checkauth";
 
 const Account = () => {
   const router = useRouter();
@@ -35,17 +34,6 @@ const Account = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    const check = async () => {
-      const isAuth = await checkAuth();
-      if (!isAuth) router.replace("/admin/login");
-      else setCheckingAuth(false);
-    };
-    check();
-  }, [router]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -72,10 +60,8 @@ const Account = () => {
           const json = await res.json();
           if (json.data) {
             const mappedOrders = json.data.map((order) => ({
-              // --- ADDED THESE FIELDS FOR RETURN LOGIC ---
               order_id: order.order_id,
               total_amount: order.total_amount,
-              // -------------------------------------------
               status: order.order_status.toUpperCase(),
               date: new Date(order.created_at).toLocaleDateString("en-GB", {
                 day: "numeric",
@@ -186,18 +172,10 @@ const Account = () => {
   };
 
   const validatePassword = (password) => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
+    if (password.length < 8) return "Password must be at least 8 characters long";
+    if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter";
+    if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter";
+    if (!/[0-9]/.test(password)) return "Password must contain at least one number";
     return null;
   };
 
@@ -253,7 +231,7 @@ const Account = () => {
     }
   };
 
-  // --- NEW: RETURN LOGIC HANDLERS ---
+  // --- RETURN LOGIC HANDLERS ---
   const handleOpenReturn = (orderData) => {
     setReturnOrderData(orderData);
     setShowReturnModal(true);
@@ -270,7 +248,7 @@ const Account = () => {
           body: JSON.stringify({
             return_name: `REQ-${order.orderNo}`,
             user_id: Number(userId),
-            order_id: Number(order.orderId), // From OrderCard props
+            order_id: Number(order.orderId),
             reason: reason,
             return_status: "PENDING",
             refund_amount: Number(order.totalAmount || 0),
@@ -294,21 +272,58 @@ const Account = () => {
     }
   };
 
+  // --- ACTIONS HANDLERS ---
+  const handleViewOrder = (orderId) => {
+    router.push(`/orders/${orderId}`);
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!confirm("Are you sure you want to cancel this order?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/order/update/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      if (res.ok) {
+        CustomToast("Order Cancelled Successfully");
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.order_id === orderId ? { ...o, status: "CANCELLED" } : o
+          )
+        );
+      } else {
+        const err = await res.json();
+        CustomToast(`Failed to cancel: ${err.message}`);
+      }
+    } catch (e) {
+      console.error(e);
+      CustomToast("Network error cancelling order");
+    }
+  };
+
   return (
     <div>
       <ToastContainer />
       <NavbarFinal />
-      <div className="flex bg-gray-50 min-h-screen">
-        <Sidebar
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          userData={userData}
-        />
+      
+      {/* RESPONSIVE CONTAINER */}
+      <div className="flex flex-col lg:flex-row bg-gray-50 min-h-screen">
+        
+        {/* Sidebar Container - Adjusts for mobile */}
+        <div className="w-full lg:w-auto lg:flex-shrink-0">
+            <Sidebar
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            userData={userData}
+            />
+        </div>
 
-        <div className="flex-1 p-8">
+        {/* Main Content */}
+        <div className="flex-1 p-4 lg:p-8 overflow-hidden">
           {activeSection === "overview" && (
             <div>
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-1.5 w-full border-gray-300 border rounded-md p-4">
+              <h1 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2 w-full border-gray-300 border rounded-md p-4 bg-white">
                 <User size={22} />
                 <div>ACCOUNT OVERVIEW</div>
               </h1>
@@ -329,7 +344,7 @@ const Account = () => {
 
           {activeSection === "orders" && (
             <div>
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-1.5 w-full border-gray-300 border rounded-md p-4">
+              <h1 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2 w-full border-gray-300 border rounded-md p-4 bg-white">
                 <Package size={22} />
                 <div>MY ORDERS</div>
               </h1>
@@ -344,12 +359,12 @@ const Account = () => {
                     <OrderCard
                       key={idx}
                       {...order}
-                      // --- Pass Data Needed for Return ---
                       orderId={order.order_id}
                       totalAmount={order.total_amount}
                       onReturn={handleOpenReturn}
-                      // -----------------------------------
                       onComplaint={handleOpenComplaint}
+                      onView={handleViewOrder}
+                      onCancel={handleCancelOrder}
                     />
                   ))}
                 </div>
@@ -361,18 +376,20 @@ const Account = () => {
             </div>
           )}
 
+          {/* RESPONSIVE RETURNS SECTION */}
           {activeSection === "returns" && (
             <div>
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-1.5 w-full border-gray-300 border rounded-md p-4">
+              <h1 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2 w-full border-gray-300 border rounded-md p-4 bg-white shadow-sm">
                 <RotateCcw size={22} />
                 <div>MY RETURNS</div>
               </h1>
               {loading ? (
-                <div className="text-center py-10 text-gray-500">
+                <div className="text-center py-12 text-gray-500">
+                  <Loader2 className="animate-spin inline-block mr-2" size={20}/> 
                   Loading returns...
                 </div>
               ) : returns.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   {returns.map((ret) => {
                     const firstItem = ret.ReturnItem?.[0]?.order_item?.product;
                     const productImg =
@@ -389,50 +406,61 @@ const Account = () => {
                     return (
                       <div
                         key={ret.return_id}
-                        className="bg-white shadow-sm border rounded-md p-4 flex flex-col md:flex-row justify-between items-start gap-4 text-[Poppins]"
+                        className="bg-white shadow-sm border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-[Poppins] hover:shadow-md transition-shadow"
                       >
-                        <div className="flex gap-4">
-                          <div className="w-20 h-20 flex-shrink-0 border rounded overflow-hidden">
+                        {/* Left: Image & Info */}
+                        <div className="flex gap-4 w-full md:w-auto items-start">
+                          <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 border rounded-lg overflow-hidden bg-gray-50">
                             <img
                               src={productImg}
                               alt="Product"
                               className="w-full h-full object-cover"
                             />
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <div className="text-sm font-bold text-gray-800">
+                          <div className="flex flex-col gap-1 min-w-0 flex-1">
+                            <div className="text-sm font-bold text-gray-900 truncate">
                               RETURN #{ret.return_number}
                             </div>
-                            <div className="text-sm text-gray-600">
-                              Requested: {formattedDate}
+                            <div className="text-xs text-gray-500">
+                              Requested: <span className="font-medium text-gray-700">{formattedDate}</span>
                             </div>
-                            <div
-                              className={`text-sm font-semibold uppercase ${
-                                ret.return_status === "APPROVED"
-                                  ? "text-green-600"
-                                  : "text-orange-500"
-                              }`}
-                            >
-                              {ret.return_status}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Refund:{" "}
-                              <span className="font-medium text-black">
-                                ${ret.refund_amount}
-                              </span>
+                            
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase tracking-wide border ${
+                                    ret.return_status === "APPROVED" 
+                                    ? "bg-green-50 text-green-700 border-green-200" 
+                                    : ret.return_status === "REJECTED"
+                                    ? "bg-red-50 text-red-700 border-red-200"
+                                    : "bg-orange-50 text-orange-700 border-orange-200"
+                                }`}>
+                                {ret.return_status}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                    Refund: <span className="font-bold text-black">${Number(ret.refund_amount).toFixed(2)}</span>
+                                </span>
                             </div>
                           </div>
                         </div>
-                        <button className="border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100 transition rounded-sm">
-                          VIEW DETAILS
-                        </button>
+                        
+                        {/* Right: Action Button */}
+                        <div className="w-full md:w-auto">
+                            <button className="w-full md:w-auto border border-gray-300 px-5 py-2 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition rounded active:scale-95 text-center">
+                            VIEW DETAILS
+                            </button>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-10 text-gray-500 bg-white rounded shadow-sm">
-                  No return requests found.
+                <div className="flex flex-col items-center justify-center py-16 px-4 bg-white rounded-lg border border-dashed border-gray-300">
+                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                        <RotateCcw size={32} />
+                    </div>
+                    <p className="text-gray-900 font-medium mb-1">No returns yet</p>
+                    <p className="text-sm text-gray-500 text-center max-w-xs">
+                        Your return requests will appear here.
+                    </p>
                 </div>
               )}
             </div>
@@ -440,7 +468,7 @@ const Account = () => {
 
           {activeSection === "address" && (
             <div>
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-1.5 w-full border-gray-300 border rounded-md p-4">
+              <h1 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2 w-full border-gray-300 border rounded-md p-4 bg-white">
                 <MapPin size={22} />
                 <div>ADDRESS BOOK</div>
               </h1>
@@ -460,7 +488,7 @@ const Account = () => {
 
           {activeSection === "password" && (
             <div>
-              <h1 className="text-2xl font-bold mb-6 flex items-center gap-1.5 w-full border-gray-300 border rounded-md p-4">
+              <h1 className="text-xl md:text-2xl font-bold mb-6 flex items-center gap-2 w-full border-gray-300 border rounded-md p-4 bg-white">
                 <Lock size={22} />
                 <div>CHANGE PASSWORD</div>
               </h1>
@@ -479,7 +507,7 @@ const Account = () => {
         </div>
       </div>
 
-      {/* --- COMPLAINT MODAL --- */}
+      {/* --- MODALS --- */}
       {showComplaintModal && selectedOrder && (
         <ComplaintModal
           order={selectedOrder}
@@ -488,7 +516,6 @@ const Account = () => {
         />
       )}
 
-      {/* --- RETURN MODAL (NEW) --- */}
       {showReturnModal && returnOrderData && (
         <ReturnModal
           order={returnOrderData}
