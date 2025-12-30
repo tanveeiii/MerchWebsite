@@ -5,22 +5,13 @@ import {
   Type,
   Image as ImageIcon,
   RotateCcw,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   ZoomIn,
-  ZoomOut,
   Upload,
   Droplet,
   Shirt,
   Save,
   Loader2,
-  Move,
-  Layers,
   MousePointer2,
-  CheckCircle,
-  AlertCircle
 } from "lucide-react";
 import CustomToast from "@/components/CustomToast";
 
@@ -56,7 +47,7 @@ const TShirtFrontSvg = ({ colors, config }) => {
   );
 };
 
-// --- 2. T-Shirt Back SVG (Fixed) ---
+// --- 2. T-Shirt Back SVG ---
 const TShirtBackSvg = ({ colors, config }) => {
   const isFullSleeve = config.sleeve === "full";
   const leftSleevePath = isFullSleeve
@@ -80,7 +71,6 @@ const TShirtBackSvg = ({ colors, config }) => {
 };
 
 // --- 3. Overlay Component (Interactable) ---
-// Note: Handlers are passed from parent to support Drag & Drop
 const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeItem }) => {
   const { text, graphic } = customization;
 
@@ -92,6 +82,8 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
           src={graphic.content}
           alt="Custom"
           onMouseDown={(e) => onMouseDown(e, 'graphic')}
+          // Added touch start for mobile drag support
+          onTouchStart={(e) => onMouseDown(e, 'graphic')}
           className={`absolute object-contain pointer-events-auto transition-shadow hover:drop-shadow-lg cursor-move
             ${activeItem === 'graphic' ? 'ring-2 ring-blue-500 ring-offset-2 rounded' : ''}
           `}
@@ -101,7 +93,7 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
             width: `${graphic.scale * 20}%`,
             transform: `translate(-50%, -50%) rotate(${graphic.rotation}deg)`,
           }}
-          draggable={false} // Disable native HTML5 drag to use our custom logic
+          draggable={false}
         />
       )}
       
@@ -109,6 +101,8 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
       {text.content && (
         <div
           onMouseDown={(e) => onMouseDown(e, 'text')}
+          // Added touch start for mobile drag support
+          onTouchStart={(e) => onMouseDown(e, 'text')}
           className={`absolute text-4xl font-bold text-center pointer-events-auto cursor-move hover:opacity-80
             ${activeItem === 'text' ? 'ring-2 ring-blue-500 ring-offset-4 rounded' : ''}
           `}
@@ -119,7 +113,9 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
             color: text.color,
             transform: `translate(-50%, -50%) scale(${text.scale}) rotate(${text.rotation}deg)`,
             whiteSpace: "pre",
-            textShadow: "1px 1px 3px rgba(0,0,0,0.3)"
+            textShadow: "1px 1px 3px rgba(0,0,0,0.3)",
+            // Ensure text scales with container on mobile
+            fontSize: 'clamp(12px, 4vw, 36px)'
           }}
         >
           {text.content}
@@ -129,7 +125,7 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
   );
 };
 
-// --- 4. Main Editor Logic (Advanced) ---
+// --- 4. Main Editor Logic ---
 export default function AdminTemplateEditor({ onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -155,7 +151,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
 
   const [activeSide, setActiveSide] = useState("front");
   const [activeTab, setActiveTab] = useState("style");
-  const [activeItem, setActiveItem] = useState("text"); // 'text' or 'graphic' (Last clicked)
+  const [activeItem, setActiveItem] = useState("text"); 
 
   // --- DRAG & DROP LOGIC ---
   const containerRef = useRef(null);
@@ -164,11 +160,16 @@ export default function AdminTemplateEditor({ onSuccess }) {
   const [initialPos, setInitialPos] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = (e, itemType) => {
-    e.preventDefault(); // Stop text selection
+    // Determine input type (mouse vs touch)
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+    if (!e.type.includes('touch')) e.preventDefault();
+    
     setActiveItem(itemType);
-    setActiveTab(itemType === 'text' ? 'text' : 'graphic'); // Auto switch tab
+    setActiveTab(itemType === 'text' ? 'text' : 'graphic'); 
     setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    setDragStart({ x: clientX, y: clientY });
     setInitialPos({ 
         x: customizations[activeSide][itemType].x, 
         y: customizations[activeSide][itemType].y 
@@ -178,9 +179,15 @@ export default function AdminTemplateEditor({ onSuccess }) {
   const handleMouseMove = (e) => {
     if (!isDragging || !containerRef.current) return;
     
+    // Prevent scrolling on mobile while dragging
+    if(e.type === 'touchmove') e.preventDefault();
+
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
     const rect = containerRef.current.getBoundingClientRect();
-    const deltaXPixels = e.clientX - dragStart.x;
-    const deltaYPixels = e.clientY - dragStart.y;
+    const deltaXPixels = clientX - dragStart.x;
+    const deltaYPixels = clientY - dragStart.y;
 
     // Convert pixels to percentage of container
     const deltaXPercent = (deltaXPixels / rect.width) * 100;
@@ -209,9 +216,6 @@ export default function AdminTemplateEditor({ onSuccess }) {
   // --- MOUSE WHEEL ZOOM ---
   const handleWheel = (e) => {
     if(!containerRef.current) return;
-    // Prevent page scroll only if hovering over container
-    // e.preventDefault(); (Requires passive: false listener, skipping for simplicity)
-    
     const currentScale = customizations[activeSide][activeItem].scale;
     const delta = e.deltaY * -0.001;
     const newScale = Math.min(5, Math.max(0.2, currentScale + delta));
@@ -228,9 +232,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
     }));
   };
 
-  // --- Standard Handlers ---
   const handleColorChange = (hex) => setShirtColors({ body: hex, leftSleeve: hex, rightSleeve: hex, collar: hex });
-  
   const handleConfigChange = (key, val) => setShirtConfig(prev => ({ ...prev, [key]: val }));
 
   const updateCustomization = (key, val) => {
@@ -246,9 +248,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
     }));
   };
 
-  // --- SAVE TEMPLATE ---
   const handleSave = async () => {
-    // 1. Validation
     if (!templateName.trim()) return CustomToast("Template Name is required!", "error");
     if (!previewImage.trim()) return CustomToast("Preview Image URL is required!", "error");
 
@@ -278,17 +278,14 @@ export default function AdminTemplateEditor({ onSuccess }) {
             CustomToast("Template Saved Successfully!");
             if(onSuccess) onSuccess();
         } else {
-            console.error("Save Error:", data);
-            CustomToast(data.message || "Failed to save template. Check console.", "error");
+            CustomToast(data.message || "Failed to save template.", "error");
         }
     } catch (e) { 
-        console.error("Network Error:", e);
         CustomToast("Network Error: Could not connect to server.", "error");
     } 
     finally { setIsSubmitting(false); }
   };
 
-  // --- UI Components ---
   const tabs = [
     { id: 'style', icon: <Shirt size={18} />, label: 'Style' },
     { id: 'text', icon: <Type size={18} />, label: 'Text' },
@@ -296,19 +293,23 @@ export default function AdminTemplateEditor({ onSuccess }) {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row h-[90vh] bg-gray-50 text-gray-900" onMouseUp={handleMouseUp}>
+    <div 
+      className="flex flex-col-reverse lg:flex-row h-full min-h-[80vh] bg-gray-50 text-gray-900" 
+      onMouseUp={handleMouseUp}
+      onTouchEnd={handleMouseUp}
+    >
         
         {/* LEFT SIDEBAR: CONTROLS */}
-        <div className="w-full lg:w-96 bg-white border-r border-gray-200 flex flex-col h-full shadow-xl z-20">
+        <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-r border-gray-200 flex flex-col shadow-xl z-20">
             {/* Header */}
-            <div className="p-6 border-b border-gray-100 bg-white">
-                <h2 className="text-xl font-extrabold text-gray-800 flex items-center gap-2">
-                    <Save className="text-blue-600" /> Save Template
+            <div className="p-4 md:p-6 border-b border-gray-100 bg-white">
+                <h2 className="text-lg md:text-xl font-extrabold text-gray-800 flex items-center gap-2">
+                    <Save className="text-blue-600" /> Save Configuration
                 </h2>
-                <p className="text-xs text-gray-500 mt-1">Configure metadata before saving.</p>
+                <p className="text-xs text-gray-500 mt-1 hidden md:block">Configure metadata before saving.</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 custom-scrollbar">
                 
                 {/* 1. Metadata Section */}
                 <div className="space-y-4">
@@ -325,7 +326,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
                         <div className="flex gap-2">
                             <input className="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="https://..." value={previewImage} onChange={e => setPreviewImage(e.target.value)} />
                             <div className="w-10 h-10 rounded border bg-gray-100 overflow-hidden flex-shrink-0">
-                                <img src={previewImage} className="w-full h-full object-cover" onError={(e) => e.target.src = 'https://placehold.co/100?text=?'} />
+                                <img src={previewImage} className="w-full h-full object-cover" onError={(e) => e.target.src = 'https://placehold.co/100?text=?'} alt="preview"/>
                             </div>
                         </div>
                     </div>
@@ -439,7 +440,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
                         </div>
                     )}
 
-                    {/* Common Transform Controls (For both Text & Graphic) */}
+                    {/* Common Transform Controls */}
                     {activeTab !== 'style' && (
                         <div className="pt-6 border-t border-gray-100">
                             <label className="block text-xs font-bold uppercase text-gray-500 mb-4">Transforms</label>
@@ -463,7 +464,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
                             </div>
                             <div className="mt-4 p-3 bg-blue-50 text-blue-700 text-xs rounded-lg flex gap-2">
                                 <MousePointer2 size={16} />
-                                <span><strong>Pro Tip:</strong> You can Drag elements on the canvas and use Mouse Wheel to zoom them!</span>
+                                <span><strong>Pro Tip:</strong> Drag elements on canvas to move. Use sliders to scale/rotate.</span>
                             </div>
                         </div>
                     )}
@@ -471,11 +472,11 @@ export default function AdminTemplateEditor({ onSuccess }) {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="p-4 md:p-6 border-t border-gray-200 bg-gray-50">
                 <button 
                     onClick={handleSave} 
                     disabled={isSubmitting} 
-                    className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-black text-white py-3 md:py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin" /> : <Save />} 
                     Save Template
@@ -484,18 +485,24 @@ export default function AdminTemplateEditor({ onSuccess }) {
         </div>
 
         {/* RIGHT SIDE: PREVIEW CANVAS */}
-        <div className="flex-1 flex flex-col relative bg-gray-200 overflow-hidden">
+        <div className="flex-1 flex flex-col relative bg-gray-200 overflow-hidden min-h-[50vh] lg:h-auto">
             {/* Toolbar */}
-            <div className="absolute top-6 right-6 z-10 bg-white p-1 rounded-lg shadow-md flex gap-1 border border-gray-200">
-                <button onClick={() => setActiveSide("front")} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${activeSide === 'front' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>Front</button>
-                <button onClick={() => setActiveSide("back")} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${activeSide === 'back' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>Back</button>
+            <div className="absolute top-4 right-4 z-10 bg-white p-1 rounded-lg shadow-md flex gap-1 border border-gray-200">
+                <button onClick={() => setActiveSide("front")} className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-bold rounded-md transition-colors ${activeSide === 'front' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>Front</button>
+                <button onClick={() => setActiveSide("back")} className={`px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-bold rounded-md transition-colors ${activeSide === 'back' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>Back</button>
             </div>
 
-            {/* Canvas Area */}
-            <div className="flex-1 flex items-center justify-center p-10" onMouseMove={handleMouseMove} onWheel={handleWheel}>
+            {/* Canvas Area - RESPONSIVE CONTAINER */}
+            <div 
+                className="flex-1 flex items-center justify-center p-4 md:p-10" 
+                onMouseMove={handleMouseMove} 
+                onTouchMove={handleMouseMove}
+                onWheel={handleWheel}
+            >
                 <div 
                     ref={containerRef}
-                    className="relative w-full max-w-[500px] aspect-[500/600] transition-all duration-300"
+                    // Responsive width/height logic using Aspect Ratio
+                    className="relative h-[40vh] md:h-[60vh] lg:h-[70vh] aspect-[500/600] shadow-2xl transition-all duration-300 bg-transparent"
                 >
                     {activeSide === "front" ? 
                         <TShirtFrontSvg colors={shirtColors} config={shirtConfig} /> : 
@@ -512,9 +519,9 @@ export default function AdminTemplateEditor({ onSuccess }) {
             </div>
             
             {/* Help Text */}
-            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
-                <span className="bg-black/50 text-white px-4 py-2 rounded-full text-xs font-medium backdrop-blur-md">
-                    {isDragging ? 'Dragging...' : 'Click & Drag elements to position'}
+            <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none px-4">
+                <span className="bg-black/50 text-white px-3 py-1.5 rounded-full text-[10px] md:text-xs font-medium backdrop-blur-md">
+                    {isDragging ? 'Dragging...' : 'Drag elements to position • Use sliders to Resize'}
                 </span>
             </div>
         </div>

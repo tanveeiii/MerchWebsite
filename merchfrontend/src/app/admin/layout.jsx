@@ -20,15 +20,13 @@ export default function AdminLayout({ children }) {
     const isAdmin = localStorage.getItem("adminAuthenticated");
 
     if (!isAdmin) {
-      // Not logged in? Redirect immediately
       router.push("/admin/login");
     } else {
-      // Logged in? Show content
       setAuthorized(true);
     }
   }, [pathname, router]);
 
-  // 3. Show Loading Spinner while checking (prevents flashing secret content)
+  // 3. Loading Spinner
   if (!authorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -37,18 +35,33 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  // 4. If on Login page, don't show Sidebar
+  // 4. Login Page (Full Screen, No Sidebar)
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  // 5. Render Admin Dashboard Layout
+  // 5. Admin Dashboard Layout
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <AdminSidebar />
-      <div className="flex-1 ml-64 p-8 overflow-y-auto">
-        {children}
+    <div className="flex min-h-screen bg-gray-100 relative">
+      {/* Sidebar: 
+          On Mobile: It's fixed/absolute (handled inside AdminSidebar component).
+          On Desktop: It takes up physical space.
+      */}
+      <div className="md:w-64 flex-shrink-0">
+         <AdminSidebar />
       </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+        {/* p-4: Small padding on mobile
+            md:p-8: Larger padding on desktop
+            pt-20: Extra top padding on mobile to clear the Hamburger button
+            md:pt-8: Standard top padding on desktop
+        */}
+        <div className="p-4 md:p-8 pt-20 md:pt-8 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
