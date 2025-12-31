@@ -12,6 +12,9 @@ import {
   Save,
   Loader2,
   MousePointer2,
+  Lock,
+  CheckSquare,
+  Square
 } from "lucide-react";
 import CustomToast from "@/components/CustomToast";
 
@@ -70,7 +73,7 @@ const TShirtBackSvg = ({ colors, config }) => {
   );
 };
 
-// --- 3. Overlay Component (Interactable) ---
+// --- 3. Overlay Component ---
 const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeItem }) => {
   const { text, graphic } = customization;
 
@@ -82,7 +85,6 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
           src={graphic.content}
           alt="Custom"
           onMouseDown={(e) => onMouseDown(e, 'graphic')}
-          // Added touch start for mobile drag support
           onTouchStart={(e) => onMouseDown(e, 'graphic')}
           className={`absolute object-contain pointer-events-auto transition-shadow hover:drop-shadow-lg cursor-move
             ${activeItem === 'graphic' ? 'ring-2 ring-blue-500 ring-offset-2 rounded' : ''}
@@ -101,7 +103,6 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
       {text.content && (
         <div
           onMouseDown={(e) => onMouseDown(e, 'text')}
-          // Added touch start for mobile drag support
           onTouchStart={(e) => onMouseDown(e, 'text')}
           className={`absolute text-4xl font-bold text-center pointer-events-auto cursor-move hover:opacity-80
             ${activeItem === 'text' ? 'ring-2 ring-blue-500 ring-offset-4 rounded' : ''}
@@ -114,7 +115,6 @@ const CustomizationOverlay = ({ customization, activeTab, onMouseDown, activeIte
             transform: `translate(-50%, -50%) scale(${text.scale}) rotate(${text.rotation}deg)`,
             whiteSpace: "pre",
             textShadow: "1px 1px 3px rgba(0,0,0,0.3)",
-            // Ensure text scales with container on mobile
             fontSize: 'clamp(12px, 4vw, 36px)'
           }}
         >
@@ -149,6 +149,17 @@ export default function AdminTemplateEditor({ onSuccess }) {
     }
   });
 
+  // --- NEW: Permissions State ---
+  const [permissions, setPermissions] = useState({
+    canChangeStyle: true,      // User can switch Sleeve/Neck?
+    canChangeShirtColor: true, // User can change shirt color?
+    canEditText: true,         // User can edit text content?
+    canChangeFont: true,       // User can change font family?
+    canChangeTextColor: true,  // User can change text color?
+    canUploadGraphic: true,    // User can upload new images?
+    canTransform: true,        // User can move/scale/rotate elements?
+  });
+
   const [activeSide, setActiveSide] = useState("front");
   const [activeTab, setActiveTab] = useState("style");
   const [activeItem, setActiveItem] = useState("text"); 
@@ -160,7 +171,6 @@ export default function AdminTemplateEditor({ onSuccess }) {
   const [initialPos, setInitialPos] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = (e, itemType) => {
-    // Determine input type (mouse vs touch)
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
     const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
 
@@ -179,7 +189,6 @@ export default function AdminTemplateEditor({ onSuccess }) {
   const handleMouseMove = (e) => {
     if (!isDragging || !containerRef.current) return;
     
-    // Prevent scrolling on mobile while dragging
     if(e.type === 'touchmove') e.preventDefault();
 
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
@@ -189,7 +198,6 @@ export default function AdminTemplateEditor({ onSuccess }) {
     const deltaXPixels = clientX - dragStart.x;
     const deltaYPixels = clientY - dragStart.y;
 
-    // Convert pixels to percentage of container
     const deltaXPercent = (deltaXPixels / rect.width) * 100;
     const deltaYPercent = (deltaYPixels / rect.height) * 100;
 
@@ -248,12 +256,17 @@ export default function AdminTemplateEditor({ onSuccess }) {
     }));
   };
 
+  const togglePermission = (key) => {
+    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleSave = async () => {
     if (!templateName.trim()) return CustomToast("Template Name is required!", "error");
     if (!previewImage.trim()) return CustomToast("Preview Image URL is required!", "error");
 
     setIsSubmitting(true);
 
+    // Save permissions alongside other data
     const payload = {
         name: templateName,
         description: templateDesc,
@@ -261,7 +274,8 @@ export default function AdminTemplateEditor({ onSuccess }) {
         data: {
             shirtColors,
             shirtConfig,
-            customizations
+            customizations,
+            permissions // <--- Saving the permissions
         }
     };
 
@@ -290,6 +304,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
     { id: 'style', icon: <Shirt size={18} />, label: 'Style' },
     { id: 'text', icon: <Type size={18} />, label: 'Text' },
     { id: 'graphic', icon: <ImageIcon size={18} />, label: 'Graphic' },
+    { id: 'permissions', icon: <Lock size={18} />, label: 'Rules' }, // New Tab
   ];
 
   return (
@@ -306,12 +321,12 @@ export default function AdminTemplateEditor({ onSuccess }) {
                 <h2 className="text-lg md:text-xl font-extrabold text-gray-800 flex items-center gap-2">
                     <Save className="text-blue-600" /> Save Configuration
                 </h2>
-                <p className="text-xs text-gray-500 mt-1 hidden md:block">Configure metadata before saving.</p>
+                <p className="text-xs text-gray-500 mt-1 hidden md:block">Configure metadata and permissions.</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 custom-scrollbar">
                 
-                {/* 1. Metadata Section */}
+                {/* Metadata Section */}
                 <div className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Template Name</label>
@@ -334,19 +349,48 @@ export default function AdminTemplateEditor({ onSuccess }) {
 
                 <hr className="border-gray-100" />
 
-                {/* 2. Designer Controls */}
+                {/* Designer Controls */}
                 <div>
-                    <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+                    <div className="flex bg-gray-100 p-1 rounded-lg mb-6 overflow-x-auto">
                         {tabs.map(t => (
                             <button 
                                 key={t.id} 
-                                onClick={() => { setActiveTab(t.id); if(t.id !== 'style') setActiveItem(t.id); }}
-                                className={`flex-1 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all ${activeTab === t.id ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => { setActiveTab(t.id); if(t.id !== 'style' && t.id !== 'permissions') setActiveItem(t.id); }}
+                                className={`flex-1 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-all min-w-[80px] ${activeTab === t.id ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 {t.icon} {t.label}
                             </button>
                         ))}
                     </div>
+
+                    {/* PERMISSIONS TAB (NEW) */}
+                    {activeTab === 'permissions' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-200">
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                                <h3 className="font-bold text-blue-800 text-sm mb-1">User Restrictions</h3>
+                                <p className="text-xs text-blue-600">Uncheck boxes to lock specific features for the end user.</p>
+                            </div>
+                            
+                            {[
+                                { k: 'canChangeStyle', label: 'Change Sleeve/Neck Style' },
+                                { k: 'canChangeShirtColor', label: 'Change Shirt Color' },
+                                { k: 'canEditText', label: 'Edit Text Content' },
+                                { k: 'canChangeFont', label: 'Change Text Font' },
+                                { k: 'canChangeTextColor', label: 'Change Text Color' },
+                                { k: 'canUploadGraphic', label: 'Upload New Graphics' },
+                                { k: 'canTransform', label: 'Move / Scale / Rotate Elements' },
+                            ].map(({ k, label }) => (
+                                <button 
+                                    key={k}
+                                    onClick={() => togglePermission(k)}
+                                    className="flex items-center gap-3 w-full p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                                >
+                                    {permissions[k] ? <CheckSquare className="text-green-600" /> : <Square className="text-gray-400" />}
+                                    <span className={`text-sm font-medium ${permissions[k] ? 'text-gray-900' : 'text-gray-400'}`}>{label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
                     {/* STYLE TAB */}
                     {activeTab === 'style' && (
@@ -441,7 +485,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
                     )}
 
                     {/* Common Transform Controls */}
-                    {activeTab !== 'style' && (
+                    {activeTab !== 'style' && activeTab !== 'permissions' && (
                         <div className="pt-6 border-t border-gray-100">
                             <label className="block text-xs font-bold uppercase text-gray-500 mb-4">Transforms</label>
                             <div className="space-y-4">

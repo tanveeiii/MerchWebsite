@@ -18,6 +18,7 @@ import {
   Droplet,
   Shirt,
   Loader2,
+  Lock // Imported Lock icon
 } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
@@ -41,42 +42,15 @@ const TShirtFrontSvg = ({ colors, config }) => {
     : "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,150 120,100 Q110,180 100,220 Z";
 
   return (
-    <svg
-      viewBox="0 0 500 600"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full drop-shadow-lg"
-    >
-      <path
-        fill="#e5e5e5"
-        d="M120,100 Q250,150 380,100 L380,110 Q250,160 120,110 Z"
-      />
-      <path
-        fill={colors.leftSleeve}
-        stroke="#777"
-        strokeWidth="2"
-        d={leftSleevePath}
-      />
-      <path
-        fill={colors.rightSleeve}
-        stroke="#777"
-        strokeWidth="2"
-        d={rightSleevePath}
-      />
+    <svg viewBox="0 0 500 600" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-lg">
+      <path fill="#e5e5e5" d="M120,100 Q250,150 380,100 L380,110 Q250,160 120,110 Z" />
+      <path fill={colors.leftSleeve} stroke="#777" strokeWidth="2" d={leftSleevePath} />
+      <path fill={colors.rightSleeve} stroke="#777" strokeWidth="2" d={rightSleevePath} />
       <path fill={colors.body} stroke="#777" strokeWidth="2" d={bodyPath} />
       {isPolo ? (
-        <path
-          fill={colors.collar}
-          stroke="#777"
-          strokeWidth="2"
-          d="M120,100 Q250,180 380,100 L375,105 Q250,185 125,105 L120,100 Z"
-        />
+        <path fill={colors.collar} stroke="#777" strokeWidth="2" d="M120,100 Q250,180 380,100 L375,105 Q250,185 125,105 L120,100 Z" />
       ) : (
-        <path
-          fill={colors.collar}
-          stroke="#777"
-          strokeWidth="2"
-          d="M120,100 Q250,150 380,100 L380,115 Q250,165 120,115 Z"
-        />
+        <path fill={colors.collar} stroke="#777" strokeWidth="2" d="M120,100 Q250,150 380,100 L380,115 Q250,165 120,115 Z" />
       )}
     </svg>
   );
@@ -92,40 +66,21 @@ const TShirtBackSvg = ({ colors, config }) => {
     ? "M380,100 L450,130 L490,380 L430,400 L400,220 Q390,180 380,100 Z"
     : "M380,100 L450,130 L480,200 L400,250 L400,220 Q390,180 380,100 Z";
 
-  const bodyPath =
-    "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,90 120,100 Q110,180 100,220 Z";
+  const bodyPath = "M100,220 L100,550 L400,550 L400,220 Q390,180 380,100 Q250,90 120,100 Q110,180 100,220 Z";
 
   return (
-    <svg
-      viewBox="0 0 500 600"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full drop-shadow-lg"
-    >
-      <path
-        fill={colors.leftSleeve}
-        stroke="#777"
-        strokeWidth="2"
-        d={leftSleevePath}
-      />
-      <path
-        fill={colors.rightSleeve}
-        stroke="#777"
-        strokeWidth="2"
-        d={rightSleevePath}
-      />
+    <svg viewBox="0 0 500 600" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-lg">
+      <path fill={colors.leftSleeve} stroke="#777" strokeWidth="2" d={leftSleevePath} />
+      <path fill={colors.rightSleeve} stroke="#777" strokeWidth="2" d={rightSleevePath} />
       <path fill={colors.body} stroke="#777" strokeWidth="2" d={bodyPath} />
-      <path
-        fill={colors.collar}
-        stroke="#777"
-        strokeWidth="2"
-        d="M120,100 Q250,90 380,100 L380,110 Q250,100 120,110 Z"
-      />
+      <path fill={colors.collar} stroke="#777" strokeWidth="2" d="M120,100 Q250,90 380,100 L380,110 Q250,100 120,110 Z" />
     </svg>
   );
 };
 
-// --- Customization Overlay Component (Unchanged) ---
-const CustomizationOverlay = ({ customization }) => {
+// --- Customization Overlay Component ---
+// Updated to accept 'locked' prop to disable dragging
+const CustomizationOverlay = ({ customization, locked }) => {
   const { text, graphic } = customization;
 
   return (
@@ -134,20 +89,21 @@ const CustomizationOverlay = ({ customization }) => {
         <img
           src={graphic.content}
           alt="Custom Graphic"
-          className="absolute object-contain pointer-events-auto"
+          // If locked is true, remove pointer events so user cannot drag
+          className={`absolute object-contain ${locked ? '' : 'pointer-events-auto cursor-move'}`}
           style={{
             top: `${graphic.y}%`,
             left: `${graphic.x}%`,
             width: `${graphic.scale * 20}%`,
             transform: `translate(-50%, -50%) rotate(${graphic.rotation}deg)`,
             userSelect: "none",
-            cursor: "move",
           }}
         />
       )}
       {text.content && (
         <div
-          className="absolute text-4xl font-bold text-center pointer-events-auto"
+          // If locked is true, remove pointer events
+          className={`absolute text-4xl font-bold text-center ${locked ? '' : 'pointer-events-auto cursor-move'}`}
           style={{
             top: `${text.y}%`,
             left: `${text.x}%`,
@@ -156,7 +112,6 @@ const CustomizationOverlay = ({ customization }) => {
             textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
             transform: `translate(-50%, -50%) scale(${text.scale}) rotate(${text.rotation}deg)`,
             userSelect: "none",
-            cursor: "move",
             whiteSpace: "pre",
           }}
         >
@@ -173,32 +128,25 @@ const CustomizedPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // --- State Variables ---
-  const [shirtColors, setShirtColors] = useState({
-    body: "#ffffff",
-    leftSleeve: "#ffffff",
-    rightSleeve: "#ffffff",
-    collar: "#ffffff",
-  });
-
-  const [shirtConfig, setShirtConfig] = useState({
-    sleeve: "half",
-    neck: "polo",
-  });
-
+  // --- Design State ---
+  const [shirtColors, setShirtColors] = useState({ body: "#ffffff", leftSleeve: "#ffffff", rightSleeve: "#ffffff", collar: "#ffffff" });
+  const [shirtConfig, setShirtConfig] = useState({ sleeve: "half", neck: "polo" });
   const [activeSide, setActiveSide] = useState("front");
   const [activeTab, setActiveTab] = useState("style");
 
+  // --- Permissions State (Default to all allowed) ---
+  const [permissions, setPermissions] = useState({
+    canChangeStyle: true,
+    canChangeShirtColor: true,
+    canEditText: true,
+    canChangeFont: true,
+    canChangeTextColor: true,
+    canUploadGraphic: true,
+    canTransform: true,
+  });
+
   const initialCustomization = {
-    text: {
-      content: "",
-      x: 50,
-      y: 40,
-      scale: 1,
-      font: "Arial",
-      color: "#000000",
-      rotation: 0,
-    },
+    text: { content: "", x: 50, y: 40, scale: 1, font: "Arial", color: "#000000", rotation: 0 },
     graphic: { content: null, x: 50, y: 55, scale: 5, rotation: 0 },
   };
 
@@ -224,31 +172,20 @@ const CustomizedPage = () => {
       if (savedTemplate) {
         const templateData = JSON.parse(savedTemplate);
         
-        // 1. Load Shirt Config (Sleeve, Neck)
-        if (templateData.shirtConfig) {
-            setShirtConfig(templateData.shirtConfig);
-        }
-
-        // 2. Load Colors
-        if (templateData.shirtColors) {
-            setShirtColors(templateData.shirtColors);
-        }
-
-        // 3. Load Customizations (Text, Graphics)
-        if (templateData.customizations) {
-            setCustomizations(templateData.customizations);
-        }
+        if (templateData.shirtConfig) setShirtConfig(templateData.shirtConfig);
+        if (templateData.shirtColors) setShirtColors(templateData.shirtColors);
+        if (templateData.customizations) setCustomizations(templateData.customizations);
         
-        // Optional: Clear after loading so a refresh starts fresh, 
-        // OR keep it to persist across reloads. 
-        // localStorage.removeItem("selectedTemplate"); 
+        // Load Permissions if they exist in the template
+        if (templateData.permissions) {
+            setPermissions(templateData.permissions);
+        }
       }
     } catch (e) {
       console.error("Error loading template:", e);
       CustomToast("Failed to load template layout");
     }
   }, []);
-
 
   // --- Data for Options ---
   const colorSwatches = [
@@ -262,58 +199,40 @@ const CustomizedPage = () => {
     { name: "Blue", hex: "#2563eb" },
   ];
 
-  const fonts = [
-    "Arial",
-    "Verdana",
-    "Impact",
-    "Courier New",
-    "Georgia",
-    "Times New Roman",
-    "Comic Sans MS",
-  ];
+  const fonts = ["Arial", "Verdana", "Impact", "Courier New", "Georgia", "Times New Roman", "Comic Sans MS"];
 
   // --- Helper Functions ---
   const resetCustomization = () => {
-    setCustomizations({
-      front: { ...initialCustomization },
-      back: { ...initialCustomization },
-    });
-    setShirtColors({
-      body: "#ffffff",
-      leftSleeve: "#ffffff",
-      rightSleeve: "#ffffff",
-      collar: "#ffffff",
-    });
-    setShirtConfig({
-      sleeve: "half",
-      neck: "polo",
-    });
+    setCustomizations({ front: { ...initialCustomization }, back: { ...initialCustomization } });
+    
+    // Only reset base config if user has permission to change it, otherwise keep template default
+    if(permissions.canChangeShirtColor) {
+        setShirtColors({ body: "#ffffff", leftSleeve: "#ffffff", rightSleeve: "#ffffff", collar: "#ffffff" });
+    }
+    if(permissions.canChangeStyle) {
+        setShirtConfig({ sleeve: "half", neck: "polo" });
+    }
+
     setActiveSide("front");
     setActiveTab("style");
-    // Clear template from storage on reset
-    localStorage.removeItem("selectedTemplate");
+    // We intentionally do NOT remove selectedTemplate from localStorage so permissions persist on refresh
   };
 
+  // --- Input Handlers with Permission Checks ---
+
   const handleSwatchColorChange = (hex) => {
-    setShirtColors({
-      body: hex,
-      leftSleeve: hex,
-      rightSleeve: hex,
-      collar: hex,
-    });
+    if(!permissions.canChangeShirtColor) return;
+    setShirtColors({ body: hex, leftSleeve: hex, rightSleeve: hex, collar: hex });
   };
 
   const handlePartColorChange = (e) => {
+    if(!permissions.canChangeShirtColor) return;
     const hex = e.target.value;
-    setShirtColors({
-      body: hex,
-      leftSleeve: hex,
-      rightSleeve: hex,
-      collar: hex,
-    });
+    setShirtColors({ body: hex, leftSleeve: hex, rightSleeve: hex, collar: hex });
   };
 
   const handleSliderChange = (property, value) => {
+    if(!permissions.canTransform) return;
     if (activeTab === "color" || activeTab === "style") return;
     setCustomizations((prev) => ({
       ...prev,
@@ -328,6 +247,7 @@ const CustomizedPage = () => {
   };
 
   const handleTransform = (property, change) => {
+    if(!permissions.canTransform) return;
     if (activeTab === "color" || activeTab === "style") return;
     setCustomizations((prev) => {
       const current = prev[activeSide][activeTab];
@@ -345,6 +265,7 @@ const CustomizedPage = () => {
   };
 
   const handleTextChange = (e) => {
+    if(!permissions.canEditText) return;
     setCustomizations((prev) => ({
       ...prev,
       [activeSide]: {
@@ -355,6 +276,7 @@ const CustomizedPage = () => {
   };
 
   const handleTextColorChange = (e) => {
+    if(!permissions.canChangeTextColor) return;
     setCustomizations((prev) => ({
       ...prev,
       [activeSide]: {
@@ -365,6 +287,7 @@ const CustomizedPage = () => {
   };
 
   const handleFontChange = (e) => {
+    if(!permissions.canChangeFont) return;
     setCustomizations((prev) => ({
       ...prev,
       [activeSide]: {
@@ -375,6 +298,7 @@ const CustomizedPage = () => {
   };
 
   const handleImageUpload = (e) => {
+    if(!permissions.canUploadGraphic) return;
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -395,6 +319,7 @@ const CustomizedPage = () => {
   };
 
   const clearImage = () => {
+    if(!permissions.canUploadGraphic) return;
     setCustomizations((prev) => ({
       ...prev,
       [activeSide]: {
@@ -409,36 +334,21 @@ const CustomizedPage = () => {
     }));
   };
 
-  // --- API INTEGRATION: Add to Cart ---
   const handleAddToCart = async () => {
     setIsSubmitting(true);
     try {
-      const userId = 1; // HARDCODED
-      const product_id = 1; // HARDCODED
-      const product_variant_id = 1; // HARDCODED
+      const userId = 1; 
+      const product_id = 1; 
+      const product_variant_id = 1; 
 
-      // 1. Create Base Cart Item
-      const cartResponse = await fetch(
-        "http://localhost:5000/api/cart/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: userId,
-            product_id: product_id,
-            product_variant_id: product_variant_id,
-            quantity: 1,
-          }),
-        }
-      );
-
+      const cartResponse = await fetch("http://localhost:5000/api/cart/create", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, product_id: product_id, product_variant_id: product_variant_id, quantity: 1 })
+        });
       if (!cartResponse.ok) throw new Error("Failed to add base item to cart");
       const cartData = await cartResponse.json();
+      const createdId = cartData.cart_id || cartData.order_item_id || cartData.id;
 
-      const createdId =
-        cartData.cart_id || cartData.order_item_id || cartData.id;
-
-      // 2. Add Customization Details
       const customizationPayload = {
         cart_id: createdId,
         front_image_url: "https://placeholder.com/custom-shirt-front.png",
@@ -448,20 +358,12 @@ const CustomizedPage = () => {
         text_color: customizations.front.text.color,
       };
 
-      const customResponse = await fetch(
-        "http://localhost:5000/api/customization/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+      const customResponse = await fetch("http://localhost:5000/api/customization/create", {
+          method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify(customizationPayload),
-        }
-      );
+        });
 
-      if (!customResponse.ok) {
-        const errorData = await customResponse.json();
-        throw new Error(errorData.message || "Failed to save customization");
-      }
-
+      if (!customResponse.ok) throw new Error("Failed to save customization");
       CustomToast("Customized Shirt added to cart!");
       router.push("/cart");
     } catch (error) {
@@ -472,197 +374,143 @@ const CustomizedPage = () => {
     }
   };
 
-  // --- Render Functions ---
-  const renderStyleSelector = () => (
-    <div className="space-y-6">
-      <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">
-          Sleeve Length
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <button
-            onClick={() =>
-              setShirtConfig((prev) => ({ ...prev, sleeve: "half" }))
-            }
-            className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
-              shirtConfig.sleeve === "half"
-                ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            <span className="font-bold">Half Sleeve</span>
-          </button>
-          <button
-            onClick={() =>
-              setShirtConfig((prev) => ({ ...prev, sleeve: "full" }))
-            }
-            className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
-              shirtConfig.sleeve === "full"
-                ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            <span className="font-bold">Full Sleeve</span>
-          </button>
+  // --- Render Functions (Modified for Permissions) ---
+  
+  const renderStyleSelector = () => {
+    if(!permissions.canChangeStyle) return (
+        <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400">
+            <Lock className="w-8 h-8 mb-2 opacity-50" />
+            <p className="text-sm">Style selection is locked</p>
         </div>
-      </div>
-      <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">
-          Neck Style
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <button
-            onClick={() =>
-              setShirtConfig((prev) => ({ ...prev, neck: "polo" }))
-            }
-            className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
-              shirtConfig.neck === "polo"
-                ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            <span className="font-bold">Polo Collar</span>
-          </button>
-          <button
-            onClick={() =>
-              setShirtConfig((prev) => ({ ...prev, neck: "round" }))
-            }
-            className={`flex flex-col items-center p-4 border rounded-xl transition-all ${
-              shirtConfig.neck === "round"
-                ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            <span className="font-bold">Round Neck</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 
-  const renderColorPicker = () => (
-    <div className="space-y-6">
-      <div>
-        <label className="text-sm font-medium text-gray-500 block mb-3">
-          T-Shirt Color
-        </label>
-        <div className="grid grid-cols-8 gap-2">
-          {colorSwatches.map((color) => (
-            <button
-              key={color.name}
-              title={color.name}
-              onClick={() => handleSwatchColorChange(color.hex)}
-              className="w-9 h-9 rounded-full border border-gray-200 transition-all hover:scale-110"
-              style={{ backgroundColor: color.hex }}
-            />
-          ))}
+    return (
+        <div className="space-y-6">
+        <div>
+            <label className="text-sm font-medium text-gray-500 block mb-3">Sleeve Length</label>
+            <div className="grid grid-cols-2 gap-4">
+            <button onClick={() => setShirtConfig((prev) => ({ ...prev, sleeve: "half" }))} className={`flex flex-col items-center p-4 border rounded-xl transition-all ${shirtConfig.sleeve === "half" ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}><span className="font-bold">Half Sleeve</span></button>
+            <button onClick={() => setShirtConfig((prev) => ({ ...prev, sleeve: "full" }))} className={`flex flex-col items-center p-4 border rounded-xl transition-all ${shirtConfig.sleeve === "full" ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}><span className="font-bold">Full Sleeve</span></button>
+            </div>
         </div>
-      </div>
-      <div>
-        <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <Droplet className="w-5 h-5 text-gray-500" />
-          <span className="text-sm font-medium text-gray-800 capitalize flex-1">
-            Custom Color
-          </span>
-          <input
-            type="color"
-            value={shirtColors.body}
-            onChange={handlePartColorChange}
-            className="w-10 h-10 p-0 border-none rounded-md cursor-pointer"
-          />
+        <div>
+            <label className="text-sm font-medium text-gray-500 block mb-3">Neck Style</label>
+            <div className="grid grid-cols-2 gap-4">
+            <button onClick={() => setShirtConfig((prev) => ({ ...prev, neck: "polo" }))} className={`flex flex-col items-center p-4 border rounded-xl transition-all ${shirtConfig.neck === "polo" ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}><span className="font-bold">Polo Collar</span></button>
+            <button onClick={() => setShirtConfig((prev) => ({ ...prev, neck: "round" }))} className={`flex flex-col items-center p-4 border rounded-xl transition-all ${shirtConfig.neck === "round" ? "bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}><span className="font-bold">Round Neck</span></button>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+        </div>
+    );
+  };
+
+  const renderColorPicker = () => {
+    if(!permissions.canChangeShirtColor) return (
+        <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400">
+            <Lock className="w-8 h-8 mb-2 opacity-50" />
+            <p className="text-sm">Color selection is locked</p>
+        </div>
+    );
+
+    return (
+        <div className="space-y-6">
+        <div>
+            <label className="text-sm font-medium text-gray-500 block mb-3">T-Shirt Color</label>
+            <div className="grid grid-cols-8 gap-2">
+            {colorSwatches.map((color) => (
+                <button key={color.name} title={color.name} onClick={() => handleSwatchColorChange(color.hex)} className="w-9 h-9 rounded-full border border-gray-200 transition-all hover:scale-110" style={{ backgroundColor: color.hex }} />
+            ))}
+            </div>
+        </div>
+        <div>
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <Droplet className="w-5 h-5 text-gray-500" />
+            <span className="text-sm font-medium text-gray-800 capitalize flex-1">Custom Color</span>
+            <input type="color" value={shirtColors.body} onChange={handlePartColorChange} className="w-10 h-10 p-0 border-none rounded-md cursor-pointer" />
+            </div>
+        </div>
+        </div>
+    );
+  };
 
   const renderTextEditor = () => (
     <div className="flex flex-col gap-4">
       <div>
-        <label
-          htmlFor="customText"
-          className="font-medium text-gray-700 block mb-2"
-        >
-          Enter your text:
+        <label htmlFor="customText" className="font-medium text-gray-700 block mb-2 flex justify-between">
+            Enter your text:
+            {!permissions.canEditText && <Lock size={14} className="text-gray-400"/>}
         </label>
         <textarea
           id="customText"
           value={customizations[activeSide].text.content}
           onChange={handleTextChange}
-          maxLength={50}
+          disabled={!permissions.canEditText}
           rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Your Text Here"
+          className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${!permissions.canEditText ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+          placeholder={permissions.canEditText ? "Your Text Here" : "Text editing locked"}
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="fontSelect"
-            className="font-medium text-gray-700 block mb-2"
-          >
-            Font:
-          </label>
+          <label htmlFor="fontSelect" className="font-medium text-gray-700 block mb-2">Font:</label>
           <select
             id="fontSelect"
             value={customizations[activeSide].text.font}
             onChange={handleFontChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!permissions.canChangeFont}
+            className={`w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${!permissions.canChangeFont ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
           >
             {fonts.map((font) => (
-              <option key={font} value={font} style={{ fontFamily: font }}>
-                {font}
-              </option>
+              <option key={font} value={font} style={{ fontFamily: font }}>{font}</option>
             ))}
           </select>
         </div>
         <div>
-          <label
-            htmlFor="textColor"
-            className="font-medium text-gray-700 block mb-2"
-          >
-            Color:
-          </label>
+          <label htmlFor="textColor" className="font-medium text-gray-700 block mb-2">Color:</label>
           <input
             id="textColor"
             type="color"
             value={customizations[activeSide].text.color}
             onChange={handleTextColorChange}
-            className="w-full h-10 px-1 py-1 border border-gray-300 rounded-lg cursor-pointer"
+            disabled={!permissions.canChangeTextColor}
+            className={`w-full h-10 px-1 py-1 border border-gray-300 rounded-lg cursor-pointer ${!permissions.canChangeTextColor ? 'opacity-50 cursor-not-allowed' : ''}`}
           />
         </div>
       </div>
     </div>
   );
 
-  const renderGraphicPicker = () => (
-    <div className="flex flex-col gap-4 items-center">
-      <label
-        htmlFor="imageUpload"
-        className="w-full flex flex-col items-center justify-center px-6 py-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-      >
-        <Upload className="w-10 h-10 text-gray-400 mb-2" />
-        <span className="font-medium text-blue-600">Click to upload</span>
-        <span className="text-sm text-gray-500">(PNG, JPG, SVG)</span>
-      </label>
-      <input
-        id="imageUpload"
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageUpload}
-      />
-      {customizations[activeSide].graphic.content && (
-        <button
-          onClick={clearImage}
-          className="text-sm text-gray-500 hover:text-red-500"
-        >
-          Clear Image
-        </button>
-      )}
-    </div>
-  );
+  const renderGraphicPicker = () => {
+    if(!permissions.canUploadGraphic) return (
+        <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400">
+            <Lock className="w-8 h-8 mb-2 opacity-50" />
+            <p className="text-sm">Graphic upload is locked</p>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col gap-4 items-center">
+        <label htmlFor="imageUpload" className="w-full flex flex-col items-center justify-center px-6 py-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+            <Upload className="w-10 h-10 text-gray-400 mb-2" />
+            <span className="font-medium text-blue-600">Click to upload</span>
+            <span className="text-sm text-gray-500">(PNG, JPG, SVG)</span>
+        </label>
+        <input id="imageUpload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+        {customizations[activeSide].graphic.content && (
+            <button onClick={clearImage} className="text-sm text-gray-500 hover:text-red-500">Clear Image</button>
+        )}
+        </div>
+    );
+  };
 
   const renderTransformControls = () => {
+    // If transforms are locked, hide this section entirely or show a message
+    if(!permissions.canTransform) return (
+        <div className="text-center text-xs text-gray-400 mt-4 border-t pt-2">
+            <Lock className="w-3 h-3 inline mr-1"/> Positioning is locked by template
+        </div>
+    );
+
     const currentItem = customizations[activeSide][activeTab];
     if (
       !currentItem ||
@@ -671,9 +519,7 @@ const CustomizedPage = () => {
     ) {
       return (
         <div className="text-center text-gray-500 p-4 bg-gray-50 rounded-lg">
-          {activeTab === "text"
-            ? "Add some text to see controls"
-            : "Upload a graphic to see controls"}
+          {activeTab === "text" ? "Add some text to see controls" : "Upload a graphic to see controls"}
         </div>
       );
     }
@@ -683,64 +529,26 @@ const CustomizedPage = () => {
         <h3 className="font-medium text-gray-700">Position</h3>
         <div className="grid grid-cols-3 items-center justify-items-center gap-2">
           <div />
-          <button
-            onClick={() => handleTransform("y", -5)}
-            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
-            <ArrowUp />
-          </button>
+          <button onClick={() => handleTransform("y", -5)} className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"><ArrowUp /></button>
           <div />
-          <button
-            onClick={() => handleTransform("x", -5)}
-            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
-            <ArrowLeft />
-          </button>
+          <button onClick={() => handleTransform("x", -5)} className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"><ArrowLeft /></button>
           <div className="text-xs text-gray-500">Move</div>
-          <button
-            onClick={() => handleTransform("x", 5)}
-            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
-            <ArrowRight />
-          </button>
+          <button onClick={() => handleTransform("x", 5)} className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"><ArrowRight /></button>
           <div />
-          <button
-            onClick={() => handleTransform("y", 5)}
-            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
-            <ArrowDown />
-          </button>
+          <button onClick={() => handleTransform("y", 5)} className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"><ArrowDown /></button>
           <div />
         </div>
         <h3 className="font-medium text-gray-700">Size</h3>
         <div className="flex items-center gap-2">
           <ZoomOut className="text-gray-500" />
-          <input
-            type="range"
-            min={isText ? 0.5 : 1}
-            max={isText ? 3 : 10}
-            step={isText ? 0.1 : 0.5}
-            value={currentItem.scale}
-            onChange={(e) => handleSliderChange("scale", e.target.value)}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
+          <input type="range" min={isText ? 0.5 : 1} max={isText ? 3 : 10} step={isText ? 0.1 : 0.5} value={currentItem.scale} onChange={(e) => handleSliderChange("scale", e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
           <ZoomIn className="text-gray-500" />
         </div>
         <h3 className="font-medium text-gray-700">Rotation</h3>
         <div className="flex items-center gap-2">
           <RotateCcw className="text-gray-500" />
-          <input
-            type="range"
-            min="0"
-            max="360"
-            step="1"
-            value={currentItem.rotation}
-            onChange={(e) => handleSliderChange("rotation", e.target.value)}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <span className="text-sm text-gray-600 w-10 text-right">
-            {currentItem.rotation}°
-          </span>
+          <input type="range" min="0" max="360" step="1" value={currentItem.rotation} onChange={(e) => handleSliderChange("rotation", e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+          <span className="text-sm text-gray-600 w-10 text-right">{currentItem.rotation}°</span>
         </div>
       </div>
     );
@@ -758,26 +566,8 @@ const CustomizedPage = () => {
           {/* Display */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center min-h-[85vh]">
             <div className="flex mb-6 rounded-lg bg-gray-200 p-1">
-              <button
-                onClick={() => setActiveSide("front")}
-                className={`px-8 py-2 rounded-md font-medium transition-all ${
-                  activeSide === "front"
-                    ? "bg-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Front
-              </button>
-              <button
-                onClick={() => setActiveSide("back")}
-                className={`px-8 py-2 rounded-md font-medium transition-all ${
-                  activeSide === "back"
-                    ? "bg-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Back
-              </button>
+              <button onClick={() => setActiveSide("front")} className={`px-8 py-2 rounded-md font-medium transition-all ${activeSide === "front" ? "bg-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Front</button>
+              <button onClick={() => setActiveSide("back")} className={`px-8 py-2 rounded-md font-medium transition-all ${activeSide === "back" ? "bg-white shadow-md" : "text-gray-600 hover:bg-gray-100"}`}>Back</button>
             </div>
             <div className="relative w-full max-w-lg">
               {activeSide === "front" ? (
@@ -785,38 +575,20 @@ const CustomizedPage = () => {
               ) : (
                 <TShirtBackSvg colors={shirtColors} config={shirtConfig} />
               )}
+              {/* Pass locked prop based on canTransform permission */}
               <CustomizationOverlay
                 customization={customizations[activeSide]}
+                locked={!permissions.canTransform}
               />
             </div>
           </div>
           {/* Controls */}
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-xl p-6 flex flex-col">
-            <div className="flex border-b">
-              <TabButton
-                icon={<Shirt />}
-                label="Style"
-                isActive={activeTab === "style"}
-                onClick={() => setActiveTab("style")}
-              />
-              <TabButton
-                icon={<Palette />}
-                label="Color"
-                isActive={activeTab === "color"}
-                onClick={() => setActiveTab("color")}
-              />
-              <TabButton
-                icon={<Type />}
-                label="Text"
-                isActive={activeTab === "text"}
-                onClick={() => setActiveTab("text")}
-              />
-              <TabButton
-                icon={<ImageIcon />}
-                label="Graphics"
-                isActive={activeTab === "graphic"}
-                onClick={() => setActiveTab("graphic")}
-              />
+            <div className="flex border-b overflow-x-auto">
+              <TabButton icon={<Shirt />} label="Style" isActive={activeTab === "style"} onClick={() => setActiveTab("style")} />
+              <TabButton icon={<Palette />} label="Color" isActive={activeTab === "color"} onClick={() => setActiveTab("color")} />
+              <TabButton icon={<Type />} label="Text" isActive={activeTab === "text"} onClick={() => setActiveTab("text")} />
+              <TabButton icon={<ImageIcon />} label="Graphics" isActive={activeTab === "graphic"} onClick={() => setActiveTab("graphic")} />
             </div>
             <div className="flex-1 min-h-[300px] py-6">
               {activeTab === "style" && renderStyleSelector()}
@@ -834,11 +606,7 @@ const CustomizedPage = () => {
                 onClick={handleAddToCart}
                 disabled={isSubmitting}
                 className={`w-full font-bold py-3 px-6 rounded-lg text-lg transition-colors shadow-lg flex items-center justify-center gap-2 
-                    ${
-                      isSubmitting
-                        ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/50"
-                    }`}
+                    ${isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/50"}`}
               >
                 {isSubmitting ? (
                   <>
@@ -866,7 +634,7 @@ const CustomizedPage = () => {
 const TabButton = ({ icon, label, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex flex-col items-center justify-center gap-1 px-4 py-3 font-medium transition-all ${
+    className={`flex-1 flex flex-col items-center justify-center gap-1 px-4 py-3 font-medium transition-all min-w-[70px] ${
       isActive
         ? "text-blue-600 border-b-2 border-blue-600"
         : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg"
