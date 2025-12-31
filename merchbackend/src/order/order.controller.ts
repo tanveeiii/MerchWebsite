@@ -16,6 +16,11 @@ export class OrderController {
     return this.orderService.findAllForAdmin();
   }
 
+  @Get('admin/dashboard')
+  async getDashboardData() {
+    return this.orderService.getDashboardData();
+  }
+
   @Get(':userId')
   async findAll(@Param('userId', ParseIntPipe) userId: number) {
     return this.orderService.findAll(userId);

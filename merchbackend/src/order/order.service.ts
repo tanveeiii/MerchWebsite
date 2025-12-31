@@ -2,16 +2,29 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-} from "@nestjs/common";
-import { PrismaService } from "src/prisma.service";
-import { CreateOrderDto } from "./order.dto";
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
+import { CreateOrderDto } from './order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateOrderDto) {
-    const { order_number, shipping_address, subtotal, tax_amount, shipping_cost, discount_amount, total_amount, payment_type, order_status, razorpay_order_id, razorpay_payment_id, user_id } = dto;
+    const {
+      order_number,
+      shipping_address,
+      subtotal,
+      tax_amount,
+      shipping_cost,
+      discount_amount,
+      total_amount,
+      payment_type,
+      order_status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      user_id,
+    } = dto;
 
     return await this.prisma.$transaction(async (tx) => {
       const cart_items = await tx.cart.findMany({
@@ -19,7 +32,7 @@ export class OrderService {
       });
 
       if (!cart_items.length) {
-        throw new BadRequestException("Cart not found");
+        throw new BadRequestException('Cart not found');
       }
 
       const orderData: any = {
@@ -36,7 +49,7 @@ export class OrderService {
       if (tax_amount !== undefined) orderData.tax_amount = tax_amount;
       if (shipping_cost !== undefined) orderData.shipping_cost = shipping_cost;
 
-      if (payment_type?.toLowerCase() === "online") {
+      if (payment_type?.toLowerCase() === 'online') {
         orderData.razorpay_order_id = razorpay_order_id;
         orderData.razorpay_payment_id = razorpay_payment_id;
       }
@@ -47,10 +60,11 @@ export class OrderService {
       });
 
       for (const item of cart_items) {
-        if (order_status === "FORCE_FAIL") throw new BadRequestException("Forced failure after cart fetch");
+        if (order_status === 'FORCE_FAIL')
+          throw new BadRequestException('Forced failure after cart fetch');
         if (!item.product_variant_id) {
           throw new BadRequestException(
-            `Cart item ${item.cart_id} has no product variant`
+            `Cart item ${item.cart_id} has no product variant`,
           );
         }
 
@@ -60,7 +74,7 @@ export class OrderService {
 
         if (!variant) {
           throw new BadRequestException(
-            `Product variant not found: ${item.product_variant_id}`
+            `Product variant not found: ${item.product_variant_id}`,
           );
         }
         const data_input = {
@@ -78,7 +92,6 @@ export class OrderService {
         await tx.orderItem.create({
           data: data_input,
         });
-
       }
       await tx.cart.deleteMany({
         where: { user_id },
@@ -86,7 +99,7 @@ export class OrderService {
 
       return {
         code: 201,
-        message: "Order created successfully",
+        message: 'Order created successfully',
         order_id: order.order_id,
       };
     });
@@ -94,7 +107,7 @@ export class OrderService {
 
   async findAll(userId: number) {
     if (!userId) {
-      throw new BadRequestException("User id is required");
+      throw new BadRequestException('User id is required');
     }
 
     const orders = await this.prisma.order.findMany({
@@ -102,12 +115,12 @@ export class OrderService {
         user_id: userId,
       },
       orderBy: {
-        created_at: "desc",
+        created_at: 'desc',
       },
       include: {
         OrderItem: {
           orderBy: {
-            order_item_id: "asc",
+            order_item_id: 'asc',
           },
           include: {
             product: {
@@ -125,7 +138,7 @@ export class OrderService {
 
     return {
       code: 200,
-      message: "Orders fetched successfully",
+      message: 'Orders fetched successfully',
       data: orders,
     };
   }
@@ -133,13 +146,44 @@ export class OrderService {
   async findAllForAdmin() {
     const orders = await this.prisma.order.findMany({
       orderBy: {
-        created_at: "desc",
-      }
-    })
+        created_at: 'desc',
+      },
+    });
     return {
       code: 200,
-      message: "Orders fetched successfully",
+      message: 'Orders fetched successfully',
       data: orders,
+    };
+  }
+
+  async getDashboardData() {
+    const totalOrders = await this.prisma.order.count();
+    const totalSales = await this.prisma.order.aggregate({
+      _sum: {
+        total_amount: true,
+      },
+      where: {
+        order_status: {
+          in: ['DELIVERED'],
+        },
+      },
+    });
+    const totalProducts = await this.prisma.product.count();
+    const activeUsers = await this.prisma.user.count();
+    const recentOrders = await this.prisma.order.findMany({
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: 10,
+    });
+    return {
+      stats: {
+        totalSales: totalSales._sum.total_amount ?? 0,
+        totalOrders,
+        totalProducts,
+        activeUsers,
+      },
+      recentOrders,
     };
   }
 
@@ -167,7 +211,7 @@ export class OrderService {
 
       return {
         code: 200,
-        message: "Order status updated successfully",
+        message: 'Order status updated successfully',
         order_id: orderId,
         status,
         updatedOrder,
@@ -177,39 +221,37 @@ export class OrderService {
 
   async cancelOrder(order_id: number) {
     if (!order_id) {
-      throw new BadRequestException("Order id is required");
+      throw new BadRequestException('Order id is required');
     }
 
     const order = await this.prisma.order.findUnique({
       where: { order_id },
     });
 
-    if (!order)
-      throw new NotFoundException("Order not found");
+    if (!order) throw new NotFoundException('Order not found');
 
-
-    if (order.order_status === "DELIVERED")
-      throw new BadRequestException("Delivered orders cannot be cancelled");
-    if (order.order_status === "CANCELLED")
-      throw new BadRequestException("Order is already cancelled");
+    if (order.order_status === 'DELIVERED')
+      throw new BadRequestException('Delivered orders cannot be cancelled');
+    if (order.order_status === 'CANCELLED')
+      throw new BadRequestException('Order is already cancelled');
 
     const updatedOrder = await this.prisma.order.update({
       where: { order_id },
       data: {
-        order_status: "CANCELLED",
+        order_status: 'CANCELLED',
         cancelled_at: new Date(),
       },
     });
 
     return {
       code: 200,
-      message: "Order cancelled successfully",
+      message: 'Order cancelled successfully',
       data: updatedOrder,
     };
   }
   async getOneOrder(order_id: number) {
     if (!order_id) {
-      throw new BadRequestException("Order id is required");
+      throw new BadRequestException('Order id is required');
     }
 
     const order = await this.prisma.order.findUnique({
@@ -223,7 +265,7 @@ export class OrderService {
 
         OrderItem: {
           orderBy: {
-            order_item_id: "asc",
+            order_item_id: 'asc',
           },
           include: {
             product: {
@@ -235,21 +277,20 @@ export class OrderService {
               },
             },
             product_variant: true,
-            Customization: true,   
+            Customization: true,
           },
         },
       },
     });
 
     if (!order) {
-      throw new NotFoundException("Order not found");
+      throw new NotFoundException('Order not found');
     }
 
     return {
       code: 200,
-      message: "Order fetched successfully",
+      message: 'Order fetched successfully',
       data: order,
     };
   }
-
 }
