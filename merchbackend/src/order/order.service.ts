@@ -156,37 +156,6 @@ export class OrderService {
     };
   }
 
-  async getDashboardData() {
-    const totalOrders = await this.prisma.order.count();
-    const totalSales = await this.prisma.order.aggregate({
-      _sum: {
-        total_amount: true,
-      },
-      where: {
-        order_status: {
-          in: ['DELIVERED'],
-        },
-      },
-    });
-    const totalProducts = await this.prisma.product.count();
-    const activeUsers = await this.prisma.user.count();
-    const recentOrders = await this.prisma.order.findMany({
-      orderBy: {
-        created_at: 'desc',
-      },
-      take: 10,
-    });
-    return {
-      stats: {
-        totalSales: totalSales._sum.total_amount ?? 0,
-        totalOrders,
-        totalProducts,
-        activeUsers,
-      },
-      recentOrders,
-    };
-  }
-
   async updateStatus(orderId: number, status: string) {
     return await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({

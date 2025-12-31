@@ -90,6 +90,7 @@ export class ProductService {
   // --- 2. FETCH ---
   async fetch() {
     const products = await this.prisma.product.findMany({
+      where: { is_active: true },
       include: {
         ProductImage: { orderBy: { display_order: 'asc' } },
         ProductVariant: true,
@@ -161,11 +162,13 @@ export class ProductService {
       });
 
     await this.prisma.$transaction([
-      this.prisma.productVariant.deleteMany({
+      this.prisma.productVariant.updateMany({
         where: { product_id },
+        data: { is_available: false },
       }),
-      this.prisma.product.delete({
+      this.prisma.product.update({
         where: { product_id: product_id },
+        data: { is_active: false },
       }),
     ]);
     return { code: 200, message: 'Product deleted successfully' };

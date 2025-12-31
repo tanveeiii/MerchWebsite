@@ -217,8 +217,10 @@ export default function AdminProducts() {
           method: "DELETE",
         }
       );
-      if (res.ok)
+      if (res.ok) {
         setProducts(products.filter((p) => p.product_id !== productId));
+        CustomToast("Product deleted successfully");
+      }
     } catch (error) {
       CustomToast("Error deleting the product");
       console.log(error);
@@ -506,6 +508,7 @@ export default function AdminProducts() {
             return (
               <div
                 key={p.product_id}
+                disabled={!p.is_active}
                 onClick={() => setSelectedProduct(p)}
                 className="bg-white p-4 rounded-xl border flex gap-4 hover:shadow-md transition cursor-pointer"
               >
@@ -526,9 +529,19 @@ export default function AdminProducts() {
                       </span>
                     ))}
                   </div>
-                  <p className="font-bold text-lg text-gray-900 mt-2">
-                    ${p.base_price}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="font-bold text-lg text-gray-900 mt-2">
+                      ${p.base_price}
+                    </p>
+
+                    <p
+                      className={`text-sm ${
+                        p.is_active ? "text-green-500" : "text-red-500"
+                      } mt-2`}
+                    >
+                      {p.is_active ? "Active" : "Inactive"}
+                    </p>
+                  </div>
                 </div>
               </div>
             );

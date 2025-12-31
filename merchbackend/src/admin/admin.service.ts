@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateAdminDto, AdminLoginDto } from './admin.dto';
 import * as bcrypt from 'bcrypt';
@@ -17,11 +21,11 @@ export class AdminService {
         code: 400,
         message: 'Admin already exists',
       });
-    
+
     // Hash password before saving
     const hashed = await bcrypt.hash(createAdminDTO.password, 10);
     const now = new Date();
-    
+
     const admin = await this.prisma.admin.create({
       data: {
         first_name: createAdminDTO.first_name,
@@ -70,8 +74,41 @@ export class AdminService {
         id: admin.admin_id,
         name: `${admin.first_name} ${admin.last_name}`,
         email: admin.email,
-        role: 'SUPER_ADMIN'
-      }
+        role: 'SUPER_ADMIN',
+      },
+    };
+  }
+
+  async getDashboardData() {
+    const totalOrders = await this.prisma.order.count();
+    const totalSales = await this.prisma.order.aggregate({
+      _sum: {
+        total_amount: true,
+      },
+      where: {
+        order_status: {
+          in: ['DELIVERED'],
+        },
+      },
+    });
+    const totalProducts = await this.prisma.product.count({
+      where: { is_active: true },
+    });
+    const activeUsers = await this.prisma.user.count();
+    const recentOrders = await this.prisma.order.findMany({
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: 10,
+    });
+    return {
+      stats: {
+        totalSales: totalSales._sum.total_amount ?? 0,
+        totalOrders,
+        totalProducts,
+        activeUsers,
+      },
+      recentOrders,
     };
   }
 }

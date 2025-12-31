@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   const fetchOrders = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/order/admin/dashboard"
+        "http://localhost:5000/api/admin/dashboard"
       );
       const json = await res.json();
       setStats(json.stats);
