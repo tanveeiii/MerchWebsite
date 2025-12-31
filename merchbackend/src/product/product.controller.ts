@@ -1,6 +1,15 @@
-import { Body, Controller, Post, Get, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Query,
+  Delete,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './product.dto';
+import { CreateProductDto, DeleteProductDto } from './product.dto';
 
 @Controller('product')
 export class ProductController {
@@ -12,7 +21,7 @@ export class ProductController {
   }
 
   @Get('fetch')
-  async fetch(){
+  async fetch() {
     return this.productService.fetch();
   }
 
@@ -25,5 +34,10 @@ export class ProductController {
   @Get('search')
   async search(@Query('q') q: string) {
     return this.productService.search(q);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) product_id: number) {
+    return this.productService.delete(product_id);
   }
 }

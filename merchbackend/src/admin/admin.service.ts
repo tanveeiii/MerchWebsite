@@ -47,10 +47,11 @@ export class AdminService {
 
   // 2. Admin Login (NEW)
   async login(loginDto: AdminLoginDto) {
+    console.log(loginDto);
     const admin = await this.prisma.admin.findUnique({
       where: { email: loginDto.email },
     });
-
+    console.log(admin);
     if (!admin) {
       throw new UnauthorizedException('Invalid credentials');
     }

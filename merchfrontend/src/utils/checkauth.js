@@ -2,6 +2,8 @@ export const checkAuth = async () => {
   if (typeof window === "undefined") return false;
 
   const token = localStorage.getItem("token");
+  const adminAuthenticated = localStorage.getItem("adminAuthenticated");
+  if (adminAuthenticated) return true;
   if (!token) return false;
 
   try {

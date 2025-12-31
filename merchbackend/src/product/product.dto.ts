@@ -50,3 +50,8 @@ export class CreateProductDto {
   @Type(() => CreateProductImageDto)
   images?: CreateProductImageDto[];
 }
+
+export class DeleteProductDto {
+  @IsInt()
+  product_id: number;
+}

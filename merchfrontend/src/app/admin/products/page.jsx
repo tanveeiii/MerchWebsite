@@ -17,12 +17,14 @@ import { ToastContainer, toast } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 import { checkAuth } from "@/utils/checkauth";
 import { useRouter } from "next/navigation";
+import ProductDetail from "./components/ProductDetail";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
@@ -73,7 +75,7 @@ export default function AdminProducts() {
       const prodData = await prodRes.json();
       const catData = await catRes.json();
       const tagData = await tagRes.json();
-
+      console.log(prodData.data);
       if (prodData.data) setProducts(prodData.data);
       if (Array.isArray(catData)) setCategories(catData);
       if (Array.isArray(tagData)) setTags(tagData);
@@ -204,6 +206,22 @@ export default function AdminProducts() {
       CustomToast("Error submitting");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/product/${productId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (res.ok)
+        setProducts(products.filter((p) => p.product_id !== productId));
+    } catch (error) {
+      CustomToast("Error deleting the product");
+      console.log(error);
     }
   };
 
@@ -488,7 +506,8 @@ export default function AdminProducts() {
             return (
               <div
                 key={p.product_id}
-                className="bg-white p-4 rounded-xl border flex gap-4 hover:shadow-md transition"
+                onClick={() => setSelectedProduct(p)}
+                className="bg-white p-4 rounded-xl border flex gap-4 hover:shadow-md transition cursor-pointer"
               >
                 <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border">
                   <img src={cover} className="w-full h-full object-cover" />
@@ -515,6 +534,13 @@ export default function AdminProducts() {
             );
           })}
         </div>
+        {selectedProduct && (
+          <ProductDetail
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onDelete={handleDeleteProduct}
+          />
+        )}
       </div>
     </>
   );
