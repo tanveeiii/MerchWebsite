@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /build
-
+/merch-website-firebase-adminsdk-fbsvc-fab1a980c5.json
 # Logs
 logs
 *.log

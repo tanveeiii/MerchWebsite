@@ -19,7 +19,7 @@ import {
   Shirt,
   Loader2,
 } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import CustomToast from "@/components/CustomToast";
 import { checkAuth } from "@/utils/checkauth";
 
@@ -169,9 +169,9 @@ const CustomizationOverlay = ({ customization }) => {
 
 // --- Main Page Component ---
 const CustomizedPage = () => {
-  const router = useRouter(); // Initialize Router
-  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
-  
+  const router = useRouter(); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // --- State Variables ---
   const [shirtColors, setShirtColors] = useState({
@@ -207,6 +207,49 @@ const CustomizedPage = () => {
     back: { ...initialCustomization },
   });
 
+  // --- AUTH CHECK ---
+  useEffect(() => {
+    const check = async () => {
+      const isAuth = await checkAuth();
+      if (!isAuth) router.replace("/auth/login");
+      else setCheckingAuth(false);
+    };
+    check();
+  }, [router]);
+
+  // --- LOAD TEMPLATE FROM LOCALSTORAGE ---
+  useEffect(() => {
+    try {
+      const savedTemplate = localStorage.getItem("selectedTemplate");
+      if (savedTemplate) {
+        const templateData = JSON.parse(savedTemplate);
+        
+        // 1. Load Shirt Config (Sleeve, Neck)
+        if (templateData.shirtConfig) {
+            setShirtConfig(templateData.shirtConfig);
+        }
+
+        // 2. Load Colors
+        if (templateData.shirtColors) {
+            setShirtColors(templateData.shirtColors);
+        }
+
+        // 3. Load Customizations (Text, Graphics)
+        if (templateData.customizations) {
+            setCustomizations(templateData.customizations);
+        }
+        
+        // Optional: Clear after loading so a refresh starts fresh, 
+        // OR keep it to persist across reloads. 
+        // localStorage.removeItem("selectedTemplate"); 
+      }
+    } catch (e) {
+      console.error("Error loading template:", e);
+      CustomToast("Failed to load template layout");
+    }
+  }, []);
+
+
   // --- Data for Options ---
   const colorSwatches = [
     { name: "White", hex: "#ffffff" },
@@ -229,17 +272,6 @@ const CustomizedPage = () => {
     "Comic Sans MS",
   ];
 
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    const check = async () => {
-      const isAuth = await checkAuth();
-      if (!isAuth) router.replace("/auth/login");
-      else setCheckingAuth(false);
-    };
-    check();
-  }, [router]);
-
   // --- Helper Functions ---
   const resetCustomization = () => {
     setCustomizations({
@@ -258,9 +290,10 @@ const CustomizedPage = () => {
     });
     setActiveSide("front");
     setActiveTab("style");
+    // Clear template from storage on reset
+    localStorage.removeItem("selectedTemplate");
   };
 
-  // UPDATED: Apply color to ALL parts
   const handleSwatchColorChange = (hex) => {
     setShirtColors({
       body: hex,
@@ -270,7 +303,6 @@ const CustomizedPage = () => {
     });
   };
 
-  // UPDATED: Apply color to ALL parts
   const handlePartColorChange = (e) => {
     const hex = e.target.value;
     setShirtColors({
@@ -381,9 +413,9 @@ const CustomizedPage = () => {
   const handleAddToCart = async () => {
     setIsSubmitting(true);
     try {
-      const userId = 1; // HARDCODED: Replace with actual user ID from Auth context/LocalStorage
-      const product_id = 1; // HARDCODED: Base product ID for "Custom Shirt"
-      const product_variant_id = 1; // HARDCODED: Variant ID
+      const userId = 1; // HARDCODED
+      const product_id = 1; // HARDCODED
+      const product_variant_id = 1; // HARDCODED
 
       // 1. Create Base Cart Item
       const cartResponse = await fetch(
@@ -430,7 +462,6 @@ const CustomizedPage = () => {
         throw new Error(errorData.message || "Failed to save customization");
       }
 
-      // Success
       CustomToast("Customized Shirt added to cart!");
       router.push("/cart");
     } catch (error) {
@@ -509,7 +540,6 @@ const CustomizedPage = () => {
     </div>
   );
 
-  // UPDATED: No individual part selection, just whole shirt color
   const renderColorPicker = () => (
     <div className="space-y-6">
       <div>
@@ -534,7 +564,6 @@ const CustomizedPage = () => {
           <span className="text-sm font-medium text-gray-800 capitalize flex-1">
             Custom Color
           </span>
-          {/* Using shirtColors.body as representative value since all are same */}
           <input
             type="color"
             value={shirtColors.body}
@@ -819,12 +848,12 @@ const CustomizedPage = () => {
                   "Add to Cart"
                 )}
               </button>
-              <button
+              {/* <button
                 onClick={resetCustomization}
                 className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 <RotateCcw className="w-5 h-5" /> Reset
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
