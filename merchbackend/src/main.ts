@@ -21,7 +21,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   app.enableCors({
-    origin: ['http://localhost:3000','https://flyingwalker.com'],
+    origin: true,
     credentials: true,
   });
   
