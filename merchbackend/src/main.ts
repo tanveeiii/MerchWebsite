@@ -20,10 +20,24 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  app.enableCors({
-    origin: true,
-    credentials: true,
-  });
+ app.enableCors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://flyingwalker.com',
+      'https://www.flyingwalker.com',
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+});
+
   
   app.setGlobalPrefix('api');
   await app.listen(5000);
