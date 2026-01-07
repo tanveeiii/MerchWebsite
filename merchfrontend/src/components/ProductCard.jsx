@@ -38,7 +38,7 @@ const ProductCard = ({ product }) => {
 
     setLoadingCart(true);
     try {
-      const res = await fetch("http://localhost:5000/api/cart/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "cart/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,7 +67,7 @@ const ProductCard = ({ product }) => {
 
     setLoadingWish(true);
     try {
-      const res = await fetch("http://localhost:5000/api/wishlist/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "wishlist/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -51,8 +51,8 @@ export default function AdminInventory() {
   const fetchData = async () => {
     try {
       const [logsRes, prodRes] = await Promise.all([
-        fetch("http://localhost:5000/api/inventory_log/admin/all"),
-        fetch("http://localhost:5000/api/product/fetch"),
+        fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "inventory_log/admin/all"),
+        fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/fetch"),
       ]);
 
       const logsData = await logsRes.json();
@@ -101,7 +101,7 @@ export default function AdminInventory() {
       }
 
       const res = await fetch(
-        "http://localhost:5000/api/inventory_log/adjust",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "inventory_log/adjust",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

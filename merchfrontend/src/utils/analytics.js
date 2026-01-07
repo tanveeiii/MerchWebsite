@@ -3,7 +3,7 @@ export const trackEvent = async (eventType, eventData, productId = null, pageUrl
   if (!userEmail) return;
 
   try {
-    await fetch("http://localhost:5000/api/analytics/create", {
+    await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "analytics/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

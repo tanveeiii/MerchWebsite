@@ -29,7 +29,7 @@ const ResetPasswordPage = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/auth/resetPassword`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `auth/resetPassword`,
         {
           method: "POST",
           headers: {

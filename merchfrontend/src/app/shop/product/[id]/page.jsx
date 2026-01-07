@@ -57,7 +57,7 @@ const ProductPage = ({ params }) => {
     const userId = localStorage.getItem("userId");
     const markVisit = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/analytics/create", {
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "analytics/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -77,7 +77,7 @@ const ProductPage = ({ params }) => {
 
     const fetchDetails = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/product/fetch");
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/fetch");
         const json = await res.json();
 
         if (json.data) {
@@ -126,7 +126,7 @@ const ProductPage = ({ params }) => {
     setAddingCart(true);
     try {
       // 1. Create Cart Item
-      const res = await fetch("http://localhost:5000/api/cart/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "cart/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,7 +146,7 @@ const ProductPage = ({ params }) => {
           const cartId = data.cart_id || (data.data && data.data.cart_id);
 
           if (cartId) {
-            await fetch("http://localhost:5000/api/customization/create", {
+            await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "customization/create", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -182,7 +182,7 @@ const ProductPage = ({ params }) => {
 
     setAddingWish(true);
     try {
-      const res = await fetch("http://localhost:5000/api/wishlist/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "wishlist/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

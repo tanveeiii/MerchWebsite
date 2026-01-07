@@ -51,7 +51,7 @@ export default function AdminCoupons() {
   // --- 1. Fetch Coupons ---
   const fetchCoupons = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/coupon/admin/all");
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "coupon/admin/all");
       const data = await res.json();
       if (Array.isArray(data)) setCoupons(data);
     } catch (e) {
@@ -71,7 +71,7 @@ export default function AdminCoupons() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/coupon/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "coupon/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // Ensure numbers are sent as numbers, not strings
@@ -108,7 +108,7 @@ export default function AdminCoupons() {
       return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/coupon/${id}`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `coupon/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -124,7 +124,7 @@ export default function AdminCoupons() {
   // --- 4. Toggle Status (Active/Inactive) ---
   const toggleStatus = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/coupon/toggle/${id}`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `coupon/toggle/${id}`, {
         method: "PATCH",
       });
       if (res.ok) {

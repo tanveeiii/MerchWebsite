@@ -67,9 +67,9 @@ export default function AdminProducts() {
   const fetchAllData = async () => {
     try {
       const [prodRes, catRes, tagRes] = await Promise.all([
-        fetch("http://localhost:5000/api/product/fetch"),
-        fetch("http://localhost:5000/api/category/fetch"),
-        fetch("http://localhost:5000/api/tag/fetch"),
+        fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/fetch"),
+        fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "category/fetch"),
+        fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "tag/fetch"),
       ]);
 
       const prodData = await prodRes.json();
@@ -185,7 +185,7 @@ export default function AdminProducts() {
         })),
       };
 
-      const res = await fetch("http://localhost:5000/api/product/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -212,7 +212,7 @@ export default function AdminProducts() {
   const handleDeleteProduct = async (productId) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/product/${productId}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `product/${productId}`,
         {
           method: "DELETE",
         }

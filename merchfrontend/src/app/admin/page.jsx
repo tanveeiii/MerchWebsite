@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   const fetchOrders = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/admin/dashboard"
+        process.env.NEXT_PUBLIC_BACKEND_URL + "admin/dashboard"
       );
       const json = await res.json();
       setStats(json.stats);

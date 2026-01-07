@@ -18,7 +18,7 @@ const CategoryManager = () => {
     // Fetch Categories
     const fetchCategories = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/category/fetch');
+            const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + 'category/fetch');
             const data = await res.json();
             if (Array.isArray(data)) setCategories(data);
         } catch (e) { console.error(e); }
@@ -50,7 +50,7 @@ const CategoryManager = () => {
         if (!confirm("Are you sure you want to delete this category?")) return;
         
         try {
-            const res = await fetch(`http://localhost:5000/api/category/delete/${id}`, {
+            const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `category/delete/${id}`, {
                 method: 'DELETE'
             });
             
@@ -73,8 +73,8 @@ const CategoryManager = () => {
         setLoading(true);
         
         const url = editingId 
-            ? 'http://localhost:5000/api/category/update' 
-            : 'http://localhost:5000/api/category/create';
+            ? process.env.NEXT_PUBLIC_BACKEND_URL + 'category/update' 
+            : process.env.NEXT_PUBLIC_BACKEND_URL + 'category/create';
             
         const method = editingId ? 'PUT' : 'POST';
         

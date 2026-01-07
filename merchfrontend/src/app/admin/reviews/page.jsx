@@ -25,7 +25,7 @@ export default function AdminReviews() {
   // --- Fetch Reviews ---
   const fetchReviews = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/review/admin/all");
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "review/admin/all");
       const data = await res.json();
       if (Array.isArray(data)) {
         setReviews(data);
@@ -47,7 +47,7 @@ export default function AdminReviews() {
       return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/review/${id}`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `review/${id}`, {
         method: "DELETE",
       });
 

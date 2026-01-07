@@ -30,8 +30,8 @@ export default function NonCustomizedPage() {
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch("http://localhost:5000/api/product/fetch"),
-          fetch("http://localhost:5000/api/category/fetch"),
+          fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/fetch"),
+          fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "category/fetch"),
         ]);
 
         const prodJson = await prodRes.json();

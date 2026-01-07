@@ -49,7 +49,7 @@ const Cart = () => {
       setLoading(true);
       try {
         const cartRes = await fetch(
-          `http://localhost:5000/api/cart/${storedUserId}`
+          process.env.NEXT_PUBLIC_BACKEND_URL + `cart/${storedUserId}`
         );
         const cartData = await cartRes.json();
 
@@ -71,7 +71,7 @@ const Cart = () => {
 
         // Fetch User Profile (For Payment)
         const userRes = await fetch(
-          `http://localhost:5000/api/user/profile/${storedUserId}`
+          process.env.NEXT_PUBLIC_BACKEND_URL + `user/profile/${storedUserId}`
         );
         const userData = await userRes.json();
         if (userData.data) {
@@ -105,7 +105,7 @@ const Cart = () => {
     );
 
     try {
-      await fetch(`http://localhost:5000/api/cart/update/${id}`, {
+      await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `cart/update/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantity: newQty }),
@@ -118,7 +118,7 @@ const Cart = () => {
   const handleRemove = async (id) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
     try {
-      await fetch(`http://localhost:5000/api/cart/remove/${id}`, {
+      await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `cart/remove/${id}`, {
         method: "DELETE",
       });
     } catch (error) {
@@ -130,7 +130,7 @@ const Cart = () => {
     setCouponDiscount(0);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/coupon/apply`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `coupon/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: code, orderTotal: subtotal }),
@@ -165,7 +165,7 @@ const Cart = () => {
     if (items.length === 0) return CustomToast("Your cart is empty");
     try {
       const response = await fetch(
-        "http://localhost:5000/api/razorpay/checkout",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "razorpay/checkout",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -190,7 +190,7 @@ const Cart = () => {
         handler: async function (response) {
           try {
             const verifyRes = await fetch(
-              "http://localhost:5000/api/razorpay/payment-success",
+              process.env.NEXT_PUBLIC_BACKEND_URL + "razorpay/payment-success",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

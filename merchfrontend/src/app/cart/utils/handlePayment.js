@@ -18,7 +18,7 @@ export const handleRazorpayPayment = async (orderTotal, userDetails, onSuccess, 
 
     try {
         // 1. Create Order on Backend
-        const orderRes = await fetch("http://localhost:5000/api/payment/create-order", {
+        const orderRes = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "payment/create-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: orderTotal }),
@@ -39,7 +39,7 @@ export const handleRazorpayPayment = async (orderTotal, userDetails, onSuccess, 
             handler: async function (response) {
                 // 3. Verify Payment on Backend
                 try {
-                    const verifyRes = await fetch("http://localhost:5000/api/payment/verify", {
+                    const verifyRes = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "payment/verify", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

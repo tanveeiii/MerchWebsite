@@ -25,7 +25,7 @@ export default function AdminReturnRequests() {
   const fetchRequests = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/return-request/pending"
+        process.env.NEXT_PUBLIC_BACKEND_URL + "return-request/pending"
       );
       const data = await res.json();
       if (Array.isArray(data)) setRequests(data);
@@ -44,7 +44,7 @@ export default function AdminReturnRequests() {
     if (!confirm(`Are you sure you want to ${action} this request?`)) return;
     try {
       const res = await fetch(
-        `http://localhost:5000/api/return-request/${action}/${id}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `return-request/${action}/${id}`,
         {
           method: "PUT",
         }

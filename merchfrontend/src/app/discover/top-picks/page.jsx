@@ -28,7 +28,7 @@ const TopPicksPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/product/fetch");
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "product/fetch");
         const json = await res.json();
 
         if (json.data) {

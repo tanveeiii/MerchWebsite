@@ -42,9 +42,9 @@ export default function AnalyticsDashboard() {
     const fetchData = async () => {
       try {
         const [trafficRes, productsRes, activityRes] = await Promise.all([
-          fetch("http://localhost:5000/api/analytics/admin/traffic"),
-          fetch("http://localhost:5000/api/analytics/admin/top-products"),
-          fetch("http://localhost:5000/api/analytics/admin/activity"),
+          fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "analytics/admin/traffic"),
+          fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "analytics/admin/top-products"),
+          fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "analytics/admin/activity"),
         ]);
 
         const traffic = await trafficRes.json();

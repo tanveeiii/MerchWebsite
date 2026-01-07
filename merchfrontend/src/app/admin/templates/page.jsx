@@ -27,7 +27,7 @@ export default function AdminTemplates() {
   const fetchTemplates = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/customization-template/fetch"
+        process.env.NEXT_PUBLIC_BACKEND_URL + "customization-template/fetch"
       );
       const data = await res.json();
       if (Array.isArray(data)) setTemplates(data);
@@ -46,7 +46,7 @@ export default function AdminTemplates() {
     if (!confirm("Delete this template? This cannot be undone.")) return;
     try {
       await fetch(
-        `http://localhost:5000/api/customization-template/delete/${id}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `customization-template/delete/${id}`,
         { method: "DELETE" }
       );
       CustomToast("Template deleted successfully");

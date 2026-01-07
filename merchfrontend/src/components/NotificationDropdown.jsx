@@ -14,7 +14,7 @@ const NotificationDropdown = () => {
     const fetchNotifications = async () => {
         if (!userId) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/user_notification/${userId}`);
+            const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `user_notification/${userId}`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setNotifications(data);
@@ -33,7 +33,7 @@ const NotificationDropdown = () => {
     // Mark as Read Handler
     const markAsRead = async (id, link) => {
         try {
-            await fetch(`http://localhost:5000/api/user_notification/${id}/read`, { method: 'PATCH' });
+            await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `user_notification/${id}/read`, { method: 'PATCH' });
             // Update UI locally
             setNotifications(prev => prev.map(n => n.notification_id === id ? { ...n, is_read: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));

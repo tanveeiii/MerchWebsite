@@ -22,7 +22,7 @@ export default function OrderDetails() {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/order/detail/${id}`);
+                const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `order/detail/${id}`);
                 const json = await res.json();
                 console.log("Order DAta", json);
                 if (json.data) {
@@ -62,7 +62,7 @@ export default function OrderDetails() {
         setActionLoading(true);
         try {
             const response = await fetch(
-                `http://localhost:5000/api/order/cancel/${id}`,
+                process.env.NEXT_PUBLIC_BACKEND_URL + `order/cancel/${id}`,
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },

@@ -341,7 +341,7 @@ const CustomizedPage = () => {
       const product_id = 1; 
       const product_variant_id = 1; 
 
-      const cartResponse = await fetch("http://localhost:5000/api/cart/create", {
+      const cartResponse = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "cart/create", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId, product_id: product_id, product_variant_id: product_variant_id, quantity: 1 })
         });
@@ -358,7 +358,7 @@ const CustomizedPage = () => {
         text_color: customizations.front.text.color,
       };
 
-      const customResponse = await fetch("http://localhost:5000/api/customization/create", {
+      const customResponse = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "customization/create", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify(customizationPayload),
         });

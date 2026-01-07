@@ -37,7 +37,7 @@ export class RazorpayService {
     try {
       const userId = data.userId ?? data.user_id;
 
-      const createOrderRes = await fetch("http://localhost:5000/api/order/create", {
+      const createOrderRes = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "order/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

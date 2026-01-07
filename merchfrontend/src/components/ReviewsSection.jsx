@@ -11,7 +11,7 @@ const ReviewsSection = ({ productId }) => {
 
         const fetchReviews = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/review/product/${productId}`);
+                const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `review/product/${productId}`);
                 const json = await res.json();
                 if (json.data) {
                     setReviews(json.data);

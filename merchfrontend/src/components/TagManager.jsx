@@ -12,7 +12,7 @@ const TagManager = () => {
 
   const fetchTags = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/tag/fetch");
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "tag/fetch");
       const data = await res.json();
       if (Array.isArray(data)) setTags(data);
     } catch (e) {
@@ -41,7 +41,7 @@ const TagManager = () => {
     if (!confirm("Are you sure you want to delete this tag?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/tag/delete/${id}`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `tag/delete/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -61,8 +61,8 @@ const TagManager = () => {
     setLoading(true);
 
     const url = editingId
-      ? "http://localhost:5000/api/tag/update"
-      : "http://localhost:5000/api/tag/create";
+      ? process.env.NEXT_PUBLIC_BACKEND_URL + "tag/update"
+      : process.env.NEXT_PUBLIC_BACKEND_URL + "tag/create";
     const method = editingId ? "PUT" : "POST";
     const payload = editingId
       ? { tag_id: editingId, tag_name: tagName }

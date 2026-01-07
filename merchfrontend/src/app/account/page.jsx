@@ -61,14 +61,14 @@ const Account = () => {
       try {
         if (activeSection === "overview" || activeSection === "address") {
           const res = await fetch(
-            `http://localhost:5000/api/user/profile/${userId}`
+            process.env.NEXT_PUBLIC_BACKEND_URL + `user/profile/${userId}`
           );
           const json = await res.json();
           if (json.data) setUserData(json.data);
         }
 
         if (activeSection === "orders") {
-          const res = await fetch(`http://localhost:5000/api/order/${userId}`);
+          const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `order/${userId}`);
           const json = await res.json();
           console.log("Order Data", json)
           if (json.data) {
@@ -93,7 +93,7 @@ const Account = () => {
         }
 
         if (activeSection === "returns") {
-          const res = await fetch(`http://localhost:5000/api/return/${userId}`);
+          const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `return/${userId}`);
           const json = await res.json();
           if (json.data) setReturns(json.data);
         }
@@ -111,7 +111,7 @@ const Account = () => {
 
   const handleUpdateProfile = async (updatedData) => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/update", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "user/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
@@ -131,7 +131,7 @@ const Account = () => {
 
   const handleAddAddress = async (addressData) => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/address", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "user/address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(addressData),
@@ -158,7 +158,7 @@ const Account = () => {
   const handleSubmitComplaint = async (message) => {
     const userId = localStorage.getItem("userId");
     try {
-      const res = await fetch("http://localhost:5000/api/complaint/create", {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "complaint/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -217,7 +217,7 @@ const Account = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/resetPassword",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "auth/resetPassword",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -254,7 +254,7 @@ const Account = () => {
     const userId = localStorage.getItem("userId");
     try {
       const res = await fetch(
-        "http://localhost:5000/api/return-request/create",
+        process.env.NEXT_PUBLIC_BACKEND_URL + "return-request/create",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -295,7 +295,7 @@ const Account = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/order/cancel/${orderId}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `order/cancel/${orderId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

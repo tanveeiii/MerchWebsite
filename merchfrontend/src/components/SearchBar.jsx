@@ -18,7 +18,7 @@ export default function SearchBar() {
   useEffect(() => {
     const fetchIndex = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/product/search-index");
+        const res = await fetch(proccess.env.NEXT_PUBLIC_BACKEND_URL + "product/search-index");
         const data = await res.json();
         if (Array.isArray(data)) {
           setAllProducts(data);

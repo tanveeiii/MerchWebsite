@@ -38,7 +38,7 @@ const Wishlist = () => {
 
     const fetchWishlist = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/wishlist/${userId}`);
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `wishlist/${userId}`);
         const data = await res.json();
 
         if (Array.isArray(data)) {
@@ -79,7 +79,7 @@ const Wishlist = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/wishlist/remove/${wishlistId}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `wishlist/remove/${wishlistId}`,
         {
           method: "DELETE",
         }

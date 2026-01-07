@@ -27,7 +27,7 @@ const SignupPage = () => {
     try {
       // Replace with your actual backend URL
       // If you are testing locally without a backend yet, this will fail unless you comment the fetch out.
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
+      const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

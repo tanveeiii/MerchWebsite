@@ -35,7 +35,7 @@ export default function AdminComplaints() {
 
   const fetchComplaints = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/complaint/admin/all");
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "complaint/admin/all");
       const data = await res.json();
       if (Array.isArray(data)) setComplaints(data);
     } catch (error) {
@@ -56,7 +56,7 @@ export default function AdminComplaints() {
     setSubmitting(id);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/complaint/resolve/${id}`,
+        process.env.NEXT_PUBLIC_BACKEND_URL + `complaint/resolve/${id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

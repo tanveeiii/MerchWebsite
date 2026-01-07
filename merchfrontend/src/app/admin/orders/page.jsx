@@ -27,7 +27,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/order/admin/all");
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "order/admin/all");
       const json = await res.json();
       if (Array.isArray(json.data)) setOrders(json.data);
     } catch (e) {
@@ -43,7 +43,7 @@ export default function AdminOrders() {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/order/update/${id}`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + `order/update/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

@@ -280,7 +280,7 @@ export default function AdminTemplateEditor({ onSuccess }) {
     };
 
     try {
-        const res = await fetch("http://localhost:5000/api/customization-template/create", {
+        const res = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "customization-template/create", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
